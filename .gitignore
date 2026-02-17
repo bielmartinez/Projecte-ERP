@@ -1,15 +1,23 @@
-# Node
-frontend/node_modules
-frontend/dist
+# Node / Vue
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+frontend/.env.production
 
-# CodeIgniter
+# PHP / Composer / CodeIgniter 4
+backend/vendor/
 backend/writable/*
 !backend/writable/.htaccess
 !backend/writable/index.html
-
-# Environment
+backend/writable/cache/
+backend/writable/logs/
+backend/writable/session/
 backend/.env
 
-# System
+# IDE
+.vscode/
+.idea/
+
+# OS
 .DS_Store
 Thumbs.db
