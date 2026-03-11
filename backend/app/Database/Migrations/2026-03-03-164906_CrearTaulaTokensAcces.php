@@ -9,60 +9,38 @@ class CrearTaulaTokensAcces extends Migration
     public function up(): void
     {
         $this->forge->addField([
-
             'id' => [
-                'type'           => 'INT',
-                'constraint'     => 11,
-                'unsigned'       => true,
-                'auto_increment' => true,
+                'type'           => 'SERIAL',
             ],
-
             'usuari_id' => [
                 'type'       => 'INT',
-                'constraint' => 11,
-                'unsigned'   => true,
             ],
-
             'token' => [
                 'type'       => 'VARCHAR',
-                'constraint' => 64,
-                'unique'     => true,
+                'constraint' => 255,
             ],
-
             'expires_at' => [
-                'type' => 'DATETIME',
-                'null' => true,
+                'type'    => 'TIMESTAMP',
+                'null'    => true,
                 'default' => null,
             ],
-
             'last_used_at' => [
-                'type' => 'DATETIME',
-                'null' => true,
+                'type'    => 'TIMESTAMP',
+                'null'    => true,
                 'default' => null,
             ],
-
             'created_at' => [
-                'type' => 'DATETIME',
-                'null' => true,
-                'default' => null,
+                'type'    => 'TIMESTAMP',
+                'null'    => true,
             ],
         ]);
 
-        $this->forge->addPrimaryKey('id');
-
+        $this->forge->addKey('id', true);
         $this->forge->addUniqueKey('token');
-
         $this->forge->addKey('usuari_id');
+        $this->forge->addForeignKey('usuari_id', 'usuaris', 'id', 'CASCADE', 'CASCADE');
 
         $this->forge->createTable('tokens_acces');
-
-        $this->db->query('
-            ALTER TABLE tokens_acces
-            ADD CONSTRAINT fk_tokens_usuari
-            FOREIGN KEY (usuari_id)
-            REFERENCES usuaris(id)
-            ON DELETE CASCADE
-        ');
     }
 
     public function down(): void

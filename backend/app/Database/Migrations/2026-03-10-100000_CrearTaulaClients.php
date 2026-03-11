@@ -4,27 +4,16 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class CrearTaulaUsuaris extends Migration
+class CrearTaulaClients extends Migration
 {
     public function up(): void
     {
         $this->forge->addField([
             'id' => [
-                'type'           => 'SERIAL',
+                'type' => 'SERIAL',
             ],
-            'email' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 150,
-            ],
-            'password_hash' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 255,
-            ],
-            'remember_token' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 255,
-                'null'       => true,
-                'default'    => null,
+            'usuari_id' => [
+                'type' => 'INT',
             ],
             'nom' => [
                 'type'       => 'VARCHAR',
@@ -36,21 +25,27 @@ class CrearTaulaUsuaris extends Migration
                 'null'       => true,
                 'default'    => null,
             ],
+            'nom_empresa' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 200,
+                'null'       => true,
+                'default'    => null,
+            ],
             'nif' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 20,
                 'null'       => true,
                 'default'    => null,
             ],
-            'telefon' => [
+            'email' => [
                 'type'       => 'VARCHAR',
-                'constraint' => 20,
+                'constraint' => 150,
                 'null'       => true,
                 'default'    => null,
             ],
-            'nom_empresa' => [
+            'telefon' => [
                 'type'       => 'VARCHAR',
-                'constraint' => 200,
+                'constraint' => 20,
                 'null'       => true,
                 'default'    => null,
             ],
@@ -84,44 +79,18 @@ class CrearTaulaUsuaris extends Migration
                 'null'       => true,
                 'default'    => 'Espanya',
             ],
-            'compte_bancari' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 34,
-                'null'       => true,
-                'default'    => null,
-            ],
-            'logo' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 500,
-                'null'       => true,
-                'default'    => null,
-            ],
-            'role' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 20,
-                'default'    => 'usuari',
-            ],
-            'is_active' => [
-                'type'    => 'BOOLEAN',
-                'default' => true,
-            ],
-            'email_verified_at' => [
-                'type'    => 'TIMESTAMP',
-                'null'    => true,
-                'default' => null,
-            ],
-            'last_login_at' => [
-                'type'    => 'TIMESTAMP',
-                'null'    => true,
+            'notes' => [
+                'type' => 'TEXT',
+                'null' => true,
                 'default' => null,
             ],
             'created_at' => [
-                'type'    => 'TIMESTAMP',
-                'null'    => true,
+                'type' => 'TIMESTAMP',
+                'null' => true,
             ],
             'updated_at' => [
-                'type'    => 'TIMESTAMP',
-                'null'    => true,
+                'type' => 'TIMESTAMP',
+                'null' => true,
             ],
             'deleted_at' => [
                 'type'    => 'TIMESTAMP',
@@ -131,13 +100,15 @@ class CrearTaulaUsuaris extends Migration
         ]);
 
         $this->forge->addKey('id', true);
-        $this->forge->addUniqueKey('email');
+        $this->forge->addKey('usuari_id');
+        $this->forge->addKey('nif');
+        $this->forge->addForeignKey('usuari_id', 'usuaris', 'id', 'CASCADE', 'CASCADE');
 
-        $this->forge->createTable('usuaris');
+        $this->forge->createTable('clients');
     }
 
     public function down(): void
     {
-        $this->forge->dropTable('usuaris', true);
+        $this->forge->dropTable('clients', true);
     }
 }
