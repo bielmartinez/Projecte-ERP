@@ -2,8 +2,8 @@
 
 namespace App\Controllers;
 
-use App\Models\UsuariModel;
 use App\Models\TokenAccesModel;
+use App\Models\UsuariModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class AuthController extends BaseController
@@ -14,102 +14,148 @@ class AuthController extends BaseController
     public function __construct()
     {
         $this->usuariModel = new UsuariModel();
-        $this->tokenModel  = new TokenAccesModel();
+        $this->tokenModel = new TokenAccesModel();
     }
 
     public function register(): ResponseInterface
     {
-        $dades = $this->request->getJSON(true);
+        $dades = $this->request->getJSON(true) ?? [];
 
         $usuari = [
-            'email'         => $dades['email']    ?? '',
-            'password_hash' => $dades['password'] ?? '',
-            'nom'           => $dades['nom']       ?? '',
-            'cognoms'       => $dades['cognoms']   ?? null,
-            'nif'           => $dades['nif']       ?? null,
-            'telefon'       => $dades['telefon']   ?? null,
+            'email' => trim((string) ($dades['email'] ?? '')),
+            'password_hash' => (string) ($dades['password'] ?? ''),
+            'nom' => trim((string) ($dades['nom'] ?? '')),
+            'cognoms' => isset($dades['cognoms']) ? trim((string) $dades['cognoms']) : null,
+            'nif' => isset($dades['nif']) ? trim((string) $dades['nif']) : null,
+            'telefon' => isset($dades['telefon']) ? trim((string) $dades['telefon']) : null,
         ];
 
         if (!$this->usuariModel->validate($usuari)) {
-            return $this->response
-                ->setStatusCode(422)
-                ->setJSON([
-                    'status'  => 'error',
-                    'errors'  => $this->usuariModel->errors(),
-                ]);
+            return $this->response->setStatusCode(422)->setJSON([
+                'status' => 'error',
+                'errors' => $this->usuariModel->errors(),
+            ]);
         }
 
         $usuari['password_hash'] = password_hash($usuari['password_hash'], PASSWORD_BCRYPT);
 
-        $nouId = $this->usuariModel->insert($usuari);
-
+        $nouId = $this->usuariModel->insert($usuari, true);
         $usuariCreat = $this->usuariModel->find($nouId);
 
-        return $this->response
-            ->setStatusCode(201)
-            ->setJSON([
-                'status' => 'ok',
-                'usuari' => $usuariCreat,
-            ]);
+        return $this->response->setStatusCode(201)->setJSON([
+            'status' => 'ok',
+            'usuari' => $usuariCreat,
+        ]);
     }
 
     public function login(): ResponseInterface
     {
-        $dades = $this->request->getJSON(true);
+        $dades = $this->request->getJSON(true) ?? [];
 
-        $email     = $dades['email']    ?? '';
-        $password  = $dades['password'] ?? '';
-        $recordar  = $dades['recordar'] ?? false;
+        $email = trim((string) ($dades['email'] ?? ''));
+        $password = (string) ($dades['password'] ?? '');
+        $recordar = (bool) ($dades['recordar'] ?? false);
+
+        if ($email === '' || $password === '') {
+            return $this->response->setStatusCode(422)->setJSON([
+                'status' => 'error',
+                'message' => 'Email i contrasenya són obligatoris.',
+            ]);
+        }
 
         $usuari = $this->usuariModel->findPerLogin($email);
 
         if (!$usuari || !password_verify($password, $usuari['password_hash'])) {
-            return $this->response
-                ->setStatusCode(401)
-                ->setJSON([
-                    'status'  => 'error',
-                    'message' => 'Credencials incorrectes.',
-                ]);
+            return $this->response->setStatusCode(401)->setJSON([
+                'status' => 'error',
+                'message' => 'Credencials incorrectes.',
+            ]);
         }
 
-        $this->usuariModel->update($usuari['id'], [
+        $this->usuariModel->update((int) $usuari['id'], [
             'last_login_at' => date('Y-m-d H:i:s'),
         ]);
 
-        $token = $this->tokenModel->crearToken($usuari['id'], $recordar);
+        $token = $this->tokenModel->crearToken((int) $usuari['id'], $recordar);
 
         unset($usuari['password_hash']);
 
-        return $this->response
-            ->setStatusCode(200)
-            ->setJSON([
-                'status' => 'ok',
-                'token'  => $token,
-                'usuari' => $usuari,
-            ]);
+        return $this->response->setStatusCode(200)->setJSON([
+            'status' => 'ok',
+            'token' => $token,
+            'usuari' => $usuari,
+        ]);
     }
 
     public function logout(): ResponseInterface
     {
-        $token = $this->request->getHeaderLine('Authorization');
-        $token = str_replace('Bearer ', '', $token);
+        $token = $this->getBearerToken();
 
-        if (empty($token)) {
-            return $this->response
-                ->setStatusCode(400)
-                ->setJSON([
-                    'status'  => 'error',
-                    'message' => 'No s\'ha proporcionat cap token.',
-                ]);
+        if ($token === null) {
+            return $this->response->setStatusCode(401)->setJSON([
+                'status' => 'error',
+                'message' => 'No autenticat.',
+            ]);
         }
 
         $this->tokenModel->eliminarToken($token);
 
-        return $this->response
-            ->setStatusCode(200)
-            ->setJSON([
-                'status'  => 'ok',
-                'message' => 'Sessió tancada correctament.',
+        return $this->response->setStatusCode(200)->setJSON([
+            'status' => 'ok',
+            'message' => 'Sessió tancada correctament.',
+        ]);
+    }
+
+    //Persisteix la sessió i retorna les dades de l'usuari associat al token vàlid
+    public function me(): ResponseInterface
+    {
+        $token = $this->getBearerToken();
+
+        if ($token === null) {
+            return $this->response->setStatusCode(401)->setJSON([
+                'status' => 'error',
+                'message' => 'No autenticat.',
             ]);
+        }
+
+        $tokenData = $this->tokenModel->findTokenValid($token);
+
+        if (!$tokenData) {
+            return $this->response->setStatusCode(401)->setJSON([
+                'status' => 'error',
+                'message' => 'Token invàlid o expirat.',
+            ]);
+        }
+
+        $this->tokenModel->registrarUs($token);
+
+        $usuari = $this->usuariModel->find((int) $tokenData['usuari_id']);
+
+        if (!$usuari) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'status' => 'error',
+                'message' => 'Usuari no trobat.',
+            ]);
+        }
+
+        return $this->response->setStatusCode(200)->setJSON([
+            'status' => 'ok',
+            'usuari' => $usuari,
+        ]);
+    }
+
+    private function getBearerToken(): ?string
+    {
+        $header = $this->request->getHeaderLine('Authorization');
+
+        if ($header === '') {
+            return null;
+        }
+
+        if (!preg_match('/^Bearer\s+(.+)$/i', $header, $matches)) {
+            return null;
+        }
+
+        return trim($matches[1]);
     }
 }
