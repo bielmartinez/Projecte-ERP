@@ -7,3 +7,10 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Home::index');
 $routes->get('prueba-bd', 'ProvaBD::index');
+
+$routes->group('auth', static function ($routes) {
+	$routes->post('register', 'AuthController::register');
+	$routes->post('login', 'AuthController::login');
+	$routes->post('logout', 'AuthController::logout', ['filter' => 'auth']);
+	$routes->get('me', 'AuthController::me', ['filter' => 'auth']);
+});

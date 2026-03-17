@@ -25,6 +25,14 @@ class UsuariModel extends Model
         'cognoms',
         'nif',
         'telefon',
+        'nom_empresa',
+        'adreca',
+        'codi_postal',
+        'poblacio',
+        'provincia',
+        'pais',
+        'compte_bancari',
+        'logo',
         'role',
         'is_active',
         'email_verified_at',
@@ -52,6 +60,54 @@ class UsuariModel extends Model
             'label' => 'NIF',
             'rules' => 'permit_empty|max_length[20]',
         ],
+        'telefon' => [
+            'label' => 'Telèfon',
+            'rules' => 'permit_empty|max_length[20]',
+        ],
+        'remember_token' => [
+            'label' => 'Token recordatori',
+            'rules' => 'permit_empty|max_length[255]',
+        ],
+        'nom_empresa' => [
+            'label' => 'Nom empresa',
+            'rules' => 'permit_empty|max_length[200]',
+        ],
+        'adreca' => [
+            'label' => 'Adreça',
+            'rules' => 'permit_empty|max_length[255]',
+        ],
+        'codi_postal' => [
+            'label' => 'Codi postal',
+            'rules' => 'permit_empty|max_length[10]',
+        ],
+        'poblacio' => [
+            'label' => 'Població',
+            'rules' => 'permit_empty|max_length[100]',
+        ],
+        'provincia' => [
+            'label' => 'Província',
+            'rules' => 'permit_empty|max_length[100]',
+        ],
+        'pais' => [
+            'label' => 'País',
+            'rules' => 'permit_empty|max_length[100]',
+        ],
+        'compte_bancari' => [
+            'label' => 'Compte bancari',
+            'rules' => 'permit_empty|max_length[34]',
+        ],
+        'logo' => [
+            'label' => 'Logo',
+            'rules' => 'permit_empty|max_length[500]',
+        ],
+        'role' => [
+            'label' => 'Rol',
+            'rules' => 'required|max_length[20]',
+        ],
+        'is_active' => [
+            'label' => 'Actiu',
+            'rules' => 'required|in_list[0,1]',
+        ],
     ];
 
     protected $validationMessages = [
@@ -66,6 +122,16 @@ class UsuariModel extends Model
         ],
         'nom' => [
             'required' => 'El nom és obligatori.',
+        ],
+        'codi_postal' => [
+            'max_length' => 'El codi postal no pot excedir 10 caràcters.',
+        ],
+        'compte_bancari' => [
+            'max_length' => 'El compte bancari no pot excedir 34 caràcters.',
+        ],
+        'is_active' => [
+            'required' => 'L\'estat actiu és obligatori.',
+            'in_list' => 'L\'estat ha de ser 0 (inactiu) o 1 (actiu).',
         ],
     ];
 
