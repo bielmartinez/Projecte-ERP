@@ -31,12 +31,13 @@ class TokenAccesModel extends Model
     public function crearToken(int $usuariId, bool $recordar = false): string
     {
         $token = $this->generarToken();
+        $expiresAt = $recordar ? null : date('Y-m-d H:i:s', strtotime('+8 hours'));
+        $createdAt = date('Y-m-d H:i:s');
 
-        $this->insert([
-            'usuari_id'  => $usuariId,
-            'token'      => $token,
-            'expires_at' => $recordar ? null : date('Y-m-d H:i:s', strtotime('+8 hours')),
-        ]);
+        $this->db->query(
+            'INSERT INTO tokens_acces (usuari_id, token, expires_at, created_at) VALUES (?, ?, ?, ?)',
+            [$usuariId, $token, $expiresAt, $createdAt]
+        );
 
         return $token;
     }
@@ -53,9 +54,10 @@ class TokenAccesModel extends Model
 
     public function registrarUs(string $token): void
     {
-        $this->where('token', $token)
-             ->set('last_used_at', date('Y-m-d H:i:s'))
-             ->update();
+        $this->db->query(
+            'UPDATE tokens_acces SET last_used_at = ? WHERE token = ?',
+            [date('Y-m-d H:i:s'), $token]
+        );
     }
 
     public function eliminarToken(string $token): void

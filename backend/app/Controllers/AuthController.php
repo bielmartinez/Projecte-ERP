@@ -28,6 +28,8 @@ class AuthController extends BaseController
             'cognoms' => isset($dades['cognoms']) ? trim((string) $dades['cognoms']) : null,
             'nif' => isset($dades['nif']) ? trim((string) $dades['nif']) : null,
             'telefon' => isset($dades['telefon']) ? trim((string) $dades['telefon']) : null,
+            'role' => 'user',
+            'is_active' => true,
         ];
 
         if (!$this->usuariModel->validate($usuari)) {

@@ -106,7 +106,7 @@ class UsuariModel extends Model
         ],
         'is_active' => [
             'label' => 'Actiu',
-            'rules' => 'required|in_list[0,1]',
+            'rules' => 'required',
         ],
     ];
 
@@ -131,7 +131,6 @@ class UsuariModel extends Model
         ],
         'is_active' => [
             'required' => 'L\'estat actiu és obligatori.',
-            'in_list' => 'L\'estat ha de ser 0 (inactiu) o 1 (actiu).',
         ],
     ];
 
@@ -158,7 +157,7 @@ class UsuariModel extends Model
     {
         return $this->builder()
                     ->where('email', $email)
-                    ->where('is_active', 1)
+                    ->where('is_active', true)
                     ->where('deleted_at IS NULL')
                     ->get()
                     ->getRowArray();
@@ -167,7 +166,7 @@ class UsuariModel extends Model
     public function findPerEmail(string $email): array|null
     {
         return $this->where('email', $email)
-                    ->where('is_active', 1)
+                    ->where('is_active', true)
                     ->first();
     }
 }
