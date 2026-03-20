@@ -31,6 +31,8 @@ class AuthFilter implements FilterInterface
             ]);
         }
 
+        $request->usuariId = $tokenData['usuari_id'];
+
         return null;
     }
 

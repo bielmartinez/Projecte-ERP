@@ -14,3 +14,10 @@ $routes->group('auth', static function ($routes) {
 	$routes->post('logout', 'AuthController::logout', ['filter' => 'auth']);
 	$routes->get('me', 'AuthController::me', ['filter' => 'auth']);
 });
+
+$routes->group('perfil', ['filter' => 'auth'], static function ($routes) {
+	$routes->get('/', 'PerfilController::getPerfil');
+	$routes->put('/', 'PerfilController::updatePerfil');
+	$routes->post('logo', 'PerfilController::pujarLogo');
+	$routes->put('contrasenya', 'PerfilController::canviarContrasenya');
+});

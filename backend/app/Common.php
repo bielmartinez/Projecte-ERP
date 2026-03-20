@@ -13,3 +13,12 @@
  *
  * @see: https://codeigniter.com/user_guide/extending/common.html
  */
+
+// Retorna l'ID de l'usuari autenticat (des del filtre auth)
+if (!function_exists('user_id')) {
+    function user_id(): ?int
+    {
+        $request = service('request');
+        return $request->usuariId ?? null;
+    }
+}

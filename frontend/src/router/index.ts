@@ -4,6 +4,7 @@ import MainLayout from '@/layouts/MainLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 import Dashboard from '@/views/Dashboard.vue'
 import LoginView from '@/views/LoginView.vue'
+import PerfilView from '@/views/PerfilView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 
 const router = createRouter({
@@ -30,6 +31,11 @@ const router = createRouter({
           path: '',
           name: 'dashboard',
           component: Dashboard
+        },
+        {
+          path: 'perfil',
+          name: 'perfil',
+          component: PerfilView
         }
       ]
     }
