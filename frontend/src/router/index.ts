@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import MainLayout from '@/layouts/MainLayout.vue'
 import { useAuthStore } from '@/stores/auth'
+import ClientDetailView from '@/views/ClientDetailView.vue'
+import ClientsView from '@/views/ClientsView.vue'
 import Dashboard from '@/views/Dashboard.vue'
 import LoginView from '@/views/LoginView.vue'
 import PerfilView from '@/views/PerfilView.vue'
@@ -36,6 +38,16 @@ const router = createRouter({
           path: 'perfil',
           name: 'perfil',
           component: PerfilView
+        },
+        {
+          path: 'clients',
+          name: 'clients',
+          component: ClientsView
+        },
+        {
+          path: 'clients/:id',
+          name: 'client-detail',
+          component: ClientDetailView
         }
       ]
     }
