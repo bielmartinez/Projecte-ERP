@@ -2,63 +2,99 @@
   <div class="space-y-6">
     <h2 class="text-2xl font-semibold">Perfil</h2>
 
-    <section class="bg-white rounded shadow p-6 space-y-4">
-      <h3 class="text-lg font-semibold">Dades personals i fiscals</h3>
+    <!-- Div de càrrega  de la pagina-->
+    <div v-if="initialLoading" class="space-y-6" aria-busy="true" aria-live="polite">
+      <section class="bg-white rounded shadow p-6 space-y-4 animate-pulse">
+        <div class="h-6 w-56 rounded bg-gray-200"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="h-10 rounded bg-gray-200"></div>
+          <div class="h-10 rounded bg-gray-200"></div>
+          <div class="h-10 rounded bg-gray-200"></div>
+          <div class="h-10 rounded bg-gray-200"></div>
+          <div class="h-10 rounded bg-gray-200"></div>
+          <div class="h-10 rounded bg-gray-200"></div>
+          <div class="h-10 rounded bg-gray-200 md:col-span-2"></div>
+          <div class="h-10 rounded bg-gray-200"></div>
+          <div class="h-10 rounded bg-gray-200"></div>
+          <div class="h-10 rounded bg-gray-200"></div>
+          <div class="h-10 rounded bg-gray-200"></div>
+        </div>
+        <div class="h-10 w-36 rounded bg-gray-200"></div>
+      </section>
 
-      <p v-if="perfilError" class="text-sm text-red-600">{{ perfilError }}</p>
-      <p v-if="perfilSuccess" class="text-sm text-green-600">{{ perfilSuccess }}</p>
+      <section class="bg-white rounded shadow p-6 space-y-4 animate-pulse">
+        <div class="h-6 w-44 rounded bg-gray-200"></div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="h-10 rounded bg-gray-200"></div>
+          <div class="h-10 rounded bg-gray-200"></div>
+          <div class="h-10 rounded bg-gray-200"></div>
+        </div>
+        <div class="h-10 w-44 rounded bg-gray-200"></div>
+      </section>
+    </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <input v-model="perfil.nom" class="border rounded px-3 py-2" placeholder="Nom" type="text" />
-        <input v-model="perfil.cognoms" class="border rounded px-3 py-2" placeholder="Cognoms" type="text" />
-        <input v-model="perfil.nif" class="border rounded px-3 py-2" placeholder="NIF" type="text" />
-        <input v-model="perfil.telefon" class="border rounded px-3 py-2" placeholder="Telèfon" type="text" />
-        <input v-model="perfil.nom_empresa" class="border rounded px-3 py-2" placeholder="Nom empresa" type="text" />
-        <input v-model="perfil.compte_bancari" class="border rounded px-3 py-2" placeholder="Compte bancari" type="text" />
-        <input v-model="perfil.adreca" class="border rounded px-3 py-2 md:col-span-2" placeholder="Adreça" type="text" />
-        <input v-model="perfil.codi_postal" class="border rounded px-3 py-2" placeholder="Codi postal" type="text" />
-        <input v-model="perfil.poblacio" class="border rounded px-3 py-2" placeholder="Població" type="text" />
-        <input v-model="perfil.provincia" class="border rounded px-3 py-2" placeholder="Província" type="text" />
-        <input v-model="perfil.pais" class="border rounded px-3 py-2" placeholder="País" type="text" />
-      </div>
+    <template v-else>
 
-      <button
-        type="button"
-        class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
-        :disabled="perfilLoading"
-        @click="handleSavePerfil"
-      >
-        {{ perfilLoading ? 'Guardant...' : 'Guardar canvis' }}
-      </button>
-    </section>
+      <section class="bg-white rounded shadow p-6 space-y-4">
+        <h3 class="text-lg font-semibold">Dades personals i fiscals</h3>
 
-    <section class="bg-white rounded shadow p-6 space-y-4">
-      <h3 class="text-lg font-semibold">Canviar contrasenya</h3>
+        <p v-if="perfilError" class="text-sm text-red-600">{{ perfilError }}</p>
+        <p v-if="perfilSuccess" class="text-sm text-green-600">{{ perfilSuccess }}</p>
 
-      <p v-if="passwordError" class="text-sm text-red-600">{{ passwordError }}</p>
-      <p v-if="passwordSuccess" class="text-sm text-green-600">{{ passwordSuccess }}</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <input v-model="perfil.nom" class="border rounded px-3 py-2" placeholder="Nom" type="text" />
+          <input v-model="perfil.cognoms" class="border rounded px-3 py-2" placeholder="Cognoms" type="text" />
+          <input v-model="perfil.nif" class="border rounded px-3 py-2" placeholder="NIF" type="text" />
+          <input v-model="perfil.telefon" class="border rounded px-3 py-2" placeholder="Telèfon" type="text" />
+          <input v-model="perfil.nom_empresa" class="border rounded px-3 py-2" placeholder="Nom empresa" type="text" />
+          <input v-model="perfil.compte_bancari" class="border rounded px-3 py-2" placeholder="Compte bancari" type="text" />
+          <input v-model="perfil.adreca" class="border rounded px-3 py-2 md:col-span-2" placeholder="Adreça" type="text" />
+          <input v-model="perfil.codi_postal" class="border rounded px-3 py-2" placeholder="Codi postal" type="text" />
+          <input v-model="perfil.poblacio" class="border rounded px-3 py-2" placeholder="Població" type="text" />
+          <input v-model="perfil.provincia" class="border rounded px-3 py-2" placeholder="Província" type="text" />
+          <input v-model="perfil.pais" class="border rounded px-3 py-2" placeholder="País" type="text" />
+        </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <input v-model="passwordForm.contrasenya_actual" class="border rounded px-3 py-2" placeholder="Contrasenya actual" type="password" />
-        <input v-model="passwordForm.contrasenya_nova" class="border rounded px-3 py-2" placeholder="Contrasenya nova" type="password" />
-        <input v-model="passwordForm.contrasenya_confirmacio" class="border rounded px-3 py-2" placeholder="Confirmació contrasenya" type="password" />
-      </div>
+        <button
+          type="button"
+          class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+          :disabled="perfilLoading"
+          @click="handleSavePerfil"
+        >
+          {{ perfilLoading ? 'Guardant...' : 'Guardar canvis' }}
+        </button>
+      </section>
 
-      <button
-        type="button"
-        class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
-        :disabled="passwordLoading"
-        @click="handleChangePassword"
-      >
-        {{ passwordLoading ? 'Actualitzant...' : 'Canviar contrasenya' }}
-      </button>
-    </section>
+      <section class="bg-white rounded shadow p-6 space-y-4">
+        <h3 class="text-lg font-semibold">Canviar contrasenya</h3>
+
+        <p v-if="passwordError" class="text-sm text-red-600">{{ passwordError }}</p>
+        <p v-if="passwordSuccess" class="text-sm text-green-600">{{ passwordSuccess }}</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <input v-model="passwordForm.contrasenya_actual" class="border rounded px-3 py-2" placeholder="Contrasenya actual" type="password" />
+          <input v-model="passwordForm.contrasenya_nova" class="border rounded px-3 py-2" placeholder="Contrasenya nova" type="password" />
+          <input v-model="passwordForm.contrasenya_confirmacio" class="border rounded px-3 py-2" placeholder="Confirmació contrasenya" type="password" />
+        </div>
+
+        <button
+          type="button"
+          class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+          :disabled="passwordLoading"
+          @click="handleChangePassword"
+        >
+          {{ passwordLoading ? 'Actualitzant...' : 'Canviar contrasenya' }}
+        </button>
+      </section>
+
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 
+import { useInitialLoading } from '@/composables/useInitialLoading'
 import { changePassword, getPerfil, type PerfilPayload, updatePerfil } from '@/services/profile'
 
 const perfil = reactive<PerfilPayload>({
@@ -88,6 +124,7 @@ const passwordForm = reactive({
 const passwordLoading = ref(false)
 const passwordError = ref('')
 const passwordSuccess = ref('')
+const { initialLoading, runInitialLoad } = useInitialLoading()
 
 async function loadPerfil() {
   perfilError.value = ''
@@ -146,6 +183,6 @@ async function handleChangePassword() {
 }
 
 onMounted(() => {
-  loadPerfil()
+  runInitialLoad(loadPerfil)
 })
 </script>
