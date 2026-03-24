@@ -5,6 +5,9 @@ import { useAuthStore } from '@/stores/auth'
 import ClientDetailView from '@/views/ClientDetailView.vue'
 import ClientsView from '@/views/ClientsView.vue'
 import Dashboard from '@/views/Dashboard.vue'
+import FacturaDetailView from '@/views/FacturaDetailView.vue'
+import FacturaFormView from '@/views/FacturaFormView.vue'
+import FacturesView from '@/views/FacturesView.vue'
 import LoginView from '@/views/LoginView.vue'
 import PerfilView from '@/views/PerfilView.vue'
 import RegisterView from '@/views/RegisterView.vue'
@@ -48,6 +51,26 @@ const router = createRouter({
           path: 'clients/:id',
           name: 'client-detail',
           component: ClientDetailView
+        },
+        {
+          path: 'factures',
+          name: 'factures',
+          component: FacturesView
+        },
+        {
+          path: 'factures/nova',
+          name: 'factura-create',
+          component: FacturaFormView
+        },
+        {
+          path: 'factures/:id',
+          name: 'factura-detail',
+          component: FacturaDetailView
+        },
+        {
+          path: 'factures/:id/editar',
+          name: 'factura-edit',
+          component: FacturaFormView
         }
       ]
     }

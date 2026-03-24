@@ -29,3 +29,14 @@ $routes->group('clients', ['filter' => 'auth'], static function ($routes) {
 	$routes->put('(:num)', 'ClientController::update/$1');
 	$routes->delete('(:num)', 'ClientController::delete/$1');
 });
+
+$routes->group('factures', ['filter' => 'auth'], static function ($routes) {
+	$routes->get('/', 'FacturaController::index');
+	$routes->get('(:num)', 'FacturaController::show/$1');
+	$routes->post('/', 'FacturaController::create');
+	$routes->put('(:num)', 'FacturaController::update/$1');
+	$routes->delete('(:num)', 'FacturaController::delete/$1');
+	$routes->put('(:num)/linies/(:num)', 'FacturaController::updateLinia/$1/$2');
+	$routes->delete('(:num)/linies/(:num)', 'FacturaController::deleteLinia/$1/$2');
+	$routes->put('(:num)/estat', 'FacturaController::canviarEstat/$1');
+});
