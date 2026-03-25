@@ -43,10 +43,8 @@ async function handleLogout() {
 
   try {
     await authStore.logout()
-  } catch {
-    authStore.clearSession()
   } finally {
-    await router.push({ name: 'login' })
+    await router.replace({ name: 'login' })
     isLoggingOut.value = false
   }
 }

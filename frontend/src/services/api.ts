@@ -2,6 +2,8 @@ import axios from 'axios'
 
 import { useAuthStore } from '@/stores/auth'
 
+const AUTH_REASON_STORAGE_KEY = 'erp_auth_redirect_reason'
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:8080',
   headers: {
@@ -29,9 +31,10 @@ api.interceptors.response.use(
     if (status === 401 && !isAuthEndpoint) {
       const authStore = useAuthStore()
       authStore.clearSession()
+      sessionStorage.setItem(AUTH_REASON_STORAGE_KEY, 'session-expired')
 
       if (window.location.pathname !== '/login') {
-        window.location.assign('/login')
+        window.location.assign('/login?reason=session-expired')
       }
     }
 

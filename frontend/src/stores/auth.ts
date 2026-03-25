@@ -107,10 +107,21 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     async logout() {
+      const previousToken = this.token
+
+      this.clearSession()
+
+      if (!previousToken) {
+        return
+      }
+
       try {
-        await api.post('/auth/logout')
-      } finally {
-        this.clearSession()
+        await api.post('/auth/logout', null, {
+          headers: {
+            Authorization: `Bearer ${previousToken}`
+          }
+        })
+      } catch {
       }
     }
   }
