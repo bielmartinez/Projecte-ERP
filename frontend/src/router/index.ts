@@ -73,6 +73,10 @@ const router = createRouter({
           component: FacturaFormView
         }
       ]
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/'
     }
   ]
 })

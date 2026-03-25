@@ -19,4 +19,24 @@ api.interceptors.request.use((config) => {
   return config
 })
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status
+    const requestUrl = String(error?.config?.url ?? '')
+    const isAuthEndpoint = requestUrl.includes('/auth/login') || requestUrl.includes('/auth/register') || requestUrl.includes('/auth/logout')
+
+    if (status === 401 && !isAuthEndpoint) {
+      const authStore = useAuthStore()
+      authStore.clearSession()
+
+      if (window.location.pathname !== '/login') {
+        window.location.assign('/login')
+      }
+    }
+
+    return Promise.reject(error)
+  }
+)
+
 export default api

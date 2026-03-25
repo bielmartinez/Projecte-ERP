@@ -106,3 +106,23 @@ export async function canviarEstatFactura(id: number | string, estat: FacturaPay
   const { data } = await api.put(`/factures/${id}/estat`, { estat })
   return data
 }
+
+export async function descarregarFacturaPdf(id: number | string) {
+  const response = await api.get(`/factures/${id}/pdf`, {
+    responseType: 'blob'
+  })
+
+  const contentDisposition = response.headers['content-disposition'] as string | undefined
+  const fileNameMatch = contentDisposition?.match(/filename="?([^\"]+)"?/)
+  const fileName = fileNameMatch?.[1] ?? `factura-${id}.pdf`
+
+  const blob = new Blob([response.data], { type: 'application/pdf' })
+  const url = window.URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.URL.revokeObjectURL(url)
+}

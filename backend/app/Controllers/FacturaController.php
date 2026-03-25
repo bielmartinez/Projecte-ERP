@@ -2,9 +2,11 @@
 
 namespace App\Controllers;
 
+use App\Libraries\PdfFactura;
 use App\Models\ClientModel;
 use App\Models\FacturaModel;
 use App\Models\LiniaFacturaModel;
+use App\Models\UsuariModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class FacturaController extends BaseController
@@ -12,12 +14,16 @@ class FacturaController extends BaseController
     protected FacturaModel $facturaModel;
     protected LiniaFacturaModel $liniaModel;
     protected ClientModel $clientModel;
+    protected UsuariModel $usuariModel;
+    protected PdfFactura $pdfFactura;
 
     public function __construct()
     {
         $this->facturaModel = new FacturaModel();
         $this->liniaModel = new LiniaFacturaModel();
         $this->clientModel = new ClientModel();
+        $this->usuariModel = new UsuariModel();
+        $this->pdfFactura = new PdfFactura();
     }
 
     public function index(): ResponseInterface
@@ -146,6 +152,54 @@ class FacturaController extends BaseController
             return $this->response->setStatusCode(500)->setJSON([
                 'status' => 'error',
                 'message' => 'Error al carregar la factura',
+            ]);
+        }
+    }
+
+    public function pdf(int $id): ResponseInterface
+    {
+        try {
+            $usuariId = user_id();
+
+            if (!$usuariId) {
+                return $this->response->setStatusCode(401)->setJSON([
+                    'status' => 'error',
+                    'message' => 'No autenticat',
+                ]);
+            }
+
+            $factura = $this->facturaModel
+                ->where('id', $id)
+                ->where('usuari_id', $usuariId)
+                ->first();
+
+            if (!$factura) {
+                return $this->response->setStatusCode(404)->setJSON([
+                    'status' => 'error',
+                    'message' => 'Factura no trobada',
+                ]);
+            }
+
+            $linies = $this->liniaModel->obtenirLiniesFactura($id);
+            $client = $this->clientModel
+                ->where('id', (int) $factura['client_id'])
+                ->where('usuari_id', $usuariId)
+                ->first();
+
+            $usuari = $this->usuariModel->find($usuariId);
+            $pdfContent = $this->pdfFactura->generar($factura, $linies, $client, $usuari);
+            $nomArxiu = 'factura-' . preg_replace('/[^A-Za-z0-9\-_]/', '-', (string) ($factura['numero_factura'] ?? $id)) . '.pdf';
+
+            return $this->response
+                ->setHeader('Content-Type', 'application/pdf')
+                ->setHeader('Content-Disposition', 'attachment; filename="' . $nomArxiu . '"')
+                ->setBody($pdfContent);
+        } catch (\Exception $e) {
+            log_message('error', 'Error en factures pdf: ' . $e->getMessage());
+
+            return $this->response->setStatusCode(500)->setJSON([
+                'status' => 'error',
+                'message' => 'Error en generar el PDF de la factura',
             ]);
         }
     }

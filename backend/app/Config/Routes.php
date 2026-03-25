@@ -33,6 +33,7 @@ $routes->group('clients', ['filter' => 'auth'], static function ($routes) {
 $routes->group('factures', ['filter' => 'auth'], static function ($routes) {
 	$routes->get('/', 'FacturaController::index');
 	$routes->get('(:num)', 'FacturaController::show/$1');
+	$routes->get('(:num)/pdf', 'FacturaController::pdf/$1');
 	$routes->post('/', 'FacturaController::create');
 	$routes->put('(:num)', 'FacturaController::update/$1');
 	$routes->delete('(:num)', 'FacturaController::delete/$1');

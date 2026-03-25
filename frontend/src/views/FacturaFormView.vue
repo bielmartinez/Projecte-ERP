@@ -392,13 +392,17 @@ async function handleSubmit() {
 
 onMounted(() => {
   runInitialLoad(async () => {
-    await loadClients()
+    try {
+      await loadClients()
 
-    if (isEdit.value) {
-      await loadFacturaForEdit(route.params.id as string)
-    } else {
-      form.data_emisio = todayDate()
-      addLinia()
+      if (isEdit.value) {
+        await loadFacturaForEdit(route.params.id as string)
+      } else {
+        form.data_emisio = todayDate()
+        addLinia()
+      }
+    } catch (requestError: any) {
+      error.value = requestError?.response?.data?.message ?? 'No s\'ha pogut carregar el formulari de factura.'
     }
   })
 })

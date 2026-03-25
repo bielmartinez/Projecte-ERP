@@ -141,6 +141,9 @@
                   <RouterLink :to="`/factures/${factura.id}`" class="text-blue-600 hover:underline">
                     Veure
                   </RouterLink>
+                  <button type="button" class="text-gray-700 hover:underline" @click="handleDescarregarPdf(factura.id)">
+                    PDF
+                  </button>
                   <RouterLink :to="`/factures/${factura.id}/editar`" class="text-gray-700 hover:underline">
                     Editar
                   </RouterLink>
@@ -188,7 +191,7 @@ import { RouterLink } from 'vue-router'
 
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { getClients, type Client } from '@/services/clients'
-import { deleteFactura, getFactures, type Factura } from '@/services/factures'
+import { descarregarFacturaPdf, deleteFactura, getFactures, type Factura } from '@/services/factures'
 
 const loading = ref(false)
 const listError = ref('')
@@ -231,8 +234,12 @@ function resetFilters() {
 }
 
 async function loadClientsSelect() {
-  const response = await getClients({ page: 1, limit: 100 })
-  clients.value = response.data ?? []
+  try {
+    const response = await getClients({ page: 1, limit: 100 })
+    clients.value = response.data ?? []
+  } catch (error: any) {
+    listError.value = error?.response?.data?.message ?? 'No s\'han pogut carregar els clients.'
+  }
 }
 
 async function loadFactures(page = 1) {
@@ -276,6 +283,16 @@ async function handleDelete(id: number) {
     await loadFactures(meta.page)
   } catch (error: any) {
     listError.value = error?.response?.data?.message ?? 'No s\'ha pogut eliminar la factura.'
+  }
+}
+
+async function handleDescarregarPdf(id: number) {
+  listError.value = ''
+
+  try {
+    await descarregarFacturaPdf(id)
+  } catch (error: any) {
+    listError.value = error?.response?.data?.message ?? 'No s\'ha pogut descarregar el PDF.'
   }
 }
 

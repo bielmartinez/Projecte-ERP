@@ -7,6 +7,14 @@
         <RouterLink v-if="factura" :to="`/factures/${factura.id}/editar`" class="text-gray-700 hover:underline">
           Editar
         </RouterLink>
+        <button
+          v-if="factura"
+          type="button"
+          class="text-gray-700 hover:underline"
+          @click="handleDescarregarPdf"
+        >
+          Descarregar PDF
+        </button>
       </div>
     </div>
 
@@ -118,7 +126,7 @@ import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
 import { useInitialLoading } from '@/composables/useInitialLoading'
-import { canviarEstatFactura, deleteFactura, getFactura, type Factura, type FacturaLinia } from '@/services/factures'
+import { canviarEstatFactura, descarregarFacturaPdf, deleteFactura, getFactura, type Factura, type FacturaLinia } from '@/services/factures'
 
 const route = useRoute()
 const router = useRouter()
@@ -195,6 +203,20 @@ async function handleDeleteFactura() {
     await router.push('/factures')
   } catch (requestError: any) {
     error.value = requestError?.response?.data?.message ?? 'No s\'ha pogut eliminar la factura.'
+  }
+}
+
+async function handleDescarregarPdf() {
+  if (!factura.value) {
+    return
+  }
+
+  error.value = ''
+
+  try {
+    await descarregarFacturaPdf(factura.value.id)
+  } catch (requestError: any) {
+    error.value = requestError?.response?.data?.message ?? 'No s\'ha pogut descarregar el PDF.'
   }
 }
 
