@@ -34,6 +34,7 @@ class PdfFactura
         $dataEmisio = $this->text($factura['data_emisio'] ?? null, '-');
         $dataVenciment = $this->text($factura['data_venciment'] ?? null, '-');
         $estat = $this->text($factura['estat'] ?? null, '-');
+        $observacions = trim((string) ($factura['observacions'] ?? ''));
 
         $subtotal = $this->money((float) ($factura['subtotal'] ?? 0));
         $ivaPercentatge = $this->number((float) ($factura['iva_percentatge'] ?? 0));
@@ -45,81 +46,131 @@ class PdfFactura
         $liniesRows = '';
         foreach ($linies as $linia) {
             $liniesRows .= '<tr>'
-                . '<td style="border:1px solid #d1d5db; padding:6px;">' . $this->escape($this->text($linia['descripcio'] ?? null, '-')) . '</td>'
-                . '<td style="border:1px solid #d1d5db; padding:6px; text-align:right;">' . $this->number((float) ($linia['quantitat'] ?? 0), 3) . '</td>'
-                . '<td style="border:1px solid #d1d5db; padding:6px; text-align:right;">' . $this->money((float) ($linia['preu_unitari'] ?? 0)) . '</td>'
-                . '<td style="border:1px solid #d1d5db; padding:6px; text-align:right;">' . $this->number((float) ($linia['descompte'] ?? 0)) . ' %</td>'
-                . '<td style="border:1px solid #d1d5db; padding:6px; text-align:right;">' . $this->money((float) ($linia['total_linia'] ?? 0)) . '</td>'
+                . '<td style="border:1px solid #d1d5db; padding:8px; vertical-align:middle;">' . $this->escape($this->text($linia['descripcio'] ?? null, '-')) . '</td>'
+                . '<td style="border:1px solid #d1d5db; padding:8px; text-align:right; vertical-align:middle;">' . $this->number((float) ($linia['quantitat'] ?? 0), 3) . '</td>'
+                . '<td style="border:1px solid #d1d5db; padding:8px; text-align:right; vertical-align:middle;">' . $this->money((float) ($linia['preu_unitari'] ?? 0)) . '</td>'
+                . '<td style="border:1px solid #d1d5db; padding:8px; text-align:right; vertical-align:middle;">' . $this->number((float) ($linia['descompte'] ?? 0)) . ' %</td>'
+                . '<td style="border:1px solid #d1d5db; padding:8px; text-align:right; vertical-align:middle;">' . $this->money((float) ($linia['total_linia'] ?? 0)) . '</td>'
                 . '</tr>';
         }
 
         if ($liniesRows === '') {
-            $liniesRows = '<tr><td colspan="5" style="border:1px solid #d1d5db; padding:6px;">Sense línies</td></tr>';
+            $liniesRows = '<tr><td colspan="5" style="border:1px solid #d1d5db; padding:8px; text-align:center;">Sense línies</td></tr>';
         }
 
         return '
-            <h1 style="font-size:20px;">Factura ' . $this->escape($numero) . '</h1>
-            <table cellpadding="3" cellspacing="0" width="100%">
-                <tr>
-                    <td width="50%">
-                        <strong>Emissor</strong><br>
-                        ' . $this->escape($empresa) . '<br>
-                        NIF: ' . $this->escape($empresaNif) . '<br>
-                        ' . $this->escape($empresaAdreca) . '
-                    </td>
-                    <td width="50%">
-                        <strong>Client</strong><br>
-                        ' . $this->escape($clientNom) . '<br>
-                        NIF: ' . $this->escape($clientNif) . '<br>
-                        ' . $this->escape($clientAdreca) . '
-                    </td>
-                </tr>
-            </table>
-
-            <br>
-            <table cellpadding="4" cellspacing="0" width="100%">
-                <tr>
-                    <td width="25%"><strong>Data emissió</strong></td>
-                    <td width="25%">' . $this->escape($dataEmisio) . '</td>
-                    <td width="25%"><strong>Data venciment</strong></td>
-                    <td width="25%">' . $this->escape($dataVenciment) . '</td>
-                </tr>
-                <tr>
-                    <td width="25%"><strong>Estat</strong></td>
-                    <td width="25%">' . $this->escape($estat) . '</td>
-                    <td width="25%"></td>
-                    <td width="25%"></td>
-                </tr>
-            </table>
-
-            <br>
-            <table cellpadding="0" cellspacing="0" width="100%">
-                <thead>
-                    <tr style="font-weight:bold; background-color:#f3f4f6;">
-                        <th style="border:1px solid #d1d5db; padding:6px;" width="44%">Descripció</th>
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:right;" width="14%">Quantitat</th>
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:right;" width="14%">Preu</th>
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:right;" width="14%">Desc %</th>
-                        <th style="border:1px solid #d1d5db; padding:6px; text-align:right;" width="14%">Total</th>
+            <div style="font-size:11px; color:#111827;">
+                <table cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td width="62%" style="font-size:22px; font-weight:bold;">FACTURA</td>
+                        <td width="38%" style="text-align:right;">
+                            <table cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #d1d5db;">
+                                <tr>
+                                    <td style="padding:7px; border-right:1px solid #d1d5db; border-bottom:1px solid #d1d5db;"><strong>Núm. factura</strong></td>
+                                    <td style="padding:7px; text-align:right; border-bottom:1px solid #d1d5db;">' . $this->escape($numero) . '</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:7px; border-right:1px solid #d1d5db;"><strong>Data emissió</strong></td>
+                                    <td style="padding:7px; text-align:right;">' . $this->escape($dataEmisio) . '</td>
+                                </tr>
+                            </table>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>' . $liniesRows . '</tbody>
-            </table>
+                </table>
 
-            <br>
-            <table cellpadding="4" cellspacing="0" width="100%">
-                <tr>
-                    <td width="70%"></td>
-                    <td width="30%">
-                        <table cellpadding="4" cellspacing="0" width="100%">
-                            <tr><td><strong>Subtotal</strong></td><td align="right">' . $subtotal . '</td></tr>
-                            <tr><td><strong>IVA (' . $ivaPercentatge . ' %)</strong></td><td align="right">' . $ivaImport . '</td></tr>
-                            <tr><td><strong>IRPF (' . $irpfPercentatge . ' %)</strong></td><td align="right">-' . $irpfImport . '</td></tr>
-                            <tr><td><strong>Total</strong></td><td align="right"><strong>' . $total . '</strong></td></tr>
-                        </table>
-                    </td>
-                </tr>
-            </table>
+                <div style="height:10px;"></div>
+
+                <table cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td width="49%" style="border:1px solid #d1d5db; padding:9px; vertical-align:top; line-height:1.45;">
+                            <strong style="font-size:12px;">Emissor</strong><br>
+                            ' . $this->escape($empresa) . '<br>
+                            NIF: ' . $this->escape($empresaNif) . '<br>
+                            ' . $this->escape($empresaAdreca) . '
+                        </td>
+                        <td width="2%"></td>
+                        <td width="49%" style="border:1px solid #d1d5db; padding:9px; vertical-align:top; line-height:1.45;">
+                            <strong style="font-size:12px;">Client</strong><br>
+                            ' . $this->escape($clientNom) . '<br>
+                            NIF: ' . $this->escape($clientNif) . '<br>
+                            ' . $this->escape($clientAdreca) . '
+                        </td>
+                    </tr>
+                </table>
+
+                <div style="height:10px;"></div>
+
+                <table cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #d1d5db;">
+                    <tr>
+                        <td width="25%" style="padding:7px; border-right:1px solid #d1d5db;"><strong>Data venciment</strong></td>
+                        <td width="25%" style="padding:7px; border-right:1px solid #d1d5db;">' . $this->escape($dataVenciment) . '</td>
+                        <td width="25%" style="padding:7px; border-right:1px solid #d1d5db;"><strong>Estat</strong></td>
+                        <td width="25%" style="padding:7px;">' . $this->escape($estat) . '</td>
+                    </tr>
+                </table>
+
+                <div style="height:10px;"></div>
+
+                <table cellpadding="0" cellspacing="0" width="100%">
+                    <thead>
+                        <tr style="font-weight:bold; background-color:#f3f4f6;">
+                            <th style="border:1px solid #d1d5db; padding:8px; text-align:left;" width="44%">Concepte</th>
+                            <th style="border:1px solid #d1d5db; padding:8px; text-align:right;" width="14%">Quantitat</th>
+                            <th style="border:1px solid #d1d5db; padding:8px; text-align:right;" width="14%">Preu unit.</th>
+                            <th style="border:1px solid #d1d5db; padding:8px; text-align:right;" width="14%">Dto. %</th>
+                            <th style="border:1px solid #d1d5db; padding:8px; text-align:right;" width="14%">Base imp.</th>
+                        </tr>
+                    </thead>
+                    <tbody>' . $liniesRows . '</tbody>
+                </table>
+
+                <div style="height:10px;"></div>
+
+                <table cellpadding="0" cellspacing="0" width="100%">
+                    <tr>
+                        <td width="55%"></td>
+                        <td width="45%">
+                            <table cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #d1d5db;">
+                                <tr style="background-color:#f3f4f6;">
+                                    <td style="padding:8px; border-bottom:1px solid #d1d5db;"><strong>Resum impostos</strong></td>
+                                    <td style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db;"><strong>Import</strong></td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px; border-bottom:1px solid #d1d5db;"><strong>Base imposable</strong></td>
+                                    <td style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db; white-space:nowrap;">' . $subtotal . '</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px; border-bottom:1px solid #d1d5db;"><strong>Tipus IVA</strong></td>
+                                    <td style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db; white-space:nowrap;">' . $ivaPercentatge . ' %</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px; border-bottom:1px solid #d1d5db;"><strong>Quota IVA</strong></td>
+                                    <td style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db; white-space:nowrap;">' . $ivaImport . '</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:8px; border-bottom:1px solid #d1d5db;"><strong>Retenció IRPF (' . $irpfPercentatge . ' %)</strong></td>
+                                    <td style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db; white-space:nowrap;">-' . $irpfImport . '</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding:9px; background-color:#f3f4f6;"><strong>Total factura</strong></td>
+                                    <td style="padding:9px; text-align:right; white-space:nowrap; background-color:#f3f4f6;"><strong>' . $total . '</strong></td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+
+                ' . ($observacions !== '' ? '
+                <div style="height:10px;"></div>
+                <table cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #d1d5db;">
+                    <tr>
+                        <td style="padding:8px; background-color:#f3f4f6;"><strong>Observacions</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="padding:8px; line-height:1.4;">' . nl2br($this->escape($observacions)) . '</td>
+                    </tr>
+                </table>' : '') . '
+            </div>
         ';
     }
 
@@ -157,7 +208,7 @@ class PdfFactura
 
     private function money(float $value): string
     {
-        return $this->number($value) . ' EUR';
+        return $this->number($value) . ' €';
     }
 
     private function escape(string $text): string

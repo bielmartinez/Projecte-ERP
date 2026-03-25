@@ -122,8 +122,8 @@
             <input
               v-model.number="linia.quantitat"
               type="number"
-              min="0.001"
-              step="0.001"
+              min="1"
+              step="1"
               class="border rounded px-3 py-2 md:col-span-2"
               placeholder="Quantitat"
             />
