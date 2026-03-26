@@ -9,6 +9,8 @@ import FacturaDetailView from '@/views/FacturaDetailView.vue'
 import FacturaFormView from '@/views/FacturaFormView.vue'
 import FacturesView from '@/views/FacturesView.vue'
 import LoginView from '@/views/LoginView.vue'
+import PlantillaFormView from '@/views/PlantillaFormView.vue'
+import PlantillesView from '@/views/PlantillesView.vue'
 import PerfilView from '@/views/PerfilView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 
@@ -71,6 +73,21 @@ const router = createRouter({
           path: 'factures/:id/editar',
           name: 'factura-edit',
           component: FacturaFormView
+        },
+        {
+          path: 'plantilles',
+          name: 'plantilles',
+          component: PlantillesView
+        },
+        {
+          path: 'plantilles/nova',
+          name: 'plantilla-create',
+          component: PlantillaFormView
+        },
+        {
+          path: 'plantilles/:id/editar',
+          name: 'plantilla-edit',
+          component: PlantillaFormView
         }
       ]
     },

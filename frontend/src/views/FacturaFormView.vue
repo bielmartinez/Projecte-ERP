@@ -178,6 +178,14 @@
         <div class="flex gap-2">
           <button
             type="button"
+            class="px-4 py-2 rounded border disabled:opacity-50"
+            :disabled="saving"
+            @click="handleSaveAsTemplate"
+          >
+            Desar com plantilla
+          </button>
+          <button
+            type="button"
             class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
             :disabled="saving"
             @click="handleSubmit"
@@ -197,6 +205,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { getClients, type Client } from '@/services/clients'
 import { createFactura, getFactura, updateFactura, type FacturaLiniaPayload, type FacturaPayload } from '@/services/factures'
+import { createPlantilla, type PlantillaPayload } from '@/services/plantilles'
 
 type EstatFactura = 'esborrany' | 'emesa' | 'cancel·lada' | 'cobrada'
 
@@ -385,6 +394,42 @@ async function handleSubmit() {
     }
   } catch (requestError: any) {
     error.value = requestError?.response?.data?.message ?? 'No s\'ha pogut desar la factura.'
+  } finally {
+    saving.value = false
+  }
+}
+
+async function handleSaveAsTemplate() {
+  error.value = ''
+  success.value = ''
+
+  const formError = validateForm()
+  if (formError) {
+    error.value = formError
+    return
+  }
+
+  const nomPlantilla = window.prompt('Nom de la plantilla:', isEdit.value ? `Plantilla ${route.params.id}` : 'Nova plantilla')?.trim()
+  if (!nomPlantilla) {
+    return
+  }
+
+  saving.value = true
+
+  const payload: PlantillaPayload = {
+    nom: nomPlantilla,
+    iva_percentatge: Number(form.iva_percentatge) || 0,
+    irpf_percentatge: Number(form.irpf_percentatge) || 0,
+    metode_pagament: form.metode_pagament || undefined,
+    notes_plantilla: form.notes || undefined,
+    linies: mapLiniesPayload()
+  }
+
+  try {
+    await createPlantilla(payload)
+    success.value = 'Plantilla desada correctament.'
+  } catch (requestError: any) {
+    error.value = requestError?.response?.data?.message ?? 'No s\'ha pogut desar la plantilla.'
   } finally {
     saving.value = false
   }

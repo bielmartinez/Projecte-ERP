@@ -41,3 +41,12 @@ $routes->group('factures', ['filter' => 'auth'], static function ($routes) {
 	$routes->delete('(:num)/linies/(:num)', 'FacturaController::deleteLinia/$1/$2');
 	$routes->put('(:num)/estat', 'FacturaController::canviarEstat/$1');
 });
+
+$routes->group('plantilles', ['filter' => 'auth'], static function ($routes) {
+	$routes->get('/', 'PlantillaController::index');
+	$routes->get('(:num)', 'PlantillaController::show/$1');
+	$routes->post('/', 'PlantillaController::create');
+	$routes->put('(:num)', 'PlantillaController::update/$1');
+	$routes->delete('(:num)', 'PlantillaController::delete/$1');
+	$routes->post('(:num)/crear-factura', 'PlantillaController::crearFactura/$1');
+});

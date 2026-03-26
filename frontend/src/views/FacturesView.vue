@@ -2,12 +2,20 @@
   <div class="space-y-6">
     <div class="flex items-center justify-between gap-4">
       <h2 class="text-2xl font-semibold">Factures</h2>
-      <RouterLink
-        to="/factures/nova"
-        class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
-      >
-        Nova factura
-      </RouterLink>
+      <div class="flex items-center gap-2">
+        <RouterLink
+          to="/plantilles"
+          class="px-4 py-2 rounded border hover:bg-gray-50"
+        >
+          Des de plantilla
+        </RouterLink>
+        <RouterLink
+          to="/factures/nova"
+          class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
+        >
+          Nova factura
+        </RouterLink>
+      </div>
     </div>
 
     <!-- Div de càrrega  de la pagina-->
