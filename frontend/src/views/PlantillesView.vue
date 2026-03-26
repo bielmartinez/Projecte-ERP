@@ -37,21 +37,6 @@
               @keyup.enter="loadPlantilles(1)"
             />
           </label>
-
-          <label class="space-y-1">
-            <span class="text-sm font-medium text-gray-700">Client per crear factura</span>
-            <select v-model.number="selectedClientId" class="border rounded px-3 py-2 w-full">
-              <option :value="0">Selecciona client</option>
-              <option v-for="client in clients" :key="client.id" :value="client.id">
-                {{ client.nom }} {{ client.cognoms ?? '' }}
-              </option>
-            </select>
-          </label>
-
-          <label class="space-y-1">
-            <span class="text-sm font-medium text-gray-700">Data emissió</span>
-            <input v-model="dataEmisio" type="date" class="border rounded px-3 py-2 w-full" />
-          </label>
         </div>
 
         <div class="flex gap-2">
@@ -99,15 +84,9 @@
                 </td>
                 <td class="py-2 pr-4">{{ plantilla.metode_pagament || '-' }}</td>
                 <td class="py-2 pr-4 flex flex-wrap gap-2">
-                  <button type="button" class="text-indigo-600 hover:underline" @click="handleCrearFactura(plantilla.id)">
-                    Crear factura
-                  </button>
-                  <RouterLink :to="`/plantilles/${plantilla.id}/editar`" class="text-blue-600 hover:underline">
-                    Editar
-                  </RouterLink>
-                  <button type="button" class="text-red-600 hover:underline" @click="handleDelete(plantilla.id)">
-                    Eliminar
-                  </button>
+                  <LlistaFacturesAction label="Crear factura" variant="primary" @click="handleCrearFactura(plantilla.id)" />
+                  <LlistaFacturesAction label="Editar" :to="`/plantilles/${plantilla.id}/editar`" variant="neutral" />
+                  <LlistaFacturesAction label="Eliminar" variant="danger" @click="handleDelete(plantilla.id)" />
                 </td>
               </tr>
               <tr v-if="!loading && plantilles.length === 0">
@@ -147,18 +126,15 @@
 import { onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 
+import LlistaFacturesAction from '@/components/LlistaFacturesAction.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
-import { getClients, type Client } from '@/services/clients'
-import { crearFacturaDesDePlantilla, deletePlantilla, getPlantilles, type Plantilla } from '@/services/plantilles'
+import { deletePlantilla, getPlantilles, type Plantilla } from '@/services/plantilles'
 
 const router = useRouter()
 
 const loading = ref(false)
 const error = ref('')
 const plantilles = ref<Plantilla[]>([])
-const clients = ref<Client[]>([])
-const selectedClientId = ref(0)
-const dataEmisio = ref(todayDate())
 
 const filters = reactive({
   search: ''
@@ -173,21 +149,9 @@ const meta = reactive({
 
 const { initialLoading, runInitialLoad } = useInitialLoading()
 
-function todayDate() {
-  const now = new Date()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
-  return `${now.getFullYear()}-${month}-${day}`
-}
-
 function resetFilters() {
   filters.search = ''
   loadPlantilles(1)
-}
-
-async function loadClientsSelect() {
-  const response = await getClients({ page: 1, limit: 100 })
-  clients.value = response.data ?? []
 }
 
 async function loadPlantilles(page = 1) {
@@ -231,32 +195,18 @@ async function handleDelete(id: number) {
 }
 
 async function handleCrearFactura(id: number) {
-  error.value = ''
-
-  if (!selectedClientId.value) {
-    error.value = 'Selecciona un client abans de crear la factura des de plantilla.'
-    return
-  }
-
-  try {
-    const response = await crearFacturaDesDePlantilla(id, {
-      client_id: selectedClientId.value,
-      data_emisio: dataEmisio.value
-    })
-
-    const facturaId = response?.data?.factura?.id
-    if (facturaId) {
-      await router.push(`/factures/${facturaId}`)
+  await router.push({
+    path: '/factures/nova',
+    query: {
+      plantilla_id: String(id)
     }
-  } catch (requestError: any) {
-    error.value = requestError?.response?.data?.message ?? 'No s\'ha pogut crear la factura.'
-  }
+  })
 }
 
 onMounted(() => {
   runInitialLoad(async () => {
     try {
-      await Promise.all([loadClientsSelect(), loadPlantilles(1)])
+      await loadPlantilles(1)
     } catch (requestError: any) {
       error.value = requestError?.response?.data?.message ?? 'No s\'ha pogut carregar la pantalla de plantilles.'
     }

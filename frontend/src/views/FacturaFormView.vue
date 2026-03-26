@@ -205,7 +205,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { getClients, type Client } from '@/services/clients'
 import { createFactura, getFactura, updateFactura, type FacturaLiniaPayload, type FacturaPayload } from '@/services/factures'
-import { createPlantilla, type PlantillaPayload } from '@/services/plantilles'
+import { createPlantilla, getPlantilla, type PlantillaPayload } from '@/services/plantilles'
 
 type EstatFactura = 'esborrany' | 'emesa' | 'cancel·lada' | 'cobrada'
 
@@ -352,6 +352,33 @@ async function loadFacturaForEdit(id: string) {
   }
 }
 
+async function loadPlantillaForCreate(id: string) {
+  const response = await getPlantilla(id)
+  const plantilla = response?.data?.plantilla
+  const linies = response?.data?.linies ?? []
+
+  if (!plantilla) {
+    throw new Error('Plantilla no trobada')
+  }
+
+  const ivaPlantilla = Number(plantilla.iva_percentatge ?? 21)
+  form.iva_percentatge = IVA_OPTIONS.includes(ivaPlantilla) ? ivaPlantilla : 21
+  form.irpf_percentatge = Number(plantilla.irpf_percentatge ?? 0)
+  form.metode_pagament = plantilla.metode_pagament ?? ''
+  form.notes = plantilla.notes_plantilla ?? ''
+
+  form.linies = linies.map((linia: any) => ({
+    descripcio: linia.descripcio ?? '',
+    quantitat: Number(linia.quantitat ?? 1),
+    preu_unitari: Number(linia.preu_unitari ?? 0),
+    descompte: Number(linia.descompte ?? 0)
+  }))
+
+  if (form.linies.length === 0) {
+    addLinia()
+  }
+}
+
 async function handleSubmit() {
   error.value = ''
   success.value = ''
@@ -444,7 +471,13 @@ onMounted(() => {
         await loadFacturaForEdit(route.params.id as string)
       } else {
         form.data_emisio = todayDate()
-        addLinia()
+
+        const plantillaId = route.query.plantilla_id
+        if (typeof plantillaId === 'string' && plantillaId.trim() !== '') {
+          await loadPlantillaForCreate(plantillaId)
+        } else {
+          addLinia()
+        }
       }
     } catch (requestError: any) {
       error.value = requestError?.response?.data?.message ?? 'No s\'ha pogut carregar el formulari de factura.'

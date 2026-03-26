@@ -146,18 +146,10 @@
                 </td>
                 <td class="py-2 pr-4">{{ Number(factura.total).toFixed(2) }} €</td>
                 <td class="py-2 pr-4 flex flex-wrap gap-2">
-                  <RouterLink :to="`/factures/${factura.id}`" class="text-blue-600 hover:underline">
-                    Veure
-                  </RouterLink>
-                  <button type="button" class="text-gray-700 hover:underline" @click="handleDescarregarPdf(factura.id)">
-                    PDF
-                  </button>
-                  <RouterLink :to="`/factures/${factura.id}/editar`" class="text-gray-700 hover:underline">
-                    Editar
-                  </RouterLink>
-                  <button type="button" class="text-red-600 hover:underline" @click="handleDelete(factura.id)">
-                    Eliminar
-                  </button>
+                  <LlistaFacturesAction label="Veure" :to="`/factures/${factura.id}`" variant="primary" />
+                  <LlistaFacturesAction label="PDF" variant="neutral" @click="handleDescarregarPdf(factura.id)" />
+                  <LlistaFacturesAction label="Editar" :to="`/factures/${factura.id}/editar`" variant="neutral" />
+                  <LlistaFacturesAction label="Eliminar" variant="danger" @click="handleDelete(factura.id)" />
                 </td>
               </tr>
               <tr v-if="!loading && factures.length === 0">
@@ -197,6 +189,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
+import LlistaFacturesAction from '@/components/LlistaFacturesAction.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { getClients, type Client } from '@/services/clients'
 import { descarregarFacturaPdf, deleteFactura, getFactures, type Factura } from '@/services/factures'
