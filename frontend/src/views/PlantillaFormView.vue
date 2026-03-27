@@ -78,9 +78,10 @@
 
         <div class="space-y-3">
           <div class="hidden md:grid md:grid-cols-12 gap-3 text-xs font-semibold text-gray-500 uppercase">
-            <span class="md:col-span-5">Descripció</span>
+            <span class="md:col-span-4">Descripció</span>
             <span class="md:col-span-2">Quantitat</span>
             <span class="md:col-span-2">Preu unitari</span>
+            <span class="md:col-span-1">IVA %</span>
             <span class="md:col-span-2">Descompte %</span>
             <span class="md:col-span-1">Acció</span>
           </div>
@@ -93,7 +94,7 @@
             <input
               v-model="linia.descripcio"
               type="text"
-              class="border rounded px-3 py-2 md:col-span-5"
+              class="border rounded px-3 py-2 md:col-span-4"
               placeholder="Descripció"
             />
 
@@ -117,6 +118,13 @@
               />
               <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">€</span>
             </div>
+
+            <select
+              v-model.number="linia.iva_percentatge"
+              class="border rounded px-3 py-2 md:col-span-1"
+            >
+              <option v-for="iva in IVA_OPTIONS" :key="`iva-${index}-${iva}`" :value="iva">{{ iva }}%</option>
+            </select>
 
             <input
               v-model.number="linia.descompte"
@@ -164,6 +172,7 @@ interface FormLinia {
   descripcio: string
   quantitat: number
   preu_unitari: number
+  iva_percentatge: number
   descompte: number
 }
 
@@ -193,6 +202,7 @@ function addLinia() {
     descripcio: '',
     quantitat: 1,
     preu_unitari: 0,
+    iva_percentatge: Number(form.iva_percentatge) || 21,
     descompte: 0
   })
 }
@@ -206,7 +216,7 @@ function mapLiniesPayload(): PlantillaLiniaPayload[] {
     descripcio: linia.descripcio,
     quantitat: Number(linia.quantitat),
     preu_unitari: Number(linia.preu_unitari),
-    iva_percentatge: Number(form.iva_percentatge) || 0,
+    iva_percentatge: Number(linia.iva_percentatge) || Number(form.iva_percentatge) || 0,
     descompte: Number(linia.descompte) || 0
   }))
 }
@@ -221,7 +231,7 @@ function validateForm() {
   }
 
   if (!IVA_OPTIONS.includes(Number(form.iva_percentatge))) {
-    return 'L\'IVA només pot ser 0, 4, 10 o 21.'
+    return 'L\'IVA per defecte només pot ser 0, 4, 10 o 21.'
   }
 
   const liniaBuida = form.linies.find((linia) => !linia.descripcio.trim())
@@ -232,6 +242,11 @@ function validateForm() {
   const liniaInvalid = form.linies.find((linia) => Number(linia.quantitat) <= 0)
   if (liniaInvalid) {
     return 'La quantitat ha de ser major que 0 a totes les línies.'
+  }
+
+  const liniaIvaInvalid = form.linies.find((linia) => !IVA_OPTIONS.includes(Number(linia.iva_percentatge)))
+  if (liniaIvaInvalid) {
+    return 'L\'IVA de cada línia només pot ser 0, 4, 10 o 21.'
   }
 
   return ''
@@ -260,6 +275,7 @@ async function loadPlantillaForEdit(id: string) {
     descripcio: linia.descripcio ?? '',
     quantitat: Number(linia.quantitat ?? 1),
     preu_unitari: Number(linia.preu_unitari ?? 0),
+    iva_percentatge: Number(linia.iva_percentatge ?? plantilla.iva_percentatge ?? 21),
     descompte: Number(linia.descompte ?? 0)
   }))
 

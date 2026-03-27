@@ -98,6 +98,7 @@
                 <th class="py-2 pr-4">Descripció</th>
                 <th class="py-2 pr-4">Quantitat</th>
                 <th class="py-2 pr-4">Preu</th>
+                <th class="py-2 pr-4">IVA %</th>
                 <th class="py-2 pr-4">Desc %</th>
                 <th class="py-2 pr-4">Total línia</th>
               </tr>
@@ -107,11 +108,12 @@
                 <td class="py-2 pr-4">{{ linia.descripcio }}</td>
                 <td class="py-2 pr-4">{{ Number(linia.quantitat).toFixed(3) }}</td>
                 <td class="py-2 pr-4">{{ Number(linia.preu_unitari).toFixed(2) }} €</td>
+                <td class="py-2 pr-4">{{ Number(linia.iva_percentatge).toFixed(2) }} %</td>
                 <td class="py-2 pr-4">{{ Number(linia.descompte).toFixed(2) }} %</td>
                 <td class="py-2 pr-4">{{ Number(linia.total_linia).toFixed(2) }} €</td>
               </tr>
               <tr v-if="linies.length === 0">
-                <td colspan="5" class="py-4 text-gray-500">Aquesta factura no té línies</td>
+                <td colspan="6" class="py-4 text-gray-500">Aquesta factura no té línies</td>
               </tr>
             </tbody>
           </table>

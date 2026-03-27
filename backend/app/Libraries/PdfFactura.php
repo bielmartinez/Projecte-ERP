@@ -46,16 +46,17 @@ class PdfFactura
         $liniesRows = '';
         foreach ($linies as $linia) {
             $liniesRows .= '<tr>'
-                . '<td style="border:1px solid #d1d5db; padding:8px; vertical-align:middle;">' . $this->escape($this->text($linia['descripcio'] ?? null, '-')) . '</td>'
-                . '<td style="border:1px solid #d1d5db; padding:8px; text-align:right; vertical-align:middle;">' . $this->number((float) ($linia['quantitat'] ?? 0), 3) . '</td>'
-                . '<td style="border:1px solid #d1d5db; padding:8px; text-align:right; vertical-align:middle;">' . $this->money((float) ($linia['preu_unitari'] ?? 0)) . '</td>'
-                . '<td style="border:1px solid #d1d5db; padding:8px; text-align:right; vertical-align:middle;">' . $this->number((float) ($linia['descompte'] ?? 0)) . ' %</td>'
-                . '<td style="border:1px solid #d1d5db; padding:8px; text-align:right; vertical-align:middle;">' . $this->money((float) ($linia['total_linia'] ?? 0)) . '</td>'
+                . '<td style="border:1px solid #d1d5db; padding:8px; vertical-align:middle;" width="36%">' . $this->escape($this->text($linia['descripcio'] ?? null, '-')) . '</td>'
+                . '<td style="border:1px solid #d1d5db; padding:8px; text-align:right; vertical-align:middle;" width="12%">' . $this->number((float) ($linia['quantitat'] ?? 0), 3) . '</td>'
+                . '<td style="border:1px solid #d1d5db; padding:8px; text-align:right; vertical-align:middle;" width="14%">' . $this->money((float) ($linia['preu_unitari'] ?? 0)) . '</td>'
+                . '<td style="border:1px solid #d1d5db; padding:8px; text-align:right; vertical-align:middle;" width="12%">' . $this->number((float) ($linia['iva_percentatge'] ?? 0)) . ' %</td>'
+                . '<td style="border:1px solid #d1d5db; padding:8px; text-align:right; vertical-align:middle;" width="12%">' . $this->number((float) ($linia['descompte'] ?? 0)) . ' %</td>'
+                . '<td style="border:1px solid #d1d5db; padding:8px; text-align:right; vertical-align:middle;" width="14%">' . $this->money((float) ($linia['total_linia'] ?? 0)) . '</td>'
                 . '</tr>';
         }
 
         if ($liniesRows === '') {
-            $liniesRows = '<tr><td colspan="5" style="border:1px solid #d1d5db; padding:8px; text-align:center;">Sense línies</td></tr>';
+            $liniesRows = '<tr><td colspan="6" style="border:1px solid #d1d5db; padding:8px; text-align:center;">Sense línies</td></tr>';
         }
 
         return '
@@ -114,10 +115,11 @@ class PdfFactura
                 <table cellpadding="0" cellspacing="0" width="100%">
                     <thead>
                         <tr style="font-weight:bold; background-color:#f3f4f6;">
-                            <th style="border:1px solid #d1d5db; padding:8px; text-align:left;" width="44%">Concepte</th>
-                            <th style="border:1px solid #d1d5db; padding:8px; text-align:right;" width="14%">Quantitat</th>
+                            <th style="border:1px solid #d1d5db; padding:8px; text-align:left;" width="36%">Concepte</th>
+                            <th style="border:1px solid #d1d5db; padding:8px; text-align:right;" width="12%">Quantitat</th>
                             <th style="border:1px solid #d1d5db; padding:8px; text-align:right;" width="14%">Preu unit.</th>
-                            <th style="border:1px solid #d1d5db; padding:8px; text-align:right;" width="14%">Dto. %</th>
+                            <th style="border:1px solid #d1d5db; padding:8px; text-align:right;" width="12%">IVA %</th>
+                            <th style="border:1px solid #d1d5db; padding:8px; text-align:right;" width="12%">Dto. %</th>
                             <th style="border:1px solid #d1d5db; padding:8px; text-align:right;" width="14%">Base imp.</th>
                         </tr>
                     </thead>

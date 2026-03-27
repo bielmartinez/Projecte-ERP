@@ -48,5 +48,4 @@ $routes->group('plantilles', ['filter' => 'auth'], static function ($routes) {
 	$routes->post('/', 'PlantillaController::create');
 	$routes->put('(:num)', 'PlantillaController::update/$1');
 	$routes->delete('(:num)', 'PlantillaController::delete/$1');
-	$routes->post('(:num)/crear-factura', 'PlantillaController::crearFactura/$1');
 });

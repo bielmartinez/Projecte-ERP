@@ -280,6 +280,7 @@ class FacturaController extends BaseController
                 $payloadLinia = $this->filtrarPayloadLinia($linia);
                 $payloadLinia['factura_id'] = $facturaId;
                 $payloadLinia['ordre'] = $index;
+                $payloadLinia['iva_percentatge'] = (float) ($payloadLinia['iva_percentatge'] ?? $payload['iva_percentatge']);
 
                 if (!$this->liniaModel->crearLinia($payloadLinia)) {
                     $db->transRollback();
@@ -381,6 +382,7 @@ class FacturaController extends BaseController
 
             if (array_key_exists('linies', $data)) {
                 $linies = $data['linies'];
+                $ivaFactura = (float) ($payload['iva_percentatge'] ?? $factura['iva_percentatge'] ?? 21);
 
                 if (!is_array($linies) || $linies === []) {
                     $db->transRollback();
@@ -406,6 +408,7 @@ class FacturaController extends BaseController
                     $payloadLinia = $this->filtrarPayloadLinia($linia);
                     $payloadLinia['factura_id'] = $id;
                     $payloadLinia['ordre'] = $index;
+                    $payloadLinia['iva_percentatge'] = (float) ($payloadLinia['iva_percentatge'] ?? $ivaFactura);
 
                     if (!$this->liniaModel->crearLinia($payloadLinia)) {
                         $db->transRollback();

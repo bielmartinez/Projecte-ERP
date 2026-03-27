@@ -186,23 +186,31 @@ class FacturaModel extends Model
             ];
         }
 
-        $ivaPercentatge = (float) ($factura['iva_percentatge'] ?? 21);
+        $ivaPercentatgeFactura = (float) ($factura['iva_percentatge'] ?? 21);
         $irpfPercentatge = (float) ($factura['irpf_percentatge'] ?? 0);
 
         $liniaModel = new LiniaFacturaModel();
         $subtotal = 0;
+        $ivaImport = 0;
 
         $linies = $liniaModel->where('factura_id', $facturaId)->findAll();
         foreach ($linies as $linia) {
-            $subtotal += (float) $linia['total_linia'];
+            $baseLinia = (float) ($linia['total_linia'] ?? 0);
+            $ivaPercentatgeLinia = (float) ($linia['iva_percentatge'] ?? $ivaPercentatgeFactura);
+
+            $subtotal += $baseLinia;
+            $ivaImport += $baseLinia * ($ivaPercentatgeLinia / 100);
         }
 
-        $ivaImport = $subtotal * ($ivaPercentatge / 100);
         $irpfImport = $subtotal * ($irpfPercentatge / 100);
         $total = $subtotal + $ivaImport - $irpfImport;
+        $ivaPercentatgeEfectiu = $subtotal > 0
+            ? round(($ivaImport / $subtotal) * 100, 2)
+            : $ivaPercentatgeFactura;
 
         return [
             'subtotal' => round($subtotal, 2),
+            'iva_percentatge' => $ivaPercentatgeEfectiu,
             'iva_import' => round($ivaImport, 2),
             'irpf_import' => round($irpfImport, 2),
             'total' => round($total, 2),

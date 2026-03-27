@@ -2,8 +2,6 @@
 
 namespace App\Controllers;
 
-use App\Models\FacturaModel;
-use App\Models\LiniaFacturaModel;
 use App\Models\LiniaPlantillaModel;
 use App\Models\PlantillaFacturaModel;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -12,15 +10,11 @@ class PlantillaController extends BaseController
 {
     protected PlantillaFacturaModel $plantillaModel;
     protected LiniaPlantillaModel $liniaPlantillaModel;
-    protected FacturaModel $facturaModel;
-    protected LiniaFacturaModel $liniaFacturaModel;
 
     public function __construct()
     {
         $this->plantillaModel = new PlantillaFacturaModel();
         $this->liniaPlantillaModel = new LiniaPlantillaModel();
-        $this->facturaModel = new FacturaModel();
-        $this->liniaFacturaModel = new LiniaFacturaModel();
     }
 
     public function index(): ResponseInterface
@@ -378,141 +372,6 @@ class PlantillaController extends BaseController
         }
     }
 
-    public function crearFactura(int $id): ResponseInterface
-    {
-        try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
-
-            $plantilla = $this->plantillaModel
-                ->where('id', $id)
-                ->where('usuari_id', $usuariId)
-                ->first();
-
-            if (!$plantilla) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Plantilla no trobada',
-                ]);
-            }
-
-            $liniesPlantilla = $this->liniaPlantillaModel->obtenirLiniesPlantilla($id);
-            if ($liniesPlantilla === []) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'La plantilla no té línies',
-                ]);
-            }
-
-            $data = $this->request->getJSON(true) ?? [];
-            $clientId = (int) ($data['client_id'] ?? 0);
-            $dataEmisio = trim((string) ($data['data_emisio'] ?? date('Y-m-d')));
-            $dataVenciment = trim((string) ($data['data_venciment'] ?? ''));
-
-            if ($clientId <= 0) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Has d\'indicar un client per crear la factura',
-                ]);
-            }
-
-            if (!$this->clientEsDelUsuari($clientId, $usuariId)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Client no vàlid per a aquest usuari',
-                ]);
-            }
-
-            $payloadFactura = [
-                'usuari_id' => $usuariId,
-                'client_id' => $clientId,
-                'serie' => 'F',
-                'numero_factura' => $this->facturaModel->generarNumeroFactura($usuariId, 'F'),
-                'data_emisio' => $dataEmisio,
-                'data_venciment' => $dataVenciment !== '' ? $dataVenciment : null,
-                'estat' => 'esborrany',
-                'iva_percentatge' => (float) ($plantilla['iva_percentatge'] ?? 21),
-                'iva_import' => 0,
-                'irpf_percentatge' => (float) ($plantilla['irpf_percentatge'] ?? 0),
-                'irpf_import' => 0,
-                'subtotal' => 0,
-                'total' => 0,
-                'metode_pagament' => $plantilla['metode_pagament'] ?? null,
-                'notes' => $plantilla['notes_plantilla'] ?? null,
-            ];
-
-            $db = \Config\Database::connect();
-            $db->transBegin();
-
-            if (!$this->facturaModel->insert($payloadFactura)) {
-                $db->transRollback();
-
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha pogut crear la factura',
-                    'errors' => $this->facturaModel->errors(),
-                ]);
-            }
-
-            $facturaId = (int) $this->facturaModel->getInsertID();
-
-            foreach (array_values($liniesPlantilla) as $index => $linia) {
-                $payloadLinia = [
-                    'factura_id' => $facturaId,
-                    'descripcio' => $linia['descripcio'],
-                    'quantitat' => (float) $linia['quantitat'],
-                    'preu_unitari' => (float) $linia['preu_unitari'],
-                    'iva_percentatge' => (float) ($linia['iva_percentatge'] ?? $payloadFactura['iva_percentatge']),
-                    'descompte' => (float) ($linia['descompte'] ?? 0),
-                    'ordre' => $index,
-                ];
-
-                if (!$this->liniaFacturaModel->crearLinia($payloadLinia)) {
-                    $db->transRollback();
-
-                    return $this->response->setStatusCode(422)->setJSON([
-                        'status' => 'error',
-                        'message' => 'No s\'ha pogut crear una línia de factura',
-                        'errors' => $this->liniaFacturaModel->errors(),
-                    ]);
-                }
-            }
-
-            if (!$this->facturaModel->actualitzarTotals($facturaId)) {
-                $db->transRollback();
-
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'han pogut actualitzar els totals de la factura',
-                ]);
-            }
-
-            $db->transCommit();
-
-            return $this->response->setStatusCode(201)->setJSON([
-                'status' => 'ok',
-                'message' => 'Factura creada a partir de plantilla',
-                'data' => [
-                    'factura' => $this->facturaModel->find($facturaId),
-                    'linies' => $this->liniaFacturaModel->obtenirLiniesFactura($facturaId),
-                ],
-            ]);
-        } catch (\Exception $e) {
-            log_message('error', 'Error en plantilles crearFactura: ' . $e->getMessage());
-
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error en crear la factura des de plantilla',
-            ]);
-        }
-    }
-
     private function filtrarPayloadPlantilla(array $data): array
     {
         $campsPermesos = [
@@ -584,17 +443,4 @@ class PlantillaController extends BaseController
         return $resultat;
     }
 
-    private function clientEsDelUsuari(int $clientId, int $usuariId): bool
-    {
-        $db = \Config\Database::connect();
-        $client = $db->table('clients')
-            ->select('id')
-            ->where('id', $clientId)
-            ->where('usuari_id', $usuariId)
-            ->where('deleted_at', null)
-            ->get()
-            ->getRowArray();
-
-        return $client !== null;
-    }
 }

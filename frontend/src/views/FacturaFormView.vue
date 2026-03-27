@@ -59,7 +59,7 @@
           </label>
 
           <label class="space-y-1">
-            <span class="text-sm font-medium text-gray-700">IVA (%)</span>
+            <span class="text-sm font-medium text-gray-700">IVA per defecte (%)</span>
             <select v-model.number="form.iva_percentatge" class="border rounded px-3 py-2 w-full">
               <option v-for="iva in IVA_OPTIONS" :key="iva" :value="iva">{{ iva }}%</option>
             </select>
@@ -100,9 +100,10 @@
 
         <div class="space-y-3">
           <div class="hidden md:grid md:grid-cols-12 gap-3 text-xs font-semibold text-gray-500 uppercase">
-            <span class="md:col-span-5">Descripció</span>
+            <span class="md:col-span-4">Descripció</span>
             <span class="md:col-span-2">Quantitat</span>
             <span class="md:col-span-2">Preu unitari</span>
+            <span class="md:col-span-1">IVA %</span>
             <span class="md:col-span-2">Descompte %</span>
             <span class="md:col-span-1">Acció</span>
           </div>
@@ -115,7 +116,7 @@
             <input
               v-model="linia.descripcio"
               type="text"
-              class="border rounded px-3 py-2 md:col-span-5"
+              class="border rounded px-3 py-2 md:col-span-4"
               placeholder="Descripció"
             />
 
@@ -140,6 +141,13 @@
               <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">€</span>
             </div>
 
+            <select
+              v-model.number="linia.iva_percentatge"
+              class="border rounded px-3 py-2 md:col-span-1"
+            >
+              <option v-for="iva in IVA_OPTIONS" :key="`iva-${index}-${iva}`" :value="iva">{{ iva }}%</option>
+            </select>
+
             <input
               v-model.number="linia.descompte"
               type="number"
@@ -159,7 +167,8 @@
             </button>
 
             <div class="md:col-span-12 text-sm text-gray-600">
-              Total línia: {{ totalLinia(linia).toFixed(2) }} €
+              Base línia: {{ totalLinia(linia).toFixed(2) }} € ·
+              IVA línia: {{ ivaLiniaImport(linia).toFixed(2) }} €
             </div>
           </div>
         </div>
@@ -182,7 +191,7 @@
             :disabled="saving"
             @click="handleSaveAsTemplate"
           >
-            Desar com plantilla
+            {{ saving ? 'Guardant...' : 'Desar com plantilla' }}
           </button>
           <button
             type="button"
@@ -194,6 +203,41 @@
           </button>
         </div>
       </section>
+
+      <div
+        v-if="showZeroPriceModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        role="dialog"
+        aria-modal="true"
+      >
+        <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl space-y-4">
+          <h4 class="text-lg font-semibold text-gray-900">Revisió de preus</h4>
+          <p class="text-sm text-gray-700">
+            La factura conté un objecte amb valor de 0€.
+          </p>
+          <p class="text-sm text-gray-700">
+            Estàs segur que vols {{ isEdit ? 'actualitzar' : 'crear' }} la factura?
+          </p>
+          <div class="flex justify-end gap-2">
+            <button
+              type="button"
+              class="px-4 py-2 rounded border"
+              :disabled="saving"
+              @click="cancelZeroPriceWarning"
+            >
+              Cancel·lar
+            </button>
+            <button
+              type="button"
+              class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+              :disabled="saving"
+              @click="confirmZeroPriceWarning"
+            >
+              {{ saving ? 'Enviant...' : 'D\'acord, enviar' }}
+            </button>
+          </div>
+        </div>
+      </div>
     </template>
   </div>
 </template>
@@ -213,6 +257,7 @@ interface FormLinia {
   descripcio: string
   quantitat: number
   preu_unitari: number
+  iva_percentatge: number
   descompte: number
 }
 
@@ -225,6 +270,8 @@ const clients = ref<Client[]>([])
 const saving = ref(false)
 const error = ref('')
 const success = ref('')
+const showZeroPriceModal = ref(false)
+const pendingPayload = ref<FacturaPayload | null>(null)
 
 const form = reactive({
   client_id: 0,
@@ -254,6 +301,7 @@ function addLinia() {
     descripcio: '',
     quantitat: 1,
     preu_unitari: 0,
+    iva_percentatge: Number(form.iva_percentatge) || 21,
     descompte: 0
   })
 }
@@ -269,11 +317,17 @@ function totalLinia(linia: FormLinia) {
   return Math.max(0, baseAmbDescompte)
 }
 
+function ivaLiniaImport(linia: FormLinia) {
+  return totalLinia(linia) * ((Number(linia.iva_percentatge) || 0) / 100)
+}
+
 const subtotal = computed(() => {
   return form.linies.reduce((acc, linia) => acc + totalLinia(linia), 0)
 })
 
-const ivaImport = computed(() => subtotal.value * ((Number(form.iva_percentatge) || 0) / 100))
+const ivaImport = computed(() => {
+  return form.linies.reduce((acc, linia) => acc + ivaLiniaImport(linia), 0)
+})
 const irpfImport = computed(() => subtotal.value * ((Number(form.irpf_percentatge) || 0) / 100))
 const total = computed(() => subtotal.value + ivaImport.value - irpfImport.value)
 
@@ -287,7 +341,7 @@ function mapLiniesPayload(): FacturaLiniaPayload[] {
     descripcio: linia.descripcio,
     quantitat: Number(linia.quantitat),
     preu_unitari: Number(linia.preu_unitari),
-    iva_percentatge: Number(form.iva_percentatge) || 0,
+    iva_percentatge: Number(linia.iva_percentatge) || Number(form.iva_percentatge) || 0,
     descompte: Number(linia.descompte) || 0
   }))
 }
@@ -306,7 +360,7 @@ function validateForm() {
   }
 
   if (!IVA_OPTIONS.includes(Number(form.iva_percentatge))) {
-    return 'L\'IVA només pot ser 0, 4, 10 o 21.'
+    return 'L\'IVA per defecte només pot ser 0, 4, 10 o 21.'
   }
 
   const liniaBuida = form.linies.find((linia) => !linia.descripcio.trim())
@@ -319,7 +373,34 @@ function validateForm() {
     return 'La quantitat ha de ser major que 0 a totes les línies.'
   }
 
+  const liniaIvaInvalid = form.linies.find((linia) => !IVA_OPTIONS.includes(Number(linia.iva_percentatge)))
+  if (liniaIvaInvalid) {
+    return 'L\'IVA de cada línia només pot ser 0, 4, 10 o 21.'
+  }
+
   return ''
+}
+
+function hasZeroPriceLinia() {
+  return form.linies.some((linia) => Number(linia.preu_unitari) === 0)
+}
+
+async function submitFactura(payload: FacturaPayload) {
+  if (isEdit.value) {
+    const id = route.params.id as string
+    const response = await updateFactura(id, payload)
+    success.value = 'Factura actualitzada correctament.'
+    const facturaId = response?.data?.factura?.id ?? id
+    await router.push(`/factures/${facturaId}`)
+  } else {
+    const response = await createFactura(payload)
+    success.value = 'Factura creada correctament.'
+    const facturaId = response?.data?.factura?.id
+
+    if (facturaId) {
+      await router.push(`/factures/${facturaId}`)
+    }
+  }
 }
 
 async function loadFacturaForEdit(id: string) {
@@ -344,6 +425,7 @@ async function loadFacturaForEdit(id: string) {
     descripcio: linia.descripcio ?? '',
     quantitat: Number(linia.quantitat ?? 1),
     preu_unitari: Number(linia.preu_unitari ?? 0),
+    iva_percentatge: Number(linia.iva_percentatge ?? factura.iva_percentatge ?? 21),
     descompte: Number(linia.descompte ?? 0)
   }))
 
@@ -371,6 +453,7 @@ async function loadPlantillaForCreate(id: string) {
     descripcio: linia.descripcio ?? '',
     quantitat: Number(linia.quantitat ?? 1),
     preu_unitari: Number(linia.preu_unitari ?? 0),
+    iva_percentatge: Number(linia.iva_percentatge ?? plantilla.iva_percentatge ?? form.iva_percentatge ?? 21),
     descompte: Number(linia.descompte ?? 0)
   }))
 
@@ -389,8 +472,6 @@ async function handleSubmit() {
     return
   }
 
-  saving.value = true
-
   const payload: FacturaPayload = {
     client_id: form.client_id,
     data_emisio: form.data_emisio,
@@ -403,27 +484,39 @@ async function handleSubmit() {
     linies: mapLiniesPayload()
   }
 
-  try {
-    if (isEdit.value) {
-      const id = route.params.id as string
-      const response = await updateFactura(id, payload)
-      success.value = 'Factura actualitzada correctament.'
-      const facturaId = response?.data?.factura?.id ?? id
-      await router.push(`/factures/${facturaId}`)
-    } else {
-      const response = await createFactura(payload)
-      success.value = 'Factura creada correctament.'
-      const facturaId = response?.data?.factura?.id
+  if (hasZeroPriceLinia()) {
+    pendingPayload.value = payload
+    showZeroPriceModal.value = true
+    return
+  }
 
-      if (facturaId) {
-        await router.push(`/factures/${facturaId}`)
-      }
-    }
+  await submitWithPayload(payload)
+}
+
+async function submitWithPayload(payload: FacturaPayload) {
+  saving.value = true
+  try {
+    await submitFactura(payload)
   } catch (requestError: any) {
     error.value = requestError?.response?.data?.message ?? 'No s\'ha pogut desar la factura.'
   } finally {
     saving.value = false
   }
+}
+
+function cancelZeroPriceWarning() {
+  showZeroPriceModal.value = false
+  pendingPayload.value = null
+}
+
+async function confirmZeroPriceWarning() {
+  if (!pendingPayload.value) {
+    return
+  }
+
+  showZeroPriceModal.value = false
+  await submitWithPayload(pendingPayload.value)
+  pendingPayload.value = null
 }
 
 async function handleSaveAsTemplate() {

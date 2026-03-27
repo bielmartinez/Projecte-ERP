@@ -67,11 +67,3 @@ export async function deletePlantilla(id: number | string) {
   const { data } = await api.delete(`/plantilles/${id}`)
   return data
 }
-
-export async function crearFacturaDesDePlantilla(
-  id: number | string,
-  payload: { client_id: number; data_emisio?: string; data_venciment?: string }
-) {
-  const { data } = await api.post(`/plantilles/${id}/crear-factura`, payload)
-  return data
-}

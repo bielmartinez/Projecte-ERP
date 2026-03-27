@@ -225,6 +225,16 @@ function getClientLabel(clientId: number) {
   return `${client.nom} ${client.cognoms ?? ''}`.trim()
 }
 
+function getFacturaSortNumber(numeroFactura: string) {
+  const digits = String(numeroFactura ?? '').replace(/\D/g, '')
+  if (!digits) {
+    return 0
+  }
+
+  const parsed = Number(digits)
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
 function resetFilters() {
   filters.search = ''
   filters.estat = ''
@@ -258,7 +268,16 @@ async function loadFactures(page = 1) {
       data_fins: filters.data_fins || undefined
     })
 
-    factures.value = response.data ?? []
+    factures.value = (response.data ?? [])
+      .slice()
+      .sort((a: Factura, b: Factura) => {
+        const sortDiff = getFacturaSortNumber(b.numero_factura) - getFacturaSortNumber(a.numero_factura)
+        if (sortDiff !== 0) {
+          return sortDiff
+        }
+
+        return Number(b.id) - Number(a.id)
+      })
 
     const responseMeta = response.meta ?? {}
     meta.page = responseMeta.page ?? page
