@@ -1,0 +1,441 @@
+<template>
+  <div class="space-y-6">
+    <div class="flex items-center justify-between gap-4">
+      <h2 class="text-2xl font-semibold">Moviments</h2>
+      <button
+        type="button"
+        class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
+        @click="prepareCreate"
+      >
+        Nou moviment
+      </button>
+    </div>
+
+    <div v-if="initialLoading" class="space-y-4" aria-busy="true" aria-live="polite">
+      <section class="bg-white rounded shadow p-4 space-y-4 animate-pulse">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <div class="h-10 rounded bg-gray-200"></div>
+          <div class="h-10 rounded bg-gray-200"></div>
+          <div class="h-10 rounded bg-gray-200"></div>
+          <div class="h-10 rounded bg-gray-200"></div>
+          <div class="h-10 rounded bg-gray-200"></div>
+        </div>
+      </section>
+    </div>
+
+    <template v-else>
+      <section class="bg-white rounded shadow p-4 space-y-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Cerca</span>
+            <input
+              v-model="filters.search"
+              type="text"
+              class="border rounded px-3 py-2 w-full"
+              placeholder="Descripció o categoria"
+              @keyup.enter="loadMoviments(1)"
+            />
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Tipus</span>
+            <select v-model="filters.tipus" class="border rounded px-3 py-2 w-full">
+              <option value="">Tots els tipus</option>
+              <option value="ingres">Ingrés</option>
+              <option value="despesa">Despesa</option>
+            </select>
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Categoria</span>
+            <select v-model.number="filters.categoria_id" class="border rounded px-3 py-2 w-full">
+              <option :value="0">Totes les categories</option>
+              <option v-for="categoria in categoriesForFilter" :key="categoria.id" :value="categoria.id">
+                {{ categoria.nom }}
+              </option>
+            </select>
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Data des de</span>
+            <input v-model="filters.data_desde" type="date" class="border rounded px-3 py-2 w-full" />
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Data fins</span>
+            <input v-model="filters.data_fins" type="date" class="border rounded px-3 py-2 w-full" />
+          </label>
+        </div>
+
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
+            @click="loadMoviments(1)"
+          >
+            Cercar
+          </button>
+          <button type="button" class="px-4 py-2 rounded border" @click="resetFilters">Netejar</button>
+        </div>
+
+        <p v-if="listError" class="text-sm text-red-600">{{ listError }}</p>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead>
+              <tr class="text-left border-b">
+                <th class="py-2 pr-4">Data</th>
+                <th class="py-2 pr-4">Tipus</th>
+                <th class="py-2 pr-4">Categoria</th>
+                <th class="py-2 pr-4">Descripció</th>
+                <th class="py-2 pr-4">Import</th>
+                <th class="py-2 pr-4">Accions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="moviment in moviments" :key="moviment.id" class="border-b">
+                <td class="py-2 pr-4">{{ moviment.data }}</td>
+                <td class="py-2 pr-4 capitalize">{{ moviment.tipus }}</td>
+                <td class="py-2 pr-4">{{ moviment.categoria_nom ?? '-' }}</td>
+                <td class="py-2 pr-4">{{ moviment.descripcio }}</td>
+                <td class="py-2 pr-4">{{ Number(moviment.import).toFixed(2) }} €</td>
+                <td class="py-2 pr-4 flex gap-2">
+                  <button type="button" class="text-gray-700 hover:underline" @click="prepareEdit(moviment)">
+                    Editar
+                  </button>
+                  <button type="button" class="text-red-600 hover:underline" @click="handleDelete(moviment.id)">
+                    Eliminar
+                  </button>
+                </td>
+              </tr>
+              <tr v-if="!loading && moviments.length === 0">
+                <td colspan="6" class="py-4 text-gray-500">No hi ha moviments</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="flex items-center justify-between">
+          <p class="text-sm text-gray-600">Pàgina {{ meta.page }} de {{ meta.total_pages || 1 }}</p>
+          <div class="flex gap-2">
+            <button
+              type="button"
+              class="px-3 py-1 border rounded disabled:opacity-50"
+              :disabled="meta.page <= 1"
+              @click="loadMoviments(meta.page - 1)"
+            >
+              Anterior
+            </button>
+            <button
+              type="button"
+              class="px-3 py-1 border rounded disabled:opacity-50"
+              :disabled="meta.page >= (meta.total_pages || 1)"
+              @click="loadMoviments(meta.page + 1)"
+            >
+              Següent
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="bg-white rounded shadow p-6 space-y-4">
+        <h3 class="text-lg font-semibold">{{ editingId ? 'Editar moviment' : 'Crear moviment' }}</h3>
+        <p v-if="formError" class="text-sm text-red-600">{{ formError }}</p>
+        <p v-if="formSuccess" class="text-sm text-green-600">{{ formSuccess }}</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Tipus</span>
+            <select v-model="form.tipus" class="border rounded px-3 py-2 w-full">
+              <option value="ingres">Ingrés</option>
+              <option value="despesa">Despesa</option>
+            </select>
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Categoria</span>
+            <select v-model.number="form.categoria_id" class="border rounded px-3 py-2 w-full">
+              <option :value="0">Selecciona categoria</option>
+              <option v-for="categoria in categoriesForForm" :key="categoria.id" :value="categoria.id">
+                {{ categoria.nom }}
+              </option>
+            </select>
+          </label>
+
+          <label class="space-y-1 md:col-span-2">
+            <span class="text-sm font-medium text-gray-700">Descripció</span>
+            <input
+              v-model="form.descripcio"
+              type="text"
+              class="border rounded px-3 py-2 w-full"
+              placeholder="Descripció del moviment"
+            />
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Import (€)</span>
+            <input
+              v-model.number="form.import"
+              type="number"
+              min="0.01"
+              step="0.01"
+              class="border rounded px-3 py-2 w-full"
+            />
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Data</span>
+            <input v-model="form.data" type="date" class="border rounded px-3 py-2 w-full" />
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Factura (opcional)</span>
+            <input v-model.number="form.factura_id" type="number" min="1" class="border rounded px-3 py-2 w-full" />
+          </label>
+        </div>
+
+        <div class="flex gap-2">
+          <button
+            type="button"
+            class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+            :disabled="formLoading"
+            @click="handleSubmit"
+          >
+            {{ formLoading ? 'Guardant...' : editingId ? 'Actualitzar' : 'Crear' }}
+          </button>
+          <button type="button" class="px-4 py-2 rounded border" :disabled="formLoading" @click="resetForm">
+            Netejar
+          </button>
+        </div>
+      </section>
+    </template>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { computed, onMounted, reactive, ref, watch } from 'vue'
+
+import { useInitialLoading } from '@/composables/useInitialLoading'
+import { getCategories, type CategoriaMoviment, type TipusMoviment } from '@/services/categories'
+import { createMoviment, deleteMoviment, getMoviments, updateMoviment, type Moviment } from '@/services/moviments'
+
+const loading = ref(false)
+const listError = ref('')
+const moviments = ref<Moviment[]>([])
+const categories = ref<CategoriaMoviment[]>([])
+
+const filters = reactive({
+  search: '',
+  tipus: '',
+  categoria_id: 0,
+  data_desde: '',
+  data_fins: ''
+})
+
+const meta = reactive({
+  page: 1,
+  limit: 10,
+  total: 0,
+  total_pages: 1
+})
+
+const editingId = ref<number | null>(null)
+const formLoading = ref(false)
+const formError = ref('')
+const formSuccess = ref('')
+
+const form = reactive({
+  categoria_id: 0,
+  factura_id: 0,
+  tipus: 'despesa' as TipusMoviment,
+  descripcio: '',
+  import: 0,
+  data: todayDate()
+})
+
+const { initialLoading, runInitialLoad } = useInitialLoading()
+
+const categoriesForFilter = computed(() => {
+  if (!filters.tipus) {
+    return categories.value
+  }
+
+  return categories.value.filter((categoria) => categoria.tipus === filters.tipus)
+})
+
+const categoriesForForm = computed(() => {
+  return categories.value.filter((categoria) => categoria.tipus === form.tipus)
+})
+
+watch(
+  () => form.tipus,
+  () => {
+    const stillValid = categoriesForForm.value.some((categoria) => categoria.id === form.categoria_id)
+    if (!stillValid) {
+      form.categoria_id = 0
+    }
+  }
+)
+
+watch(
+  () => filters.tipus,
+  () => {
+    const stillValid = categoriesForFilter.value.some((categoria) => categoria.id === filters.categoria_id)
+    if (!stillValid) {
+      filters.categoria_id = 0
+    }
+  }
+)
+
+function todayDate() {
+  const now = new Date()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${now.getFullYear()}-${month}-${day}`
+}
+
+function resetFilters() {
+  filters.search = ''
+  filters.tipus = ''
+  filters.categoria_id = 0
+  filters.data_desde = ''
+  filters.data_fins = ''
+  loadMoviments(1)
+}
+
+function resetForm() {
+  editingId.value = null
+  form.tipus = 'despesa'
+  form.categoria_id = 0
+  form.factura_id = 0
+  form.descripcio = ''
+  form.import = 0
+  form.data = todayDate()
+  formError.value = ''
+  formSuccess.value = ''
+}
+
+function prepareCreate() {
+  resetForm()
+}
+
+function prepareEdit(moviment: Moviment) {
+  editingId.value = moviment.id
+  form.tipus = moviment.tipus
+  form.categoria_id = moviment.categoria_id
+  form.factura_id = moviment.factura_id ? Number(moviment.factura_id) : 0
+  form.descripcio = moviment.descripcio
+  form.import = Number(moviment.import)
+  form.data = moviment.data
+  formError.value = ''
+  formSuccess.value = ''
+}
+
+async function loadCategoriesCatalog() {
+  const response = await getCategories({ page: 1, limit: 100 })
+  categories.value = response.data ?? []
+}
+
+async function loadMoviments(page = 1) {
+  loading.value = true
+  listError.value = ''
+
+  try {
+    const response = await getMoviments({
+      page,
+      limit: meta.limit,
+      search: filters.search.trim() || undefined,
+      tipus: (filters.tipus || undefined) as TipusMoviment | undefined,
+      categoria_id: filters.categoria_id || undefined,
+      data_desde: filters.data_desde || undefined,
+      data_fins: filters.data_fins || undefined
+    })
+
+    moviments.value = response.data ?? []
+
+    const responseMeta = response.meta ?? {}
+    meta.page = responseMeta.page ?? page
+    meta.limit = responseMeta.limit ?? meta.limit
+    meta.total = responseMeta.total ?? 0
+    meta.total_pages = responseMeta.total_pages ?? 1
+  } catch (error: any) {
+    listError.value = error?.response?.data?.message ?? 'No s\'han pogut carregar els moviments.'
+  } finally {
+    loading.value = false
+  }
+}
+
+async function handleSubmit() {
+  formError.value = ''
+  formSuccess.value = ''
+
+  if (!form.descripcio.trim()) {
+    formError.value = 'La descripció és obligatòria.'
+    return
+  }
+
+  if (!form.categoria_id) {
+    formError.value = 'Has de seleccionar una categoria.'
+    return
+  }
+
+  if (Number(form.import) <= 0) {
+    formError.value = 'L\'import ha de ser major que 0.'
+    return
+  }
+
+  if (!form.data) {
+    formError.value = 'La data és obligatòria.'
+    return
+  }
+
+  formLoading.value = true
+
+  const payload = {
+    categoria_id: Number(form.categoria_id),
+    factura_id: form.factura_id ? Number(form.factura_id) : undefined,
+    tipus: form.tipus,
+    descripcio: form.descripcio.trim(),
+    import: Number(form.import),
+    data: form.data
+  }
+
+  try {
+    if (editingId.value) {
+      await updateMoviment(editingId.value, payload)
+      formSuccess.value = 'Moviment actualitzat correctament.'
+    } else {
+      await createMoviment(payload)
+      formSuccess.value = 'Moviment creat correctament.'
+      resetForm()
+    }
+
+    await loadMoviments(meta.page)
+  } catch (error: any) {
+    formError.value = error?.response?.data?.message ?? 'No s\'ha pogut desar el moviment.'
+  } finally {
+    formLoading.value = false
+  }
+}
+
+async function handleDelete(id: number) {
+  if (!window.confirm('Vols eliminar aquest moviment?')) {
+    return
+  }
+
+  listError.value = ''
+
+  try {
+    await deleteMoviment(id)
+    await loadMoviments(meta.page)
+  } catch (error: any) {
+    listError.value = error?.response?.data?.message ?? 'No s\'ha pogut eliminar el moviment.'
+  }
+}
+
+onMounted(() => {
+  runInitialLoad(async () => {
+    await Promise.all([loadCategoriesCatalog(), loadMoviments(1)])
+  })
+})
+</script>

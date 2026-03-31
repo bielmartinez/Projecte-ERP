@@ -49,3 +49,19 @@ $routes->group('plantilles', ['filter' => 'auth'], static function ($routes) {
 	$routes->put('(:num)', 'PlantillaController::update/$1');
 	$routes->delete('(:num)', 'PlantillaController::delete/$1');
 });
+
+$routes->group('categories', ['filter' => 'auth'], static function ($routes) {
+	$routes->get('/', 'CategoriaController::index');
+	$routes->get('(:num)', 'CategoriaController::show/$1');
+	$routes->post('/', 'CategoriaController::create');
+	$routes->put('(:num)', 'CategoriaController::update/$1');
+	$routes->delete('(:num)', 'CategoriaController::delete/$1');
+});
+
+$routes->group('moviments', ['filter' => 'auth'], static function ($routes) {
+	$routes->get('/', 'MovimentController::index');
+	$routes->get('(:num)', 'MovimentController::show/$1');
+	$routes->post('/', 'MovimentController::create');
+	$routes->put('(:num)', 'MovimentController::update/$1');
+	$routes->delete('(:num)', 'MovimentController::delete/$1');
+});

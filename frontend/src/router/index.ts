@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '@/layouts/MainLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 import ClientDetailView from '@/views/ClientDetailView.vue'
+import CategoriesView from '@/views/CategoriesView.vue'
 import ClientsView from '@/views/ClientsView.vue'
 import Dashboard from '@/views/Dashboard.vue'
 import FacturaDetailView from '@/views/FacturaDetailView.vue'
@@ -11,6 +12,7 @@ import FacturesView from '@/views/FacturesView.vue'
 import LoginView from '@/views/LoginView.vue'
 import PlantillaFormView from '@/views/PlantillaFormView.vue'
 import PlantillesView from '@/views/PlantillesView.vue'
+import MovimentsView from '@/views/MovimentsView.vue'
 import PerfilView from '@/views/PerfilView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 
@@ -53,6 +55,16 @@ const router = createRouter({
           path: 'clients/:id',
           name: 'client-detail',
           component: ClientDetailView
+        },
+        {
+          path: 'categories',
+          name: 'categories',
+          component: CategoriesView
+        },
+        {
+          path: 'moviments',
+          name: 'moviments',
+          component: MovimentsView
         },
         {
           path: 'factures',

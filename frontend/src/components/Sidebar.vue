@@ -23,6 +23,20 @@
       </RouterLink>
 
       <RouterLink
+        to="/categories"
+        class="block px-3 py-2 rounded hover:bg-gray-700"
+      >
+        Categories
+      </RouterLink>
+
+      <RouterLink
+        to="/moviments"
+        class="block px-3 py-2 rounded hover:bg-gray-700"
+      >
+        Moviments
+      </RouterLink>
+
+      <RouterLink
         to="/plantilles"
         class="block px-3 py-2 rounded hover:bg-gray-700"
       >
