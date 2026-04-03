@@ -169,7 +169,7 @@ class MovimentController extends BaseController
             $categoriaId = (int) ($payload['categoria_id'] ?? 0);
             $tipus = (string) ($payload['tipus'] ?? '');
 
-            if (!$this->categoriaEsDelUsuari($categoriaId, $usuariId, $tipus)) {
+            if (!$this->validarCategoriaUsuario($categoriaId, $usuariId, $tipus)) {
                 return $this->response->setStatusCode(422)->setJSON([
                     'status' => 'error',
                     'message' => 'La categoria indicada no és vàlida per aquest usuari o tipus.',
@@ -177,7 +177,7 @@ class MovimentController extends BaseController
             }
 
             if (isset($payload['factura_id']) && (int) $payload['factura_id'] > 0) {
-                if (!$this->facturaEsDelUsuari((int) $payload['factura_id'], $usuariId)) {
+                if (!$this->validarFacturaUsuario((int) $payload['factura_id'], $usuariId)) {
                     return $this->response->setStatusCode(422)->setJSON([
                         'status' => 'error',
                         'message' => 'La factura indicada no és vàlida per aquest usuari.',
@@ -253,7 +253,7 @@ class MovimentController extends BaseController
             $categoriaId = (int) ($payload['categoria_id'] ?? $moviment['categoria_id']);
             $tipus = (string) ($payload['tipus'] ?? $moviment['tipus']);
 
-            if (!$this->categoriaEsDelUsuari($categoriaId, $usuariId, $tipus)) {
+            if (!$this->validarCategoriaUsuario($categoriaId, $usuariId, $tipus)) {
                 return $this->response->setStatusCode(422)->setJSON([
                     'status' => 'error',
                     'message' => 'La categoria indicada no és vàlida per aquest usuari o tipus.',
@@ -261,7 +261,7 @@ class MovimentController extends BaseController
             }
 
             if (array_key_exists('factura_id', $payload) && (int) $payload['factura_id'] > 0) {
-                if (!$this->facturaEsDelUsuari((int) $payload['factura_id'], $usuariId)) {
+                if (!$this->validarFacturaUsuario((int) $payload['factura_id'], $usuariId)) {
                     return $this->response->setStatusCode(422)->setJSON([
                         'status' => 'error',
                         'message' => 'La factura indicada no és vàlida per aquest usuari.',
@@ -332,7 +332,7 @@ class MovimentController extends BaseController
         }
     }
 
-    private function categoriaEsDelUsuari(int $categoriaId, int $usuariId, string $tipus): bool
+    private function validarCategoriaUsuario(int $categoriaId, int $usuariId, string $tipus): bool
     {
         if ($categoriaId <= 0 || !in_array($tipus, ['ingres', 'despesa'], true)) {
             return false;
@@ -347,7 +347,7 @@ class MovimentController extends BaseController
         return (bool) $categoria;
     }
 
-    private function facturaEsDelUsuari(int $facturaId, int $usuariId): bool
+    private function validarFacturaUsuario(int $facturaId, int $usuariId): bool
     {
         if ($facturaId <= 0) {
             return false;

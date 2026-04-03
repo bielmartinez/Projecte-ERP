@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\CategoriaMovimentModel;
 use App\Models\TokenAccesModel;
 use App\Models\UsuariModel;
 use CodeIgniter\HTTP\ResponseInterface;
@@ -10,44 +11,77 @@ class AuthController extends BaseController
 {
     protected UsuariModel $usuariModel;
     protected TokenAccesModel $tokenModel;
+    protected CategoriaMovimentModel $categoriaMovimentModel;
 
     public function __construct()
     {
         $this->usuariModel = new UsuariModel();
         $this->tokenModel = new TokenAccesModel();
+        $this->categoriaMovimentModel = new CategoriaMovimentModel();
     }
 
     public function register(): ResponseInterface
     {
-        $dades = $this->request->getJSON(true) ?? [];
+        try {
+            $dades = $this->request->getJSON(true) ?? [];
 
-        $usuari = [
-            'email' => trim((string) ($dades['email'] ?? '')),
-            'password_hash' => (string) ($dades['password'] ?? ''),
-            'nom' => trim((string) ($dades['nom'] ?? '')),
-            'cognoms' => isset($dades['cognoms']) ? trim((string) $dades['cognoms']) : null,
-            'nif' => isset($dades['nif']) ? trim((string) $dades['nif']) : null,
-            'telefon' => isset($dades['telefon']) ? trim((string) $dades['telefon']) : null,
-            'role' => 'user',
-            'is_active' => true,
-        ];
+            $usuari = [
+                'email' => trim((string) ($dades['email'] ?? '')),
+                'password_hash' => (string) ($dades['password'] ?? ''),
+                'nom' => trim((string) ($dades['nom'] ?? '')),
+                'cognoms' => isset($dades['cognoms']) ? trim((string) $dades['cognoms']) : null,
+                'nif' => isset($dades['nif']) ? trim((string) $dades['nif']) : null,
+                'telefon' => isset($dades['telefon']) ? trim((string) $dades['telefon']) : null,
+                'role' => 'user',
+                'is_active' => true,
+            ];
 
-        if (!$this->usuariModel->validate($usuari)) {
-            return $this->response->setStatusCode(422)->setJSON([
+            if (!$this->usuariModel->validate($usuari)) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'status' => 'error',
+                    'errors' => $this->usuariModel->errors(),
+                ]);
+            }
+
+            $usuari['password_hash'] = password_hash($usuari['password_hash'], PASSWORD_BCRYPT);
+
+            $db = \Config\Database::connect();
+            $db->transStart();
+
+            $nouId = (int) $this->usuariModel->insert($usuari, true);
+
+            if ($nouId <= 0 || !$this->crearCategoriesPerDefecte($nouId)) {
+                $db->transRollback();
+
+                return $this->response->setStatusCode(500)->setJSON([
+                    'status' => 'error',
+                    'message' => 'No s\'ha pogut completar el registre.',
+                ]);
+            }
+
+            $db->transComplete();
+
+            if ($db->transStatus() === false) {
+                return $this->response->setStatusCode(500)->setJSON([
+                    'status' => 'error',
+                    'message' => 'No s\'ha pogut completar el registre.',
+                ]);
+            }
+
+            $usuariCreat = $this->usuariModel->find($nouId);
+
+            return $this->response->setStatusCode(201)->setJSON([
+                'status' => 'ok',
+                'usuari' => $usuariCreat,
+            ]);
+        } catch (\Throwable $e) {
+            log_message('error', 'Error en auth register: ' . $e->getMessage());
+
+            return $this->response->setStatusCode(500)->setJSON([
                 'status' => 'error',
-                'errors' => $this->usuariModel->errors(),
+                'message' => 'No s\'ha pogut completar el registre.',
             ]);
         }
-
-        $usuari['password_hash'] = password_hash($usuari['password_hash'], PASSWORD_BCRYPT);
-
-        $nouId = $this->usuariModel->insert($usuari, true);
-        $usuariCreat = $this->usuariModel->find($nouId);
-
-        return $this->response->setStatusCode(201)->setJSON([
-            'status' => 'ok',
-            'usuari' => $usuariCreat,
-        ]);
     }
 
     public function login(): ResponseInterface
@@ -159,5 +193,27 @@ class AuthController extends BaseController
         }
 
         return trim($matches[1]);
+    }
+
+    private function crearCategoriesPerDefecte(int $usuariId): bool
+    {
+        if ($usuariId <= 0) {
+            return false;
+        }
+
+        $ara = date('Y-m-d H:i:s');
+        $rows = [
+            ['usuari_id' => $usuariId, 'nom' => 'Vendes', 'tipus' => 'ingres', 'created_at' => $ara, 'updated_at' => $ara],
+            ['usuari_id' => $usuariId, 'nom' => 'Serveis', 'tipus' => 'ingres', 'created_at' => $ara, 'updated_at' => $ara],
+            ['usuari_id' => $usuariId, 'nom' => 'Altres ingressos', 'tipus' => 'ingres', 'created_at' => $ara, 'updated_at' => $ara],
+            ['usuari_id' => $usuariId, 'nom' => 'Lloguer', 'tipus' => 'despesa', 'created_at' => $ara, 'updated_at' => $ara],
+            ['usuari_id' => $usuariId, 'nom' => 'Subministraments', 'tipus' => 'despesa', 'created_at' => $ara, 'updated_at' => $ara],
+            ['usuari_id' => $usuariId, 'nom' => 'Transport', 'tipus' => 'despesa', 'created_at' => $ara, 'updated_at' => $ara],
+            ['usuari_id' => $usuariId, 'nom' => 'Material oficina', 'tipus' => 'despesa', 'created_at' => $ara, 'updated_at' => $ara],
+            ['usuari_id' => $usuariId, 'nom' => 'Quotes i taxes', 'tipus' => 'despesa', 'created_at' => $ara, 'updated_at' => $ara],
+            ['usuari_id' => $usuariId, 'nom' => 'Altres despeses', 'tipus' => 'despesa', 'created_at' => $ara, 'updated_at' => $ara],
+        ];
+
+        return (bool) $this->categoriaMovimentModel->insertBatch($rows);
     }
 }
