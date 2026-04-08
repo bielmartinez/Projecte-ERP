@@ -40,6 +40,11 @@ $routes->group('factures', ['filter' => 'auth'], static function ($routes) {
 	$routes->put('(:num)/linies/(:num)', 'FacturaController::updateLinia/$1/$2');
 	$routes->delete('(:num)/linies/(:num)', 'FacturaController::deleteLinia/$1/$2');
 	$routes->put('(:num)/estat', 'FacturaController::canviarEstat/$1');
+
+	// Cobraments - delegat a CobramentController
+	$routes->get('(:num)/cobraments', 'CobramentController::index/$1');
+	$routes->post('(:num)/cobraments', 'CobramentController::create/$1');
+	$routes->delete('(:num)/cobraments/(:num)', 'CobramentController::delete/$1/$2');
 });
 
 $routes->group('plantilles', ['filter' => 'auth'], static function ($routes) {

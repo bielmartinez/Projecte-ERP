@@ -63,7 +63,7 @@ class FacturaModel extends Model
         ],
         'estat' => [
             'label' => 'Estat',
-            'rules' => 'required|in_list[esborrany,emesa,cancel·lada,cobrada]',
+            'rules' => 'required|in_list[esborrany,emesa,cancel·lada,cobrada,parcialment_cobrada]',
         ],
         'subtotal' => [
             'label' => 'Subtotal',
@@ -130,7 +130,7 @@ class FacturaModel extends Model
         ],
         'estat' => [
             'required'      => 'L\'estat de la factura és obligatori.',
-            'in_list'       => 'L\'estat ha de ser: esborrany, emesa, cancel·lada o cobrada.',
+            'in_list'       => 'L\'estat ha de ser: esborrany, emesa, cancel·lada, cobrada o parcialment_cobrada.',
         ],
         'subtotal' => [
             'required'      => 'El subtotal és obligatori.',
@@ -230,7 +230,7 @@ class FacturaModel extends Model
 
     public function canviarEstat(int $facturaId, string $nouEstat): bool
     {
-        $estatsValids = ['esborrany', 'emesa', 'cancel·lada', 'cobrada'];
+        $estatsValids = ['esborrany', 'emesa', 'cancel·lada', 'cobrada', 'parcialment_cobrada'];
 
         if (!in_array($nouEstat, $estatsValids, true)) {
             return false;

@@ -205,13 +205,8 @@ class AuthController extends BaseController
         $rows = [
             ['usuari_id' => $usuariId, 'nom' => 'Vendes', 'tipus' => 'ingres', 'created_at' => $ara, 'updated_at' => $ara],
             ['usuari_id' => $usuariId, 'nom' => 'Serveis', 'tipus' => 'ingres', 'created_at' => $ara, 'updated_at' => $ara],
-            ['usuari_id' => $usuariId, 'nom' => 'Altres ingressos', 'tipus' => 'ingres', 'created_at' => $ara, 'updated_at' => $ara],
             ['usuari_id' => $usuariId, 'nom' => 'Lloguer', 'tipus' => 'despesa', 'created_at' => $ara, 'updated_at' => $ara],
             ['usuari_id' => $usuariId, 'nom' => 'Subministraments', 'tipus' => 'despesa', 'created_at' => $ara, 'updated_at' => $ara],
-            ['usuari_id' => $usuariId, 'nom' => 'Transport', 'tipus' => 'despesa', 'created_at' => $ara, 'updated_at' => $ara],
-            ['usuari_id' => $usuariId, 'nom' => 'Material oficina', 'tipus' => 'despesa', 'created_at' => $ara, 'updated_at' => $ara],
-            ['usuari_id' => $usuariId, 'nom' => 'Quotes i taxes', 'tipus' => 'despesa', 'created_at' => $ara, 'updated_at' => $ara],
-            ['usuari_id' => $usuariId, 'nom' => 'Altres despeses', 'tipus' => 'despesa', 'created_at' => $ara, 'updated_at' => $ara],
         ];
 
         return (bool) $this->categoriaMovimentModel->insertBatch($rows);
