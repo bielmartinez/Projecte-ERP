@@ -15,6 +15,11 @@ class CrearTaulaMoviments extends Migration
             'usuari_id' => [
                 'type' => 'INT',
             ],
+            'categoria_id' => [
+                'type'    => 'INT',
+                'null'    => true,
+                'default' => null,
+            ],
             'factura_id' => [
                 'type'    => 'INT',
                 'null'    => true,
@@ -53,10 +58,12 @@ class CrearTaulaMoviments extends Migration
 
         $this->forge->addKey('id', true);
         $this->forge->addKey('usuari_id');
+        $this->forge->addKey('categoria_id');
         $this->forge->addKey('factura_id');
         $this->forge->addKey('tipus');
         $this->forge->addKey('data');
         $this->forge->addForeignKey('usuari_id', 'usuaris', 'id', 'CASCADE', 'CASCADE');
+        $this->forge->addForeignKey('categoria_id', 'categories_moviment', 'id', 'RESTRICT', 'RESTRICT');
         $this->forge->addForeignKey('factura_id', 'factures', 'id', 'SET NULL', 'SET NULL');
 
         $this->forge->createTable('moviments');
