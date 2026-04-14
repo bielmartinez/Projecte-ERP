@@ -95,11 +95,16 @@
             <tbody>
               <tr v-for="moviment in moviments" :key="moviment.id" class="border-b">
                 <td class="py-2 pr-4">{{ moviment.data }}</td>
-                <td class="py-2 pr-4 capitalize">{{ moviment.tipus }}</td>
-                <td class="py-2 pr-4">{{ moviment.categoria_nom ?? '-' }}</td>
+                <td class="py-2 pr-4">
+                  <span class="inline-block px-2 py-0.5 rounded text-xs font-medium"
+                    :class="moviment.tipus === 'ingres' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+                    {{ moviment.tipus === 'ingres' ? 'Ingrés' : 'Despesa' }}
+                  </span>
+                </td>                <td class="py-2 pr-4">{{ moviment.categoria_nom ?? '-' }}</td>
                 <td class="py-2 pr-4">{{ moviment.descripcio }}</td>
-                <td class="py-2 pr-4">{{ Number(moviment.import).toFixed(2) }} €</td>
-                <td class="py-2 pr-4 flex gap-2">
+                <td class="py-2 pr-4 font-medium" :class="moviment.tipus === 'ingres' ? 'text-green-700' : 'text-red-700'">
+                  {{ moviment.tipus === 'ingres' ? '+' : '-' }}{{ Number(moviment.import).toFixed(2) }} €
+                </td>                <td class="py-2 pr-4 flex gap-2">
                   <button type="button" class="text-gray-700 hover:underline" @click="prepareEdit(moviment)">
                     Editar
                   </button>

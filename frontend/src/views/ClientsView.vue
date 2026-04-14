@@ -164,18 +164,65 @@
         <p v-if="formSuccess" class="text-sm text-green-600">{{ formSuccess }}</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input v-model="form.nom" type="text" class="border rounded px-3 py-2" placeholder="Nom*" />
-          <input v-model="form.cognoms" type="text" class="border rounded px-3 py-2" placeholder="Cognoms" />
-          <input v-model="form.nom_empresa" type="text" class="border rounded px-3 py-2" placeholder="Nom empresa" />
-          <input v-model="form.nif" type="text" class="border rounded px-3 py-2" placeholder="NIF" />
-          <input v-model="form.email" type="email" class="border rounded px-3 py-2" placeholder="Email" />
-          <input v-model="form.telefon" type="text" class="border rounded px-3 py-2" placeholder="Telèfon" />
-          <input v-model="form.adreca" type="text" class="border rounded px-3 py-2 md:col-span-2" placeholder="Adreça" />
-          <input v-model="form.codi_postal" type="text" class="border rounded px-3 py-2" placeholder="Codi postal" />
-          <input v-model="form.poblacio" type="text" class="border rounded px-3 py-2" placeholder="Població" />
-          <input v-model="form.provincia" type="text" class="border rounded px-3 py-2" placeholder="Província" />
-          <input v-model="form.pais" type="text" class="border rounded px-3 py-2" placeholder="País" />
-          <textarea v-model="form.notes" class="border rounded px-3 py-2 md:col-span-2" rows="3" placeholder="Notes"></textarea>
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Nom <span class="text-red-500">*</span></span>
+            <input v-model="form.nom" type="text" class="border rounded px-3 py-2" placeholder="Nom*" />
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Cognoms</span>
+            <input v-model="form.cognoms" type="text" class="border rounded px-3 py-2" placeholder="Cognoms" />
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Nom empresa</span>
+            <input v-model="form.nom_empresa" type="text" class="border rounded px-3 py-2" placeholder="Nom empresa" />
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">NIF <span class="text-red-500">*</span></span>
+            <input v-model="form.nif" type="text" class="border rounded px-3 py-2" placeholder="NIF" />
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Correu electrònic <span class="text-red-500">*</span></span>
+            <input v-model="form.email" type="email" class="border rounded px-3 py-2" placeholder="Email" />
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Telèfon</span>
+            <input v-model="form.telefon" type="text" class="border rounded px-3 py-2" placeholder="Telèfon" />
+          </label>
+
+          <label class="space-y-1 md:col-span-2">
+            <span class="text-sm font-medium text-gray-700">Adreça</span>
+            <input v-model="form.adreca" type="text" class="border rounded px-3 py-2" placeholder="Adreça" />
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Codi postal</span>
+            <input v-model="form.codi_postal" type="text" class="border rounded px-3 py-2" placeholder="Codi postal" />
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Població</span>
+            <input v-model="form.poblacio" type="text" class="border rounded px-3 py-2" placeholder="Població" />
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">Província</span>
+            <input v-model="form.provincia" type="text" class="border rounded px-3 py-2" placeholder="Província" />
+          </label>
+
+          <label class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">País</span>
+            <input v-model="form.pais" type="text" class="border rounded px-3 py-2" placeholder="País" />
+          </label>
+
+          <label class="space-y-1 md:col-span-2">
+            <span class="text-sm font-medium text-gray-700">Notes</span>
+            <textarea v-model="form.notes" class="border rounded px-3 py-2" rows="3" placeholder="Notes"></textarea>
+          </label>
         </div>
 
         <div class="flex gap-2">

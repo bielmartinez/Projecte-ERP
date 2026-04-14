@@ -207,6 +207,7 @@ class AuthController extends BaseController
             ['usuari_id' => $usuariId, 'nom' => 'Serveis', 'tipus' => 'ingres', 'created_at' => $ara, 'updated_at' => $ara],
             ['usuari_id' => $usuariId, 'nom' => 'Lloguer', 'tipus' => 'despesa', 'created_at' => $ara, 'updated_at' => $ara],
             ['usuari_id' => $usuariId, 'nom' => 'Subministraments', 'tipus' => 'despesa', 'created_at' => $ara, 'updated_at' => $ara],
+            ['usuari_id' => $usuariId, 'nom' => 'Impostos i quotes', 'tipus' => 'despesa', 'created_at' => $ara, 'updated_at' => $ara],
         ];
 
         return (bool) $this->categoriaMovimentModel->insertBatch($rows);

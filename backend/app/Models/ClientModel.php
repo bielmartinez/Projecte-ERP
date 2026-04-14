@@ -48,11 +48,11 @@ class ClientModel extends Model
         ],
         'nif' => [
             'label' => 'NIF',
-            'rules' => 'permit_empty|max_length[20]',
+            'rules' => 'required|max_length[20]',
         ],
         'email' => [
             'label' => 'Correu electrònic',
-            'rules' => 'permit_empty|valid_email|max_length[150]',
+            'rules' => 'required|valid_email|max_length[150]',
         ],
         'telefon' => [
             'label' => 'Telèfon',

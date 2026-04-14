@@ -37,6 +37,13 @@
       </RouterLink>
 
       <RouterLink
+        to="/quotes"
+        class="block px-3 py-2 rounded hover:bg-gray-700"
+      >
+        Quotes
+      </RouterLink>
+
+      <RouterLink
         to="/plantilles"
         class="block px-3 py-2 rounded hover:bg-gray-700"
       >

@@ -13,6 +13,8 @@ import LoginView from '@/views/LoginView.vue'
 import PlantillaFormView from '@/views/PlantillaFormView.vue'
 import PlantillesView from '@/views/PlantillesView.vue'
 import MovimentsView from '@/views/MovimentsView.vue'
+import QuotaDetailView from '@/views/QuotaDetailView.vue'
+import QuotesView from '@/views/QuotesView.vue'
 import PerfilView from '@/views/PerfilView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 
@@ -65,6 +67,16 @@ const router = createRouter({
           path: 'moviments',
           name: 'moviments',
           component: MovimentsView
+        },
+        {
+          path: 'quotes',
+          name: 'quotes',
+          component: QuotesView
+        },
+        {
+          path: 'quotes/:id',
+          name: 'quota-detail',
+          component: QuotaDetailView
         },
         {
           path: 'factures',

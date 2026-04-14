@@ -70,3 +70,13 @@ $routes->group('moviments', ['filter' => 'auth'], static function ($routes) {
 	$routes->put('(:num)', 'MovimentController::update/$1');
 	$routes->delete('(:num)', 'MovimentController::delete/$1');
 });
+
+$routes->group('quotes', ['filter' => 'auth'], static function ($routes) {
+	$routes->get('/', 'QuotaController::index');
+	$routes->get('(:num)', 'QuotaController::show/$1');
+	$routes->post('/', 'QuotaController::create');
+	$routes->put('(:num)', 'QuotaController::update/$1');
+	$routes->delete('(:num)', 'QuotaController::delete/$1');
+	$routes->post('(:num)/pagar', 'QuotaController::pagar/$1');
+	$routes->get('(:num)/pagaments', 'QuotaController::pagaments/$1');
+});
