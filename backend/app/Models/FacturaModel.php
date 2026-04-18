@@ -238,4 +238,47 @@ class FacturaModel extends Model
 
         return $this->update($facturaId, ['estat' => $nouEstat]);
     }
+
+    /**
+     * Retorna les factures pendents de cobrament amb el client i l'import pendent.
+     */
+    public function pendentsCobrament(int $usuariId, int $limit = 10): array
+    {
+        $limit = max(1, $limit);
+
+        $factures = $this->builder()
+            ->select('factures.id, factures.numero_factura, factures.data_emisio, factures.data_venciment, factures.total, factures.estat, clients.nom AS client_nom')
+            ->join('clients', 'clients.id = factures.client_id', 'left')
+            ->where('factures.usuari_id', $usuariId)
+            ->whereIn('factures.estat', ['emesa', 'parcialment_cobrada'])
+            ->where('factures.deleted_at', null)
+            ->orderBy('factures.data_venciment', 'ASC')
+            ->orderBy('factures.data_emisio', 'ASC')
+            ->limit($limit)
+            ->get()
+            ->getResultArray();
+
+        $db = \Config\Database::connect();
+
+        foreach ($factures as &$factura) {
+            $facturaId = (int) ($factura['id'] ?? 0);
+
+            $cobrat = $this->db->table('cobraments_factura')
+                ->select('COALESCE(SUM(import), 0) AS total_cobrat', false)
+                ->where('factura_id', $facturaId)
+                ->where('deleted_at', null)
+                ->get()
+                ->getRowArray();
+
+            $importCobrat = round((float) ($cobrat['total_cobrat'] ?? 0), 2);
+            $totalFactura = round((float) ($factura['total'] ?? 0), 2);
+
+            $factura['total'] = $totalFactura;
+            $factura['import_cobrat'] = $importCobrat;
+            $factura['import_pendent'] = round($totalFactura - $importCobrat, 2);
+        }
+        unset($factura);
+
+        return $factures;
+    }
 }

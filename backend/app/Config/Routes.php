@@ -80,3 +80,10 @@ $routes->group('quotes', ['filter' => 'auth'], static function ($routes) {
 	$routes->post('(:num)/pagar', 'QuotaController::pagar/$1');
 	$routes->get('(:num)/pagaments', 'QuotaController::pagaments/$1');
 });
+
+$routes->group('dashboard', ['filter' => 'auth'], static function ($routes) {
+	$routes->get('resum', 'DashboardController::resum');
+	$routes->get('grafiques', 'DashboardController::grafiques');
+	$routes->get('factures-pendents', 'DashboardController::facturesPendents');
+	$routes->get('quotes-properes', 'DashboardController::quotesProperes');
+});

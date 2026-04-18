@@ -78,4 +78,123 @@ class MovimentModel extends Model
             'valid_date' => 'La data no és vàlida.',
         ],
     ];
+
+    /**
+     * Obté el resum d'ingressos i despeses d'un mes concret.
+     */
+    public function resumMensual(int $usuariId, string $mesPeriode): array
+    {
+        $sql = "SELECT tipus, COALESCE(SUM(import), 0) AS total
+                FROM {$this->table}
+                WHERE usuari_id = ?
+                  AND deleted_at IS NULL
+                  AND TO_CHAR(data, 'YYYY-MM') = ?
+                GROUP BY tipus";
+
+        $files = $this->db->query($sql, [$usuariId, $mesPeriode])->getResultArray();
+
+        $resum = [
+            'ingressos' => 0.0,
+            'despeses' => 0.0,
+        ];
+
+        foreach ($files as $fila) {
+            $tipus = (string) ($fila['tipus'] ?? '');
+            $total = round((float) ($fila['total'] ?? 0), 2);
+
+            if ($tipus === 'ingres') {
+                $resum['ingressos'] = $total;
+            }
+
+            if ($tipus === 'despesa') {
+                $resum['despeses'] = $total;
+            }
+        }
+
+        return $resum;
+    }
+
+    /**
+     * Calcula l'evolució mensual d'ingressos i despeses per a una finestra de mesos.
+     */
+    public function evolucioMensual(int $usuariId, int $mesos = 12): array
+    {
+        $mesos = max(1, $mesos);
+        $dataInici = date('Y-m-01', strtotime("-{$mesos} months"));
+
+        $mesosComplets = [];
+        $cursor = new \DateTime($dataInici);
+        $avui = new \DateTime(date('Y-m-01'));
+
+        while ($cursor <= $avui) {
+            $clauMes = $cursor->format('Y-m');
+            $mesosComplets[$clauMes] = [
+                'mes' => $clauMes,
+                'ingressos' => 0.0,
+                'despeses' => 0.0,
+            ];
+
+            $cursor->modify('+1 month');
+        }
+
+        $sql = "SELECT TO_CHAR(data, 'YYYY-MM') AS mes, tipus, COALESCE(SUM(import), 0) AS total
+                FROM {$this->table}
+                WHERE usuari_id = ?
+                  AND deleted_at IS NULL
+                  AND data >= ?
+                GROUP BY TO_CHAR(data, 'YYYY-MM'), tipus
+                ORDER BY mes ASC";
+
+        $files = $this->db->query($sql, [$usuariId, $dataInici])->getResultArray();
+
+        foreach ($files as $fila) {
+            $mes = (string) ($fila['mes'] ?? '');
+            $tipus = (string) ($fila['tipus'] ?? '');
+            $total = round((float) ($fila['total'] ?? 0), 2);
+
+            if (!isset($mesosComplets[$mes])) {
+                continue;
+            }
+
+            if ($tipus === 'ingres') {
+                $mesosComplets[$mes]['ingressos'] = $total;
+            }
+
+            if ($tipus === 'despesa') {
+                $mesosComplets[$mes]['despeses'] = $total;
+            }
+        }
+
+        return array_values($mesosComplets);
+    }
+
+    /**
+     * Obté la distribució de despeses per categoria del mes actual.
+     */
+    public function distribucioCategoriesMes(int $usuariId): array
+    {
+        $mesActual = date('Y-m');
+
+        $sql = "SELECT categories_moviment.nom AS categoria, COALESCE(SUM(moviments.import), 0) AS total
+                FROM {$this->table} AS moviments
+                INNER JOIN categories_moviment ON categories_moviment.id = moviments.categoria_id
+                WHERE moviments.usuari_id = ?
+                  AND moviments.tipus = 'despesa'
+                  AND moviments.deleted_at IS NULL
+                  AND TO_CHAR(moviments.data, 'YYYY-MM') = ?
+                GROUP BY categories_moviment.nom
+                ORDER BY total DESC";
+
+        $files = $this->db->query($sql, [$usuariId, $mesActual])->getResultArray();
+
+        $resultat = [];
+        foreach ($files as $fila) {
+            $resultat[] = [
+                'categoria' => (string) ($fila['categoria'] ?? ''),
+                'total' => round((float) ($fila['total'] ?? 0), 2),            
+];
+        }
+
+        return $resultat;
+    }
 }
