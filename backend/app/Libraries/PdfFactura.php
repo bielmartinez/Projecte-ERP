@@ -4,7 +4,7 @@ namespace App\Libraries;
 
 class PdfFactura
 {
-    public function generar(array $factura, array $linies, ?array $client = null, ?array $usuari = null): string
+    public function generar(array $factura, array $linies, ?array $client = null, ?array $usuari = null, ?string $urlQR = null): string
     {
         $pdf = new \TCPDF();
         $pdf->SetCreator('Projecte ERP');
@@ -13,9 +13,27 @@ class PdfFactura
         $pdf->SetMargins(15, 15, 15);
         $pdf->SetAutoPageBreak(true, 18);
         $pdf->AddPage();
-
         $html = $this->buildHtml($factura, $linies, $client, $usuari);
         $pdf->writeHTML($html, true, false, true, false, '');
+
+        if ($urlQR !== null && $urlQR !== '') {
+            $yQR = $pdf->GetY();
+            $xQR = 15;
+
+            $pdf->write2DBarcode($urlQR, 'QRCODE,H', $xQR, $yQR, 30, 30, [
+                'border' => false,
+                'padding' => 1,
+                'fgcolor' => [0, 0, 0],
+                'bgcolor' => [255, 255, 255],
+            ]);
+
+            $pdf->SetFont('helvetica', '', 6);
+            $pdf->SetXY($xQR, $yQR + 30);
+            $pdf->Cell(30, 4, 'Factura verificable', 0, 0, 'C');
+            $pdf->SetXY($xQR, $yQR + 33);
+            $pdf->Cell(30, 4, 'VERI*FACTU', 0, 0, 'C');
+        }
+
 
         return $pdf->Output('', 'S');
     }

@@ -3,9 +3,11 @@
 namespace App\Controllers;
 
 use App\Libraries\PdfFactura;
+use App\Libraries\VerifactuService;
 use App\Models\ClientModel;
 use App\Models\FacturaModel;
 use App\Models\LiniaFacturaModel;
+use App\Models\RegistreVerifactuModel;
 use App\Models\UsuariModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
@@ -187,7 +189,22 @@ class FacturaController extends BaseController
                 ->first();
 
             $usuari = $this->usuariModel->find($usuariId);
-            $pdfContent = $this->pdfFactura->generar($factura, $linies, $client, $usuari);
+
+            // Buscar la URL del QR Verifactu (si existeix registre d'alta per aquesta factura)
+            $urlQR = null;
+            $registreVerifactuModel = new RegistreVerifactuModel();
+            $registreVerifactu = $registreVerifactuModel
+                ->where('factura_id', $id)
+                ->where('usuari_id', $usuariId)
+                ->where('tipus_registre', 'alta')
+                ->orderBy('id', 'DESC')
+                ->first();
+
+            if ($registreVerifactu && !empty($registreVerifactu['codi_qr'])) {
+                $urlQR = (string) $registreVerifactu['codi_qr'];
+            }
+
+            $pdfContent = $this->pdfFactura->generar($factura, $linies, $client, $usuari, $urlQR);
             $nomArxiu = 'factura-' . preg_replace('/[^A-Za-z0-9\-_]/', '-', (string) ($factura['numero_factura'] ?? $id)) . '.pdf';
 
             return $this->response
@@ -682,6 +699,27 @@ class FacturaController extends BaseController
                     'message' => 'Estat no vàlid',
                 ]);
             }
+
+            // --- Inici Verifactu ---
+            if (in_array($nouEstat, ['emesa', 'cancel·lada'], true)) {
+                try {
+                    $usuari = $this->usuariModel->find($usuariId);
+                    $facturaActualitzada = $this->facturaModel->find($id);
+                    $verifactuService = new VerifactuService();
+
+                    if ($nouEstat === 'emesa') {
+                        $verifactuService->generarRegistreAlta($facturaActualitzada, $usuari);
+                    } elseif ($nouEstat === 'cancel·lada') {
+                        $verifactuService->generarRegistreAnulacio($facturaActualitzada, $usuari);
+                    }
+                } catch (\RuntimeException $e) {
+                    // Si falla Verifactu per NIF no informat, informem però NO revertim el canvi d'estat
+                    log_message('warning', 'Verifactu no generat: ' . $e->getMessage());
+                } catch (\Exception $e) {
+                    log_message('error', 'Error Verifactu en canviarEstat: ' . $e->getMessage());
+                }
+            }
+            // --- Fi Verifactu ---
 
             return $this->response->setJSON([
                 'status' => 'ok',

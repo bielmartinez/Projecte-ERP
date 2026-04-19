@@ -194,6 +194,53 @@
         </div>
       </section>
 
+      <section v-if="registresVerifactu.length > 0" class="bg-white rounded shadow p-6 space-y-3">
+        <h3 class="text-lg font-semibold">Registres Verifactu</h3>
+
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead>
+              <tr class="text-left border-b">
+                <th class="py-2 pr-4">Tipus</th>
+                <th class="py-2 pr-4">Data generació</th>
+                <th class="py-2 pr-4">Hash</th>
+                <th class="py-2 pr-4">Accions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="registre in registresVerifactu" :key="registre.id" class="border-b">
+                <td class="py-2 pr-4">
+                  <span
+                    class="inline-block px-2 py-0.5 rounded text-xs font-medium"
+                    :class="registre.tipus_registre === 'alta' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                  >
+                    {{ registre.tipus_registre }}
+                  </span>
+                </td>
+                <td class="py-2 pr-4">{{ formatDataHoraVerifactu(registre.data_hora_generacio) }}</td>
+                <td class="py-2 pr-4">
+                  <span class="font-mono text-xs" :title="registre.hash_registre">
+                    {{ hashVerifactuCurt(registre.hash_registre) }}
+                  </span>
+                </td>
+                <td class="py-2 pr-4 flex flex-wrap gap-3">
+                  <RouterLink :to="`/verifactu/${registre.id}`" class="text-blue-600 hover:underline">Detall</RouterLink>
+                  <a
+                    v-if="registre.codi_qr"
+                    :href="registre.codi_qr"
+                    target="_blank"
+                    rel="noopener"
+                    class="text-gray-700 hover:underline"
+                  >
+                    Verificar a l'AEAT
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
       <section class="bg-white rounded shadow p-6 space-y-3">
         <div class="flex items-center justify-between">
           <h3 class="text-lg font-semibold">Línies</h3>
@@ -246,6 +293,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { crearCobrament, eliminarCobrament, getCobramentsFactura, type Cobrament } from '@/services/cobraments'
 import { canviarEstatFactura, descarregarFacturaPdf, deleteFactura, getFactura, type Factura, type FacturaLinia } from '@/services/factures'
+import { getRegistresVerifactu, type RegistreVerifactu } from '@/services/verifactu'
 
 type FacturaEstatLocal = 'esborrany' | 'emesa' | 'cancel·lada' | 'cobrada' | 'parcialment_cobrada'
 
@@ -256,6 +304,7 @@ const factura = ref<Factura | null>(null)
 const linies = ref<FacturaLinia[]>([])
 const client = ref<any>(null)
 const cobraments = ref<Cobrament[]>([])
+const registresVerifactu = ref<RegistreVerifactu[]>([])
 
 const error = ref('')
 const success = ref('')
@@ -311,6 +360,40 @@ function avui() {
   return `${now.getFullYear()}-${month}-${day}`
 }
 
+function formatDataHoraVerifactu(dataHora: string | null | undefined): string {
+  if (!dataHora) {
+    return '-'
+  }
+
+  let normalitzada = String(dataHora).trim().replace(' ', 'T')
+  if (/[+-]\d{2}$/.test(normalitzada)) {
+    normalitzada += ':00'
+  }
+
+  const data = new Date(normalitzada)
+  if (Number.isNaN(data.getTime())) {
+    return String(dataHora)
+  }
+
+  return data.toLocaleString('ca-ES', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  })
+}
+
+function hashVerifactuCurt(hash: string): string {
+  const valor = String(hash ?? '')
+  if (valor.length <= 16) {
+    return valor
+  }
+
+  return `${valor.slice(0, 16)}...`
+}
+
 async function loadFactura() {
   error.value = ''
 
@@ -353,6 +436,24 @@ async function loadCobraments() {
   }
 }
 
+async function loadRegistresVerifactuFactura() {
+  if (!factura.value) {
+    registresVerifactu.value = []
+    return
+  }
+
+  try {
+    const resVerifactu = await getRegistresVerifactu()
+    if (resVerifactu.status === 'ok') {
+      registresVerifactu.value = (resVerifactu.data ?? []).filter(
+        (r: RegistreVerifactu) => Number(r.factura_id) === Number(factura.value?.id)
+      )
+    }
+  } catch {
+    // Silenciós — no és crític
+  }
+}
+
 function resetCobramentForm() {
   cobramentForm.import = 0
   cobramentForm.data_cobrament = avui()
@@ -363,6 +464,7 @@ function resetCobramentForm() {
 async function recarregarFacturaICobraments() {
   await loadFactura()
   await loadCobraments()
+  await loadRegistresVerifactuFactura()
 }
 
 async function handleCanviarEstat() {
@@ -482,6 +584,7 @@ onMounted(() => {
   runInitialLoad(async () => {
     await loadFactura()
     await loadCobraments()
+    await loadRegistresVerifactuFactura()
   })
 })
 </script>

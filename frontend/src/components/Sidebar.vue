@@ -51,6 +51,13 @@
       </RouterLink>
 
       <RouterLink
+        to="/verifactu"
+        class="block px-3 py-2 rounded hover:bg-gray-700"
+      >
+        Verifactu
+      </RouterLink>
+
+      <RouterLink
         to="/perfil"
         class="block px-3 py-2 rounded hover:bg-gray-700"
       >

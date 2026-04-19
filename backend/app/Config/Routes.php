@@ -87,3 +87,10 @@ $routes->group('dashboard', ['filter' => 'auth'], static function ($routes) {
 	$routes->get('factures-pendents', 'DashboardController::facturesPendents');
 	$routes->get('quotes-properes', 'DashboardController::quotesProperes');
 });
+
+$routes->group('verifactu', ['filter' => 'auth'], static function ($routes) {
+	$routes->get('registres', 'VerifactuController::index');
+	$routes->get('registres/(:num)', 'VerifactuController::show/$1');
+	$routes->get('validar', 'VerifactuController::validar');
+	$routes->get('exportar', 'VerifactuController::exportar');
+});

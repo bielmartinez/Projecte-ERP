@@ -15,6 +15,8 @@ import PlantillesView from '@/views/PlantillesView.vue'
 import MovimentsView from '@/views/MovimentsView.vue'
 import QuotaDetailView from '@/views/QuotaDetailView.vue'
 import QuotesView from '@/views/QuotesView.vue'
+import VerifactuDetailView from '@/views/VerifactuDetailView.vue'
+import VerifactuView from '@/views/VerifactuView.vue'
 import PerfilView from '@/views/PerfilView.vue'
 import RegisterView from '@/views/RegisterView.vue'
 
@@ -112,6 +114,16 @@ const router = createRouter({
           path: 'plantilles/:id/editar',
           name: 'plantilla-edit',
           component: PlantillaFormView
+        },
+        {
+          path: 'verifactu',
+          name: 'verifactu',
+          component: VerifactuView
+        },
+        {
+          path: 'verifactu/:id',
+          name: 'verifactu-detail',
+          component: VerifactuDetailView
         }
       ]
     },
