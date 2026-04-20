@@ -412,6 +412,11 @@ async function loadFacturaForEdit(id: string) {
     throw new Error('Factura no trobada')
   }
 
+  if (factura.estat !== 'esborrany') {
+    await router.replace(`/factures/${factura.id}`)
+    return
+  }
+
   form.client_id = Number(factura.client_id) || 0
   form.data_emisio = factura.data_emisio ?? ''
   form.data_venciment = factura.data_venciment ?? ''

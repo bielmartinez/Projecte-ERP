@@ -366,6 +366,14 @@ class FacturaController extends BaseController
                 ]);
             }
 
+            $estatsNoEditables = ['emesa', 'cobrada', 'parcialment_cobrada', 'cancel·lada'];
+            if (in_array($factura['estat'], $estatsNoEditables, true)) {
+                return $this->response->setStatusCode(403)->setJSON([
+                    'status' => 'error',
+                    'message' => 'No es pot editar una factura amb estat \'' . $factura['estat'] . '\'. Només es poden editar esborranys.',
+                ]);
+            }
+
             $data = $this->request->getJSON(true) ?? [];
             if ($data === []) {
                 return $this->response->setStatusCode(400)->setJSON([
@@ -495,10 +503,10 @@ class FacturaController extends BaseController
                 ]);
             }
 
-            if (in_array($factura['estat'], ['emesa', 'cobrada'], true)) {
+            if ($factura['estat'] !== 'esborrany') {
                 return $this->response->setStatusCode(403)->setJSON([
                     'status' => 'error',
-                    'message' => 'No es pot eliminar una factura emesa o cobrada',
+                    'message' => 'Només es poden eliminar factures en estat esborrany.',
                 ]);
             }
 
@@ -693,6 +701,21 @@ class FacturaController extends BaseController
                 ]);
             }
 
+            $transicionsPermeses = [
+                'esborrany' => ['emesa'],
+                'emesa' => ['cancel·lada'],
+                'parcialment_cobrada' => ['cancel·lada'],
+            ];
+
+            $estatActual = (string) ($factura['estat'] ?? '');
+
+            if (!isset($transicionsPermeses[$estatActual]) || !in_array($nouEstat, $transicionsPermeses[$estatActual], true)) {
+                return $this->response->setStatusCode(422)->setJSON([
+                    'status' => 'error',
+                    'message' => 'No es pot canviar l\'estat de \'' . $estatActual . '\' a \'' . $nouEstat . '\'.',
+                ]);
+            }
+
             if (!$this->facturaModel->canviarEstat($id, $nouEstat)) {
                 return $this->response->setStatusCode(422)->setJSON([
                     'status' => 'error',
@@ -744,7 +767,6 @@ class FacturaController extends BaseController
             'numero_factura',
             'data_emisio',
             'data_venciment',
-            'estat',
             'subtotal',
             'iva_percentatge',
             'iva_import',

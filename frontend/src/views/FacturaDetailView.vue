@@ -4,7 +4,7 @@
       <h2 class="text-2xl font-semibold">Detall de factura</h2>
       <div class="flex gap-2">
         <RouterLink to="/factures" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
-        <RouterLink v-if="factura" :to="`/factures/${factura.id}/editar`" class="text-gray-700 hover:underline">
+        <RouterLink v-if="factura && factura.estat === 'esborrany'" :to="`/factures/${factura.id}/editar`" class="text-gray-700 hover:underline">
           Editar
         </RouterLink>
         <button
@@ -66,14 +66,22 @@
 
         <div class="flex items-center gap-2">
           <label for="estat" class="text-sm">Canviar estat:</label>
-          <select id="estat" v-model="selectedEstat" class="border rounded px-3 py-2 text-sm">
-            <option value="esborrany">Esborrany</option>
-            <option value="emesa">Emesa</option>
-            <option value="parcialment_cobrada">Parcialment cobrada</option>
-            <option value="cancel·lada">Cancel·lada</option>
-            <option value="cobrada">Cobrada</option>
+          <select
+            id="estat"
+            v-model="selectedEstat"
+            class="border rounded px-3 py-2 text-sm"
+            :disabled="!potCanviarEstat"
+          >
+            <option
+              v-for="opcio in opcionsEstat"
+              :key="opcio.value"
+              :value="opcio.value"
+            >
+              {{ opcio.label }}
+            </option>
           </select>
           <button
+            v-if="potCanviarEstat"
             type="button"
             class="px-3 py-2 border rounded text-sm disabled:opacity-50"
             :disabled="changingEstat"
@@ -81,6 +89,7 @@
           >
             {{ changingEstat ? 'Actualitzant...' : 'Guardar estat' }}
           </button>
+          <span v-else class="text-sm text-gray-500">Estat definitiu</span>
         </div>
       </section>
 
@@ -245,7 +254,7 @@
         <div class="flex items-center justify-between">
           <h3 class="text-lg font-semibold">Línies</h3>
           <button
-            v-if="factura"
+            v-if="factura && factura.estat === 'esborrany'"
             type="button"
             class="text-red-600 hover:underline text-sm"
             @click="handleDeleteFactura"
@@ -342,6 +351,34 @@ const clientLabel = computed(() => {
 const potRegistrarCobraments = computed(() => {
   const estat = String(factura.value?.estat ?? '')
   return estat === 'emesa' || estat === 'parcialment_cobrada'
+})
+
+const opcionsEstat = computed(() => {
+  const estat = String(factura.value?.estat ?? '')
+
+  const transicions: Record<string, { value: string; label: string }[]> = {
+    esborrany: [
+      { value: 'esborrany', label: 'Esborrany' },
+      { value: 'emesa', label: 'Emesa' }
+    ],
+    emesa: [
+      { value: 'emesa', label: 'Emesa' },
+      { value: 'cancel·lada', label: 'Cancel·lada' }
+    ],
+    parcialment_cobrada: [
+      { value: 'parcialment_cobrada', label: 'Parcialment cobrada' },
+      { value: 'cancel·lada', label: 'Cancel·lada' }
+    ],
+    cobrada: [{ value: 'cobrada', label: 'Cobrada' }],
+    cancel·lada: [{ value: 'cancel·lada', label: 'Cancel·lada' }]
+  }
+
+  return transicions[estat] ?? [{ value: estat, label: estat }]
+})
+
+const potCanviarEstat = computed(() => {
+  const estat = String(factura.value?.estat ?? '')
+  return estat === 'esborrany' || estat === 'emesa' || estat === 'parcialment_cobrada'
 })
 
 const percentatgeCobrat = computed(() => {
