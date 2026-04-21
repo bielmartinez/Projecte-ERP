@@ -24,6 +24,7 @@ class MovimentModel extends Model
         'tipus',
         'descripcio',
         'import',
+        'iva_percentatge',
         'data',
     ];
 
@@ -51,6 +52,10 @@ class MovimentModel extends Model
         'import' => [
             'label' => 'Import',
             'rules' => 'required|decimal|greater_than[0]',
+        ],
+        'iva_percentatge' => [
+            'label' => 'IVA',
+            'rules' => 'permit_empty|decimal|in_list[0,4,10,21]',
         ],
         'data' => [
             'label' => 'Data',

@@ -188,6 +188,16 @@
             />
           </label>
 
+          <label v-if="form.tipus === 'despesa'" class="space-y-1">
+            <span class="text-sm font-medium text-gray-700">IVA (%)</span>
+            <select v-model.number="form.iva_percentatge" class="border rounded px-3 py-2 w-full">
+              <option :value="0">0% (Exempt)</option>
+              <option :value="4">4% (Superreduït)</option>
+              <option :value="10">10% (Reduït)</option>
+              <option :value="21">21% (General)</option>
+            </select>
+          </label>
+
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Data</span>
             <input v-model="form.data" type="date" class="border rounded px-3 py-2 w-full" />
@@ -255,6 +265,7 @@ const form = reactive({
   tipus: 'despesa' as TipusMoviment,
   descripcio: '',
   import: 0,
+  iva_percentatge: 21,
   data: todayDate()
 })
 
@@ -315,6 +326,7 @@ function resetForm() {
   form.factura_id = 0
   form.descripcio = ''
   form.import = 0
+  form.iva_percentatge = 21
   form.data = todayDate()
   formError.value = ''
   formSuccess.value = ''
@@ -324,13 +336,14 @@ function prepareCreate() {
   resetForm()
 }
 
-function prepareEdit(moviment: Moviment) {
+function prepareEdit(moviment: Moviment & { iva_percentatge?: number | string }) {
   editingId.value = moviment.id
   form.tipus = moviment.tipus
   form.categoria_id = moviment.categoria_id
   form.factura_id = moviment.factura_id ? Number(moviment.factura_id) : 0
   form.descripcio = moviment.descripcio
   form.import = Number(moviment.import)
+  form.iva_percentatge = Number(moviment.iva_percentatge) || 0
   form.data = moviment.data
   formError.value = ''
   formSuccess.value = ''
@@ -402,6 +415,7 @@ async function handleSubmit() {
     tipus: form.tipus,
     descripcio: form.descripcio.trim(),
     import: Number(form.import),
+    iva_percentatge: form.tipus === 'despesa' ? Number(form.iva_percentatge) : 0,
     data: form.data
   }
 

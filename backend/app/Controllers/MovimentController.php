@@ -372,6 +372,7 @@ class MovimentController extends BaseController
             'tipus',
             'descripcio',
             'import',
+            'iva_percentatge',
             'data',
         ];
 
@@ -386,7 +387,7 @@ class MovimentController extends BaseController
                 continue;
             }
 
-            if ($field === 'import') {
+            if (in_array($field, ['import', 'iva_percentatge'], true)) {
                 $payload[$field] = (float) $data[$field];
                 continue;
             }
