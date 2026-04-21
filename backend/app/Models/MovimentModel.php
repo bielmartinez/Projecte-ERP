@@ -202,4 +202,59 @@ class MovimentModel extends Model
 
         return $resultat;
     }
+
+    /**
+     * Resum d'ingressos i despeses per un rang de dates.
+     */
+    public function resumPerPeriode(int $usuariId, string $dataInici, string $dataFi): array
+    {
+        $sql = "SELECT tipus, COALESCE(SUM(import), 0) AS total
+                FROM {$this->table}
+                WHERE usuari_id = ?
+                  AND deleted_at IS NULL
+                  AND data >= ?
+                  AND data <= ?
+                GROUP BY tipus";
+
+        $files = $this->db->query($sql, [$usuariId, $dataInici, $dataFi])->getResultArray();
+
+        $resum = ['ingressos' => 0.0, 'despeses' => 0.0];
+
+        foreach ($files as $fila) {
+            if ($fila['tipus'] === 'ingres') {
+                $resum['ingressos'] = round((float) $fila['total'], 2);
+            }
+            if ($fila['tipus'] === 'despesa') {
+                $resum['despeses'] = round((float) $fila['total'], 2);
+            }
+        }
+
+        return $resum;
+    }
+
+    /**
+     * Calcula l'IVA suportat de les despeses d'un període.
+     * L'import guardat és amb IVA inclòs, per tant:
+     * base = import / (1 + iva_percentatge/100)
+     * iva_suportat = import - base
+     */
+    public function ivaSuportatPeriode(int $usuariId, string $dataInici, string $dataFi): float
+    {
+        $sql = "SELECT COALESCE(SUM(
+                CASE WHEN iva_percentatge > 0
+                    THEN import - (import / (1 + iva_percentatge / 100))
+                    ELSE 0
+                END
+            ), 0) AS iva_suportat
+            FROM {$this->table}
+            WHERE usuari_id = ?
+              AND deleted_at IS NULL
+              AND tipus = 'despesa'
+              AND data >= ?
+              AND data <= ?";
+
+        $result = $this->db->query($sql, [$usuariId, $dataInici, $dataFi])->getRowArray();
+
+        return round((float) ($result['iva_suportat'] ?? 0), 2);
+    }
 }

@@ -281,4 +281,35 @@ class FacturaModel extends Model
 
         return $factures;
     }
+
+    /**
+     * Resum fiscal de factures emeses/cobrades en un període.
+     * Només compta factures amb estat: emesa, cobrada o parcialment_cobrada.
+     * Retorna subtotal (base imposable), iva_repercutit, irpf_retingut i total facturat.
+     */
+    public function resumFiscalPeriode(int $usuariId, string $dataInici, string $dataFi): array
+    {
+        $sql = "SELECT
+                    COALESCE(SUM(subtotal), 0) AS base_imposable,
+                    COALESCE(SUM(iva_import), 0) AS iva_repercutit,
+                    COALESCE(SUM(irpf_import), 0) AS irpf_retingut,
+                    COALESCE(SUM(total), 0) AS total_facturat,
+                    COUNT(*) AS num_factures
+                FROM {$this->table}
+                WHERE usuari_id = ?
+                  AND deleted_at IS NULL
+                  AND estat IN ('emesa', 'cobrada', 'parcialment_cobrada')
+                  AND data_emisio >= ?
+                  AND data_emisio <= ?";
+
+        $result = $this->db->query($sql, [$usuariId, $dataInici, $dataFi])->getRowArray();
+
+        return [
+            'base_imposable'  => round((float) ($result['base_imposable'] ?? 0), 2),
+            'iva_repercutit'  => round((float) ($result['iva_repercutit'] ?? 0), 2),
+            'irpf_retingut'   => round((float) ($result['irpf_retingut'] ?? 0), 2),
+            'total_facturat'  => round((float) ($result['total_facturat'] ?? 0), 2),
+            'num_factures'    => (int) ($result['num_factures'] ?? 0),
+        ];
+    }
 }

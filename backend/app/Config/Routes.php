@@ -88,6 +88,13 @@ $routes->group('dashboard', ['filter' => 'auth'], static function ($routes) {
 	$routes->get('quotes-properes', 'DashboardController::quotesProperes');
 });
 
+$routes->group('informes', ['filter' => 'auth'], static function ($routes) {
+	$routes->get('mensual/(:num)/(:num)', 'InformeController::mensual/$1/$2');
+	$routes->get('trimestral/(:num)/(:num)', 'InformeController::trimestral/$1/$2');
+	$routes->get('anual/(:num)', 'InformeController::anual/$1');
+	$routes->get('pdf/(:segment)/(:segment)', 'InformeController::pdf/$1/$2');
+});
+
 $routes->group('verifactu', ['filter' => 'auth'], static function ($routes) {
 	$routes->get('registres', 'VerifactuController::index');
 	$routes->get('registres/(:num)', 'VerifactuController::show/$1');
