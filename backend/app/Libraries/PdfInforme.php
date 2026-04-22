@@ -58,12 +58,12 @@ class PdfInforme
 
                 <table cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #d1d5db;">
                     <tr>
-                        <td style="padding:7px; border-right:1px solid #d1d5db;"><strong>Període</strong></td>
-                        <td style="padding:7px; border-right:1px solid #d1d5db;">' . $etiqueta . '</td>
-                        <td style="padding:7px; border-right:1px solid #d1d5db;"><strong>Des de</strong></td>
-                        <td style="padding:7px; border-right:1px solid #d1d5db;">' . $dataInici . '</td>
-                        <td style="padding:7px; border-right:1px solid #d1d5db;"><strong>Fins a</strong></td>
-                        <td style="padding:7px;">' . $dataFi . '</td>
+                        <td width="14%" style="padding:7px; border-right:1px solid #d1d5db;"><strong>Període</strong></td>
+                        <td width="14%" style="padding:7px; border-right:1px solid #d1d5db;">' . $etiqueta . '</td>
+                        <td width="14%" style="padding:7px; border-right:1px solid #d1d5db;"><strong>Des de</strong></td>
+                        <td width="22%" style="padding:7px; border-right:1px solid #d1d5db;">' . $dataInici . '</td>
+                        <td width="14%" style="padding:7px; border-right:1px solid #d1d5db;"><strong>Fins a</strong></td>
+                        <td width="22%" style="padding:7px;">' . $dataFi . '</td>
                     </tr>
                 </table>
 
@@ -74,16 +74,16 @@ class PdfInforme
                         <td colspan="2" style="padding:8px; font-weight:bold; font-size:12px; border-bottom:1px solid #d1d5db;">Resum d\'activitat</td>
                     </tr>
                     <tr>
-                        <td style="padding:8px; border-bottom:1px solid #d1d5db; border-right:1px solid #d1d5db;" width="60%">Ingressos totals</td>
-                        <td style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db;">' . $this->money((float) ($mov['ingressos'] ?? 0)) . '</td>
+                        <td width="70%" style="padding:8px; border-bottom:1px solid #d1d5db; border-right:1px solid #d1d5db;">Ingressos totals</td>
+                        <td width="30%" style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db;">' . $this->money((float) ($mov['ingressos'] ?? 0)) . '</td>
                     </tr>
                     <tr>
-                        <td style="padding:8px; border-bottom:1px solid #d1d5db; border-right:1px solid #d1d5db;">Despeses totals</td>
-                        <td style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db;">' . $this->money((float) ($mov['despeses'] ?? 0)) . '</td>
+                        <td width="70%" style="padding:8px; border-bottom:1px solid #d1d5db; border-right:1px solid #d1d5db;">Despeses totals</td>
+                        <td width="30%" style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db;">' . $this->money((float) ($mov['despeses'] ?? 0)) . '</td>
                     </tr>
                     <tr style="background-color:#f3f4f6;">
-                        <td style="padding:9px; border-right:1px solid #d1d5db;"><strong>Benefici net</strong></td>
-                        <td style="padding:9px; text-align:right;"><strong>' . $this->money((float) ($mov['benefici'] ?? 0)) . '</strong></td>
+                        <td width="70%" style="padding:9px; border-right:1px solid #d1d5db;"><strong>Benefici net</strong></td>
+                        <td width="30%" style="padding:9px; text-align:right;"><strong>' . $this->money((float) ($mov['benefici'] ?? 0)) . '</strong></td>
                     </tr>
                 </table>
 
@@ -94,16 +94,16 @@ class PdfInforme
                         <td colspan="2" style="padding:8px; font-weight:bold; font-size:12px; border-bottom:1px solid #d1d5db;">Facturació</td>
                     </tr>
                     <tr>
-                        <td style="padding:8px; border-bottom:1px solid #d1d5db; border-right:1px solid #d1d5db;" width="60%">Factures emeses</td>
-                        <td style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db;">' . (int) ($fac['num_factures'] ?? 0) . '</td>
+                        <td width="70%" style="padding:8px; border-bottom:1px solid #d1d5db; border-right:1px solid #d1d5db;">Factures emeses</td>
+                        <td width="30%" style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db;">' . (int) ($fac['num_factures'] ?? 0) . '</td>
                     </tr>
                     <tr>
-                        <td style="padding:8px; border-bottom:1px solid #d1d5db; border-right:1px solid #d1d5db;">Base imposable</td>
-                        <td style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db;">' . $this->money((float) ($fac['base_imposable'] ?? 0)) . '</td>
+                        <td width="70%" style="padding:8px; border-bottom:1px solid #d1d5db; border-right:1px solid #d1d5db;">Base imposable</td>
+                        <td width="30%" style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db;">' . $this->money((float) ($fac['base_imposable'] ?? 0)) . '</td>
                     </tr>
                     <tr>
-                        <td style="padding:8px; border-right:1px solid #d1d5db;">Total facturat</td>
-                        <td style="padding:8px; text-align:right;">' . $this->money((float) ($fac['total_facturat'] ?? 0)) . '</td>
+                        <td width="70%" style="padding:8px; border-right:1px solid #d1d5db;">Total facturat</td>
+                        <td width="30%" style="padding:8px; text-align:right;">' . $this->money((float) ($fac['total_facturat'] ?? 0)) . '</td>
                     </tr>
                 </table>
 
@@ -114,20 +114,20 @@ class PdfInforme
                         <td colspan="2" style="padding:8px; font-weight:bold; font-size:12px; border-bottom:1px solid #d1d5db;">Resum fiscal</td>
                     </tr>
                     <tr>
-                        <td style="padding:8px; border-bottom:1px solid #d1d5db; border-right:1px solid #d1d5db;" width="60%">IVA repercutit (cobrat als clients)</td>
-                        <td style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db;">' . $this->money((float) ($fis['iva_repercutit'] ?? 0)) . '</td>
+                        <td width="70%" style="padding:8px; border-bottom:1px solid #d1d5db; border-right:1px solid #d1d5db;">IVA repercutit (cobrat als clients)</td>
+                        <td width="30%" style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db;">' . $this->money((float) ($fis['iva_repercutit'] ?? 0)) . '</td>
                     </tr>
                     <tr>
-                        <td style="padding:8px; border-bottom:1px solid #d1d5db; border-right:1px solid #d1d5db;">IVA suportat (pagat en despeses)</td>
-                        <td style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db;">' . $this->money((float) ($fis['iva_suportat'] ?? 0)) . '</td>
+                        <td width="70%" style="padding:8px; border-bottom:1px solid #d1d5db; border-right:1px solid #d1d5db;">IVA suportat (pagat en despeses)</td>
+                        <td width="30%" style="padding:8px; text-align:right; border-bottom:1px solid #d1d5db;">' . $this->money((float) ($fis['iva_suportat'] ?? 0)) . '</td>
                     </tr>
                     <tr style="background-color:#f3f4f6;">
-                        <td style="padding:9px; border-bottom:1px solid #d1d5db; border-right:1px solid #d1d5db;"><strong>Resultat IVA (a pagar a Hisenda)</strong></td>
-                        <td style="padding:9px; text-align:right; border-bottom:1px solid #d1d5db;"><strong>' . $this->money((float) ($fis['resultat_iva'] ?? 0)) . '</strong></td>
+                        <td width="70%" style="padding:9px; border-bottom:1px solid #d1d5db; border-right:1px solid #d1d5db;"><strong>Resultat IVA (a pagar a Hisenda)</strong></td>
+                        <td width="30%" style="padding:9px; text-align:right; border-bottom:1px solid #d1d5db;"><strong>' . $this->money((float) ($fis['resultat_iva'] ?? 0)) . '</strong></td>
                     </tr>
                     <tr>
-                        <td style="padding:8px; border-right:1px solid #d1d5db;">IRPF retingut en factures</td>
-                        <td style="padding:8px; text-align:right;">' . $this->money((float) ($fis['irpf_retingut'] ?? 0)) . '</td>
+                        <td width="70%" style="padding:8px; border-right:1px solid #d1d5db;">IRPF retingut en factures</td>
+                        <td width="30%" style="padding:8px; text-align:right;">' . $this->money((float) ($fis['irpf_retingut'] ?? 0)) . '</td>
                     </tr>
                 </table>
 

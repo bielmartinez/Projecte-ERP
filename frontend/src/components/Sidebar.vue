@@ -44,6 +44,13 @@
       </RouterLink>
 
       <RouterLink
+        to="/informes"
+        class="block px-3 py-2 rounded hover:bg-gray-700"
+      >
+        Informes
+      </RouterLink>
+
+      <RouterLink
         to="/plantilles"
         class="block px-3 py-2 rounded hover:bg-gray-700"
       >
