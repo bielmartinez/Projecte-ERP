@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import MainLayout from '@/layouts/MainLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 import ClientDetailView from '@/views/ClientDetailView.vue'
+import ClientFormView from '@/views/ClientFormView.vue'
 import CategoriesView from '@/views/CategoriesView.vue'
 import ClientsView from '@/views/ClientsView.vue'
 import Dashboard from '@/views/Dashboard.vue'
@@ -10,9 +11,11 @@ import FacturaDetailView from '@/views/FacturaDetailView.vue'
 import FacturaFormView from '@/views/FacturaFormView.vue'
 import FacturesView from '@/views/FacturesView.vue'
 import LoginView from '@/views/LoginView.vue'
+import MovimentFormView from '@/views/MovimentFormView.vue'
 import PlantillaFormView from '@/views/PlantillaFormView.vue'
 import PlantillesView from '@/views/PlantillesView.vue'
 import MovimentsView from '@/views/MovimentsView.vue'
+import QuotaFormView from '@/views/QuotaFormView.vue'
 import QuotaDetailView from '@/views/QuotaDetailView.vue'
 import QuotesView from '@/views/QuotesView.vue'
 import VerifactuDetailView from '@/views/VerifactuDetailView.vue'
@@ -56,6 +59,16 @@ const router = createRouter({
           component: ClientsView
         },
         {
+          path: 'clients/nou',
+          name: 'client-create',
+          component: ClientFormView
+        },
+        {
+          path: 'clients/:id/editar',
+          name: 'client-edit',
+          component: ClientFormView
+        },
+        {
           path: 'clients/:id',
           name: 'client-detail',
           component: ClientDetailView
@@ -64,6 +77,16 @@ const router = createRouter({
           path: 'categories',
           name: 'categories',
           component: CategoriesView
+        },
+        {
+          path: 'moviments/nou',
+          name: 'moviment-create',
+          component: MovimentFormView
+        },
+        {
+          path: 'moviments/:id/editar',
+          name: 'moviment-edit',
+          component: MovimentFormView
         },
         {
           path: 'moviments',
@@ -79,6 +102,16 @@ const router = createRouter({
           path: 'quotes',
           name: 'quotes',
           component: QuotesView
+        },
+        {
+          path: 'quotes/nova',
+          name: 'quota-create',
+          component: QuotaFormView
+        },
+        {
+          path: 'quotes/:id/editar',
+          name: 'quota-edit',
+          component: QuotaFormView
         },
         {
           path: 'quotes/:id',
