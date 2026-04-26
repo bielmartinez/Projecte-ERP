@@ -1,8 +1,9 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between gap-4 mb-6">
-      <h2 class="text-2xl font-semibold">Detall registre Verifactu</h2>
+    <div class="mb-6">
+      <PageHeader title="Detall registre Verifactu">
       <RouterLink to="/verifactu" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
+      </PageHeader>
     </div>
 
     <div v-if="initialLoading" class="space-y-6" aria-busy="true" aria-live="polite">
@@ -104,6 +105,7 @@
 import { onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
+import PageHeader from '@/components/PageHeader.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { getRegistreVerifactu, type RegistreVerifactu } from '@/services/verifactu'
 

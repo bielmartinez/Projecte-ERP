@@ -1,14 +1,13 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between gap-4">
-      <h2 class="text-2xl font-semibold">Moviments</h2>
+    <PageHeader title="Moviments">
       <RouterLink
         to="/moviments/nou"
         class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
       >
         Nou moviment
       </RouterLink>
-    </div>
+    </PageHeader>
 
     <div v-if="initialLoading" class="space-y-4" aria-busy="true" aria-live="polite">
       <section class="bg-white rounded shadow p-4 space-y-4 animate-pulse">
@@ -121,30 +120,19 @@
           </table>
         </div>
 
-        <div class="flex items-center justify-between">
-          <p class="text-sm text-gray-600">Pàgina {{ meta.page }} de {{ meta.total_pages || 1 }}</p>
-          <div class="flex gap-2">
-            <button
-              type="button"
-              class="px-3 py-1 border rounded disabled:opacity-50"
-              :disabled="meta.page <= 1"
-              @click="loadMoviments(meta.page - 1)"
-            >
-              Anterior
-            </button>
-            <button
-              type="button"
-              class="px-3 py-1 border rounded disabled:opacity-50"
-              :disabled="meta.page >= (meta.total_pages || 1)"
-              @click="loadMoviments(meta.page + 1)"
-            >
-              Següent
-            </button>
-          </div>
-        </div>
+        <PaginationControls :page="meta.page" :total-pages="meta.total_pages" @canvia-pagina="loadMoviments" />
       </section>
 
     </template>
+
+    <ConfirmModal
+      :visible="showDeleteModal"
+      title="Eliminar moviment"
+      message="Estàs segur que vols eliminar aquest moviment? Aquesta acció no es pot desfer."
+      confirm-text="Eliminar"
+      @confirma="confirmDelete"
+      @cancel·la="cancelDelete"
+    />
   </div>
 </template>
 
@@ -152,6 +140,9 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 
+import ConfirmModal from '@/components/ConfirmModal.vue'
+import PageHeader from '@/components/PageHeader.vue'
+import PaginationControls from '@/components/PaginationControls.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { getCategories, type CategoriaMoviment, type TipusMoviment } from '@/services/categories'
 import { deleteMoviment, getMoviments, type Moviment } from '@/services/moviments'
@@ -160,6 +151,8 @@ const loading = ref(false)
 const listError = ref('')
 const moviments = ref<Moviment[]>([])
 const categories = ref<CategoriaMoviment[]>([])
+const showDeleteModal = ref(false)
+const deletingId = ref<number | null>(null)
 
 const filters = reactive({
   search: '',
@@ -240,18 +233,32 @@ async function loadMoviments(page = 1) {
 }
 
 async function handleDelete(id: number) {
-  if (!window.confirm('Vols eliminar aquest moviment?')) {
+  deletingId.value = id
+  showDeleteModal.value = true
+}
+
+async function confirmDelete() {
+  if (!deletingId.value) {
     return
   }
+
+  showDeleteModal.value = false
 
   listError.value = ''
 
   try {
-    await deleteMoviment(id)
+    await deleteMoviment(deletingId.value)
     await loadMoviments(meta.page)
   } catch (error: any) {
     listError.value = error?.response?.data?.message ?? 'No s\'ha pogut eliminar el moviment.'
   }
+
+  deletingId.value = null
+}
+
+function cancelDelete() {
+  showDeleteModal.value = false
+  deletingId.value = null
 }
 
 onMounted(() => {

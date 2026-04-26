@@ -1,14 +1,13 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between gap-4">
-      <h2 class="text-2xl font-semibold">Plantilles</h2>
+    <PageHeader title="Plantilles">
       <RouterLink
         to="/plantilles/nova"
         class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
       >
         Nova plantilla
       </RouterLink>
-    </div>
+    </PageHeader>
 
     <div v-if="initialLoading" class="space-y-6" aria-busy="true" aria-live="polite">
       <section class="bg-white rounded shadow p-4 space-y-4 animate-pulse">
@@ -96,29 +95,18 @@
           </table>
         </div>
 
-        <div class="flex items-center justify-between">
-          <p class="text-sm text-gray-600">Pàgina {{ meta.page }} de {{ meta.total_pages || 1 }}</p>
-          <div class="flex gap-2">
-            <button
-              type="button"
-              class="px-3 py-1 border rounded disabled:opacity-50"
-              :disabled="meta.page <= 1"
-              @click="loadPlantilles(meta.page - 1)"
-            >
-              Anterior
-            </button>
-            <button
-              type="button"
-              class="px-3 py-1 border rounded disabled:opacity-50"
-              :disabled="meta.page >= (meta.total_pages || 1)"
-              @click="loadPlantilles(meta.page + 1)"
-            >
-              Següent
-            </button>
-          </div>
-        </div>
+        <PaginationControls :page="meta.page" :total-pages="meta.total_pages" @canvia-pagina="loadPlantilles" />
       </section>
     </template>
+
+    <ConfirmModal
+      :visible="showDeleteModal"
+      title="Eliminar plantilla"
+      message="Estàs segur que vols eliminar aquesta plantilla? Aquesta acció no es pot desfer."
+      confirm-text="Eliminar"
+      @confirma="confirmDelete"
+      @cancel·la="cancelDelete"
+    />
   </div>
 </template>
 
@@ -126,7 +114,10 @@
 import { onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 
+import ConfirmModal from '@/components/ConfirmModal.vue'
 import LlistaFacturesAction from '@/components/LlistaFacturesAction.vue'
+import PageHeader from '@/components/PageHeader.vue'
+import PaginationControls from '@/components/PaginationControls.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { deletePlantilla, getPlantilles, type Plantilla } from '@/services/plantilles'
 
@@ -135,6 +126,8 @@ const router = useRouter()
 const loading = ref(false)
 const error = ref('')
 const plantilles = ref<Plantilla[]>([])
+const showDeleteModal = ref(false)
+const deletingId = ref<number | null>(null)
 
 const filters = reactive({
   search: ''
@@ -180,18 +173,32 @@ async function loadPlantilles(page = 1) {
 }
 
 async function handleDelete(id: number) {
-  if (!window.confirm('Vols eliminar aquesta plantilla?')) {
+  deletingId.value = id
+  showDeleteModal.value = true
+}
+
+async function confirmDelete() {
+  if (!deletingId.value) {
     return
   }
+
+  showDeleteModal.value = false
 
   error.value = ''
 
   try {
-    await deletePlantilla(id)
+    await deletePlantilla(deletingId.value)
     await loadPlantilles(meta.page)
   } catch (requestError: any) {
     error.value = requestError?.response?.data?.message ?? 'No s\'ha pogut eliminar la plantilla.'
   }
+
+  deletingId.value = null
+}
+
+function cancelDelete() {
+  showDeleteModal.value = false
+  deletingId.value = null
 }
 
 async function handleCrearFactura(id: number) {

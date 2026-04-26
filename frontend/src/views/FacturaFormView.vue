@@ -1,9 +1,8 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between gap-4">
-      <h2 class="text-2xl font-semibold">{{ isEdit ? 'Editar factura' : 'Nova factura' }}</h2>
+    <PageHeader :title="isEdit ? 'Editar factura' : 'Nova factura'">
       <RouterLink to="/factures" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
-    </div>
+    </PageHeader>
 
     <!-- Div de càrrega  de la pagina-->
     <div v-if="initialLoading" class="space-y-6" aria-busy="true" aria-live="polite">
@@ -31,8 +30,7 @@
     </div>
 
     <template v-else>
-      <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
-      <p v-if="success" class="text-sm text-green-600">{{ success }}</p>
+      <FormMessages :error="error" :success="success" />
 
       <section class="bg-white rounded shadow p-6 space-y-4">
         <h3 class="text-lg font-semibold">Dades generals</h3>
@@ -92,87 +90,12 @@
         </div>
       </section>
 
-      <section class="bg-white rounded shadow p-6 space-y-4">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold">Línies de factura</h3>
-          <button type="button" class="px-3 py-1 border rounded" @click="addLinia">Afegir línia</button>
-        </div>
-
-        <div class="space-y-3">
-          <div class="hidden md:grid md:grid-cols-12 gap-3 text-xs font-semibold text-gray-500 uppercase">
-            <span class="md:col-span-4">Descripció</span>
-            <span class="md:col-span-2">Quantitat</span>
-            <span class="md:col-span-2">Preu unitari</span>
-            <span class="md:col-span-1">IVA %</span>
-            <span class="md:col-span-2">Descompte %</span>
-            <span class="md:col-span-1">Acció</span>
-          </div>
-
-          <div
-            v-for="(linia, index) in form.linies"
-            :key="`linia-${index}`"
-            class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start"
-          >
-            <input
-              v-model="linia.descripcio"
-              type="text"
-              class="border rounded px-3 py-2 md:col-span-4"
-              placeholder="Descripció"
-            />
-
-            <input
-              v-model.number="linia.quantitat"
-              type="number"
-              min="1"
-              step="1"
-              class="border rounded px-3 py-2 md:col-span-2"
-              placeholder="Quantitat"
-            />
-
-            <div class="relative md:col-span-2">
-              <input
-                v-model.number="linia.preu_unitari"
-                type="number"
-                min="0"
-                step="0.01"
-                class="border rounded px-3 py-2 pr-8 w-full"
-                placeholder="Preu"
-              />
-              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">€</span>
-            </div>
-
-            <select
-              v-model.number="linia.iva_percentatge"
-              class="border rounded px-3 py-2 md:col-span-1"
-            >
-              <option v-for="iva in IVA_OPTIONS" :key="`iva-${index}-${iva}`" :value="iva">{{ iva }}%</option>
-            </select>
-
-            <input
-              v-model.number="linia.descompte"
-              type="number"
-              min="0"
-              max="100"
-              step="0.01"
-              class="border rounded px-3 py-2 md:col-span-2"
-              placeholder="Desc %"
-            />
-
-            <button
-              type="button"
-              class="text-red-600 hover:underline md:col-span-1 py-2"
-              @click="removeLinia(index)"
-            >
-              Eliminar
-            </button>
-
-            <div class="md:col-span-12 text-sm text-gray-600">
-              Base línia: {{ totalLinia(linia).toFixed(2) }} € ·
-              IVA línia: {{ ivaLiniaImport(linia).toFixed(2) }} €
-            </div>
-          </div>
-        </div>
-      </section>
+      <LiniesEditor
+        v-model:linies="form.linies"
+        :iva-per-defecte="form.iva_percentatge"
+        :show-totals="true"
+        titol="Línies de factura"
+      />
 
       <section class="bg-white rounded shadow p-6 space-y-3">
         <h3 class="text-lg font-semibold">Resum</h3>
@@ -246,20 +169,15 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
+import FormMessages from '@/components/FormMessages.vue'
+import LiniesEditor, { IVA_OPTIONS, ivaLiniaImport, type LiniaForm, totalLinia } from '@/components/LiniesEditor.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { getClients, type Client } from '@/services/clients'
 import { createFactura, getFactura, updateFactura, type FacturaLiniaPayload, type FacturaPayload } from '@/services/factures'
 import { createPlantilla, getPlantilla, type PlantillaPayload } from '@/services/plantilles'
 
 type EstatFactura = 'esborrany' | 'emesa' | 'cancel·lada' | 'cobrada'
-
-interface FormLinia {
-  descripcio: string
-  quantitat: number
-  preu_unitari: number
-  iva_percentatge: number
-  descompte: number
-}
 
 const route = useRoute()
 const router = useRouter()
@@ -282,10 +200,8 @@ const form = reactive({
   irpf_percentatge: 0,
   metode_pagament: '',
   notes: '',
-  linies: [] as FormLinia[]
+  linies: [] as LiniaForm[]
 })
-
-const IVA_OPTIONS = [0, 4, 10, 21]
 
 const { initialLoading, runInitialLoad } = useInitialLoading()
 
@@ -294,31 +210,6 @@ function todayDate() {
   const month = String(now.getMonth() + 1).padStart(2, '0')
   const day = String(now.getDate()).padStart(2, '0')
   return `${now.getFullYear()}-${month}-${day}`
-}
-
-function addLinia() {
-  form.linies.push({
-    descripcio: '',
-    quantitat: 1,
-    preu_unitari: 0,
-    iva_percentatge: Number(form.iva_percentatge) || 21,
-    descompte: 0
-  })
-}
-
-function removeLinia(index: number) {
-  form.linies.splice(index, 1)
-}
-
-function totalLinia(linia: FormLinia) {
-  const base = (Number(linia.quantitat) || 0) * (Number(linia.preu_unitari) || 0)
-  const discount = Number(linia.descompte) || 0
-  const baseAmbDescompte = base * (1 - discount / 100)
-  return Math.max(0, baseAmbDescompte)
-}
-
-function ivaLiniaImport(linia: FormLinia) {
-  return totalLinia(linia) * ((Number(linia.iva_percentatge) || 0) / 100)
 }
 
 const subtotal = computed(() => {
@@ -435,7 +326,13 @@ async function loadFacturaForEdit(id: string) {
   }))
 
   if (form.linies.length === 0) {
-    addLinia()
+    form.linies.push({
+      descripcio: '',
+      quantitat: 1,
+      preu_unitari: 0,
+      iva_percentatge: Number(form.iva_percentatge) || 21,
+      descompte: 0
+    })
   }
 }
 
@@ -463,7 +360,13 @@ async function loadPlantillaForCreate(id: string) {
   }))
 
   if (form.linies.length === 0) {
-    addLinia()
+    form.linies.push({
+      descripcio: '',
+      quantitat: 1,
+      preu_unitari: 0,
+      iva_percentatge: Number(form.iva_percentatge) || 21,
+      descompte: 0
+    })
   }
 }
 
@@ -574,7 +477,13 @@ onMounted(() => {
         if (typeof plantillaId === 'string' && plantillaId.trim() !== '') {
           await loadPlantillaForCreate(plantillaId)
         } else {
-          addLinia()
+          form.linies.push({
+            descripcio: '',
+            quantitat: 1,
+            preu_unitari: 0,
+            iva_percentatge: Number(form.iva_percentatge) || 21,
+            descompte: 0
+          })
         }
       }
     } catch (requestError: any) {

@@ -1,14 +1,13 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between gap-4">
-      <h2 class="text-2xl font-semibold">Quotes</h2>
+    <PageHeader title="Quotes">
       <RouterLink
         to="/quotes/nova"
         class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
       >
         Nova quota
       </RouterLink>
-    </div>
+    </PageHeader>
 
     <div v-if="initialLoading" class="space-y-4" aria-busy="true" aria-live="polite">
       <section class="bg-white rounded shadow p-4 space-y-4 animate-pulse">
@@ -99,6 +98,15 @@
         </div>
       </section>
     </template>
+
+    <ConfirmModal
+      :visible="showDeleteModal"
+      title="Eliminar quota"
+      message="Estàs segur que vols eliminar aquesta quota? Aquesta acció no es pot desfer."
+      confirm-text="Eliminar"
+      @confirma="confirmDelete"
+      @cancel·la="cancelDelete"
+    />
   </div>
 </template>
 
@@ -106,6 +114,8 @@
 import { onMounted, reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
+import ConfirmModal from '@/components/ConfirmModal.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import {
   deleteQuota,
@@ -117,6 +127,8 @@ import {
 const loading = ref(false)
 const listError = ref('')
 const quotes = ref<Quota[]>([])
+const showDeleteModal = ref(false)
+const deletingId = ref<number | null>(null)
 
 const filters = reactive({
   activa: 'totes'
@@ -168,18 +180,32 @@ async function loadQuotes() {
 }
 
 async function handleDelete(id: number) {
-  if (!window.confirm('Vols eliminar aquesta quota?')) {
+  deletingId.value = id
+  showDeleteModal.value = true
+}
+
+async function confirmDelete() {
+  if (!deletingId.value) {
     return
   }
+
+  showDeleteModal.value = false
 
   listError.value = ''
 
   try {
-    await deleteQuota(id)
+    await deleteQuota(deletingId.value)
     await loadQuotes()
   } catch (error: any) {
     listError.value = error?.response?.data?.message ?? 'No s\'ha pogut eliminar la quota.'
   }
+
+  deletingId.value = null
+}
+
+function cancelDelete() {
+  showDeleteModal.value = false
+  deletingId.value = null
 }
 
 onMounted(() => {

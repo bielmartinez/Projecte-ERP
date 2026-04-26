@@ -1,9 +1,8 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between gap-4">
-      <h2 class="text-2xl font-semibold">{{ isEdit ? 'Editar moviment' : 'Nou moviment' }}</h2>
+    <PageHeader :title="isEdit ? 'Editar moviment' : 'Nou moviment'">
       <RouterLink to="/moviments" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
-    </div>
+    </PageHeader>
 
     <div v-if="initialLoading" class="space-y-4" aria-busy="true" aria-live="polite">
       <section class="bg-white rounded shadow p-6 space-y-4 animate-pulse">
@@ -23,7 +22,7 @@
     <template v-else>
       <section class="bg-white rounded shadow p-6 space-y-4">
         <h3 class="text-lg font-semibold">{{ isEdit ? 'Editar moviment' : 'Crear moviment' }}</h3>
-        <p v-if="formError" class="text-sm text-red-600">{{ formError }}</p>
+        <FormMessages :error="formError" />
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label class="space-y-1">
@@ -113,6 +112,8 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
+import FormMessages from '@/components/FormMessages.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { getCategories, type CategoriaMoviment, type TipusMoviment } from '@/services/categories'
 import { getFactures, type Factura } from '@/services/factures'

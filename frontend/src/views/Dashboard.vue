@@ -12,6 +12,7 @@ import {
   Title,
   Tooltip
 } from 'chart.js'
+import PageHeader from '@/components/PageHeader.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import {
   getDashboardGrafiques,
@@ -251,7 +252,9 @@ onMounted(() => {
 
 <template>
   <div>
-    <h2 class="text-2xl font-semibold mb-6">Dashboard</h2>
+    <div class="mb-6">
+      <PageHeader title="Dashboard" />
+    </div>
 
     <div v-if="initialLoading" class="space-y-8">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

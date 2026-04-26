@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between gap-4 mb-6">
-      <h2 class="text-2xl font-semibold">Registres Verifactu</h2>
-      <div class="flex gap-2">
+    <div class="mb-6">
+      <PageHeader title="Registres Verifactu">
+        <div class="flex gap-2">
         <button
           type="button"
           class="px-4 py-2 border rounded text-sm disabled:opacity-50"
@@ -19,7 +19,8 @@
         >
           {{ exportarLoading ? 'Exportant...' : 'Exportar registres' }}
         </button>
-      </div>
+        </div>
+      </PageHeader>
     </div>
 
     <div v-if="initialLoading" class="space-y-6" aria-busy="true" aria-live="polite">
@@ -152,6 +153,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
+import PageHeader from '@/components/PageHeader.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import {
   exportarRegistresVerifactu,

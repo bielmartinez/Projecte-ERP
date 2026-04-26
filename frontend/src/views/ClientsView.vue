@@ -1,14 +1,13 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between gap-4">
-      <h2 class="text-2xl font-semibold">Clients</h2>
+    <PageHeader title="Clients">
       <RouterLink
         to="/clients/nou"
         class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
       >
         Nou client
       </RouterLink>
-    </div>
+    </PageHeader>
 
     <!-- Div de càrrega  de la pagina-->
     <div v-if="initialLoading" class="space-y-6" aria-busy="true" aria-live="polite">
@@ -112,29 +111,18 @@
           </table>
         </div>
 
-        <div class="flex items-center justify-between">
-          <p class="text-sm text-gray-600">Pàgina {{ meta.page }} de {{ meta.total_pages || 1 }}</p>
-          <div class="flex gap-2">
-            <button
-              type="button"
-              class="px-3 py-1 border rounded disabled:opacity-50"
-              :disabled="meta.page <= 1"
-              @click="loadClients(meta.page - 1)"
-            >
-              Anterior
-            </button>
-            <button
-              type="button"
-              class="px-3 py-1 border rounded disabled:opacity-50"
-              :disabled="meta.page >= (meta.total_pages || 1)"
-              @click="loadClients(meta.page + 1)"
-            >
-              Següent
-            </button>
-          </div>
-        </div>
+        <PaginationControls :page="meta.page" :total-pages="meta.total_pages" @canvia-pagina="loadClients" />
       </section>
     </template>
+
+    <ConfirmModal
+      :visible="showDeleteModal"
+      title="Eliminar client"
+      message="Estàs segur que vols eliminar aquest client? Aquesta acció no es pot desfer."
+      confirm-text="Eliminar"
+      @confirma="confirmDelete"
+      @cancel·la="cancelDelete"
+    />
   </div>
 </template>
 
@@ -142,6 +130,9 @@
 import { onMounted, reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
+import ConfirmModal from '@/components/ConfirmModal.vue'
+import PageHeader from '@/components/PageHeader.vue'
+import PaginationControls from '@/components/PaginationControls.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { deleteClient, getClients, type Client } from '@/services/clients'
 
@@ -149,6 +140,8 @@ const loading = ref(false)
 const listError = ref('')
 const search = ref('')
 const clients = ref<Client[]>([])
+const showDeleteModal = ref(false)
+const deletingId = ref<number | null>(null)
 
 const meta = reactive({
   page: 1,
@@ -179,18 +172,32 @@ async function loadClients(page = 1) {
 }
 
 async function handleDelete(id: number) {
-  if (!window.confirm('Vols eliminar aquest client?')) {
+  deletingId.value = id
+  showDeleteModal.value = true
+}
+
+async function confirmDelete() {
+  if (!deletingId.value) {
     return
   }
+
+  showDeleteModal.value = false
 
   listError.value = ''
 
   try {
-    await deleteClient(id)
+    await deleteClient(deletingId.value)
     await loadClients(meta.page)
   } catch (error: any) {
     listError.value = error?.response?.data?.message ?? 'No s\'ha pogut eliminar el client.'
   }
+
+  deletingId.value = null
+}
+
+function cancelDelete() {
+  showDeleteModal.value = false
+  deletingId.value = null
 }
 
 onMounted(() => {

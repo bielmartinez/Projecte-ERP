@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-6">
-    <h2 class="text-2xl font-semibold">Informes</h2>
+    <PageHeader title="Informes" />
 
     <div v-if="initialLoading" class="space-y-4 animate-pulse" aria-busy="true">
       <div class="bg-white rounded shadow p-4 space-y-3">
@@ -173,6 +173,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 
+import PageHeader from '@/components/PageHeader.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import {
   descarregarInformePdf,

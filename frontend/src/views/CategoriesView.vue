@@ -1,7 +1,6 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between gap-4">
-      <h2 class="text-2xl font-semibold">Categories</h2>
+    <PageHeader title="Categories">
       <button
         type="button"
         class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
@@ -9,7 +8,7 @@
       >
         Nova categoria
       </button>
-    </div>
+    </PageHeader>
 
     <div v-if="initialLoading" class="space-y-4" aria-busy="true" aria-live="polite">
       <section class="bg-white rounded shadow p-4 space-y-4 animate-pulse">
@@ -113,8 +112,7 @@
 
       <section class="bg-white rounded shadow p-6 space-y-4">
         <h3 class="text-lg font-semibold">{{ editingId ? 'Editar categoria' : 'Crear categoria' }}</h3>
-        <p v-if="formError" class="text-sm text-red-600">{{ formError }}</p>
-        <p v-if="formSuccess" class="text-sm text-green-600">{{ formSuccess }}</p>
+        <FormMessages :error="formError" :success="formSuccess" />
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label class="space-y-1">
@@ -146,12 +144,24 @@
         </div>
       </section>
     </template>
+
+    <ConfirmModal
+      :visible="showDeleteModal"
+      title="Eliminar categoria"
+      message="Estàs segur que vols eliminar aquesta categoria? Si té moviments associats no es podrà eliminar."
+      confirm-text="Eliminar"
+      @confirma="confirmDelete"
+      @cancel·la="cancelDelete"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 
+import ConfirmModal from '@/components/ConfirmModal.vue'
+import FormMessages from '@/components/FormMessages.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import {
   createCategoria,
@@ -166,6 +176,8 @@ import {
 const loading = ref(false)
 const listError = ref('')
 const categories = ref<CategoriaMoviment[]>([])
+const showDeleteModal = ref(false)
+const deletingId = ref<number | null>(null)
 
 const filters = reactive({
   search: '',
@@ -273,18 +285,32 @@ async function handleSubmit() {
 }
 
 async function handleDelete(id: number) {
-  if (!window.confirm('Vols eliminar aquesta categoria?')) {
+  deletingId.value = id
+  showDeleteModal.value = true
+}
+
+async function confirmDelete() {
+  if (!deletingId.value) {
     return
   }
+
+  showDeleteModal.value = false
 
   listError.value = ''
 
   try {
-    await deleteCategoria(id)
+    await deleteCategoria(deletingId.value)
     await loadCategories(meta.page)
   } catch (error: any) {
     listError.value = error?.response?.data?.message ?? 'No s\'ha pogut eliminar la categoria.'
   }
+
+  deletingId.value = null
+}
+
+function cancelDelete() {
+  showDeleteModal.value = false
+  deletingId.value = null
 }
 
 onMounted(() => {

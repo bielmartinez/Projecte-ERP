@@ -1,7 +1,6 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between gap-4">
-      <h2 class="text-2xl font-semibold">Factures</h2>
+    <PageHeader title="Factures">
       <div class="flex items-center gap-2">
         <RouterLink
           to="/plantilles"
@@ -16,7 +15,7 @@
           Nova factura
         </RouterLink>
       </div>
-    </div>
+    </PageHeader>
 
     <!-- Div de càrrega  de la pagina-->
     <div v-if="initialLoading" class="space-y-6" aria-busy="true" aria-live="polite">
@@ -159,29 +158,18 @@
           </table>
         </div>
 
-        <div class="flex items-center justify-between">
-          <p class="text-sm text-gray-600">Pàgina {{ meta.page }} de {{ meta.total_pages || 1 }}</p>
-          <div class="flex gap-2">
-            <button
-              type="button"
-              class="px-3 py-1 border rounded disabled:opacity-50"
-              :disabled="meta.page <= 1"
-              @click="loadFactures(meta.page - 1)"
-            >
-              Anterior
-            </button>
-            <button
-              type="button"
-              class="px-3 py-1 border rounded disabled:opacity-50"
-              :disabled="meta.page >= (meta.total_pages || 1)"
-              @click="loadFactures(meta.page + 1)"
-            >
-              Següent
-            </button>
-          </div>
-        </div>
+        <PaginationControls :page="meta.page" :total-pages="meta.total_pages" @canvia-pagina="loadFactures" />
       </section>
     </template>
+
+    <ConfirmModal
+      :visible="showDeleteModal"
+      title="Eliminar factura"
+      message="Estàs segur que vols eliminar aquesta factura? Aquesta acció no es pot desfer."
+      confirm-text="Eliminar"
+      @confirma="confirmDelete"
+      @cancel·la="cancelDelete"
+    />
   </div>
 </template>
 
@@ -189,7 +177,10 @@
 import { onMounted, reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
+import ConfirmModal from '@/components/ConfirmModal.vue'
 import LlistaFacturesAction from '@/components/LlistaFacturesAction.vue'
+import PageHeader from '@/components/PageHeader.vue'
+import PaginationControls from '@/components/PaginationControls.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { getClients, type Client } from '@/services/clients'
 import { descarregarFacturaPdf, deleteFactura, getFactures, type Factura } from '@/services/factures'
@@ -198,6 +189,8 @@ const loading = ref(false)
 const listError = ref('')
 const factures = ref<Factura[]>([])
 const clients = ref<Client[]>([])
+const showDeleteModal = ref(false)
+const deletingId = ref<number | null>(null)
 
 const filters = reactive({
   search: '',
@@ -292,18 +285,32 @@ async function loadFactures(page = 1) {
 }
 
 async function handleDelete(id: number) {
-  if (!window.confirm('Vols eliminar aquesta factura?')) {
+  deletingId.value = id
+  showDeleteModal.value = true
+}
+
+async function confirmDelete() {
+  if (!deletingId.value) {
     return
   }
+
+  showDeleteModal.value = false
 
   listError.value = ''
 
   try {
-    await deleteFactura(id)
+    await deleteFactura(deletingId.value)
     await loadFactures(meta.page)
   } catch (error: any) {
     listError.value = error?.response?.data?.message ?? 'No s\'ha pogut eliminar la factura.'
   }
+
+  deletingId.value = null
+}
+
+function cancelDelete() {
+  showDeleteModal.value = false
+  deletingId.value = null
 }
 
 async function handleDescarregarPdf(id: number) {

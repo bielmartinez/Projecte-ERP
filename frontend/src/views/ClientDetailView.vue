@@ -1,9 +1,8 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <h2 class="text-2xl font-semibold">Detall del client</h2>
+    <PageHeader title="Detall del client">
       <RouterLink to="/clients" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
-    </div>
+    </PageHeader>
 
     <!-- Div de càrrega  de la pagina-->
     <div v-if="initialLoading" class="space-y-6" aria-busy="true" aria-live="polite">
@@ -100,6 +99,7 @@
 import { onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
+import PageHeader from '@/components/PageHeader.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { getClient, type Client } from '@/services/clients'
 

@@ -1,7 +1,6 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between gap-4">
-      <h2 class="text-2xl font-semibold">Detall de quota</h2>
+    <PageHeader title="Detall de quota">
       <div class="flex gap-2">
         <RouterLink to="/quotes" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
         <RouterLink
@@ -12,7 +11,7 @@
           Editar
         </RouterLink>
       </div>
-    </div>
+    </PageHeader>
 
     <div v-if="initialLoading" class="space-y-6" aria-busy="true" aria-live="polite">
       <section class="bg-white rounded shadow p-6 space-y-3 animate-pulse">
@@ -184,6 +183,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
+import PageHeader from '@/components/PageHeader.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { getQuota, pagarQuota, type PagamentQuota, type PeriodePendent, type Periodicitat, type Quota } from '@/services/quotes'
 

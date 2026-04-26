@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-6">
-    <h2 class="text-2xl font-semibold">Perfil</h2>
+    <PageHeader title="Perfil" />
 
     <!-- Div de càrrega  de la pagina-->
     <div v-if="initialLoading" class="space-y-6" aria-busy="true" aria-live="polite">
@@ -38,8 +38,7 @@
       <section class="bg-white rounded shadow p-6 space-y-4">
         <h3 class="text-lg font-semibold">Dades personals i fiscals</h3>
 
-        <p v-if="perfilError" class="text-sm text-red-600">{{ perfilError }}</p>
-        <p v-if="perfilSuccess" class="text-sm text-green-600">{{ perfilSuccess }}</p>
+        <FormMessages :error="perfilError" :success="perfilSuccess" />
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input v-model="perfil.nom" class="border rounded px-3 py-2" placeholder="Nom" type="text" />
@@ -68,8 +67,7 @@
       <section class="bg-white rounded shadow p-6 space-y-4">
         <h3 class="text-lg font-semibold">Canviar contrasenya</h3>
 
-        <p v-if="passwordError" class="text-sm text-red-600">{{ passwordError }}</p>
-        <p v-if="passwordSuccess" class="text-sm text-green-600">{{ passwordSuccess }}</p>
+        <FormMessages :error="passwordError" :success="passwordSuccess" />
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <input v-model="passwordForm.contrasenya_actual" class="border rounded px-3 py-2" placeholder="Contrasenya actual" type="password" />
@@ -94,6 +92,8 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 
+import FormMessages from '@/components/FormMessages.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { changePassword, getPerfil, type PerfilPayload, updatePerfil } from '@/services/profile'
 

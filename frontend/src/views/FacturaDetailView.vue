@@ -1,7 +1,6 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between gap-4">
-      <h2 class="text-2xl font-semibold">Detall de factura</h2>
+    <PageHeader title="Detall de factura">
       <div class="flex gap-2">
         <RouterLink to="/factures" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
         <RouterLink v-if="factura && factura.estat === 'esborrany'" :to="`/factures/${factura.id}/editar`" class="text-gray-700 hover:underline">
@@ -16,7 +15,7 @@
           Descarregar PDF
         </button>
       </div>
-    </div>
+    </PageHeader>
 
     <div v-if="initialLoading" class="space-y-6" aria-busy="true" aria-live="polite">
       <section class="bg-white rounded shadow p-6 space-y-3 animate-pulse">
@@ -292,6 +291,24 @@
         </div>
       </section>
     </template>
+
+    <ConfirmModal
+      :visible="showDeleteModal"
+      title="Eliminar factura"
+      message="Estàs segur que vols eliminar aquesta factura? Aquesta acció no es pot desfer."
+      confirm-text="Eliminar"
+      @confirma="confirmDeleteFactura"
+      @cancel·la="cancelDeleteFactura"
+    />
+
+    <ConfirmModal
+      :visible="showDeleteCobramentModal"
+      title="Eliminar cobrament"
+      message="Estàs segur que vols eliminar aquest cobrament? Aquesta acció no es pot desfer."
+      confirm-text="Eliminar"
+      @confirma="confirmDeleteCobrament"
+      @cancel·la="cancelDeleteCobrament"
+    />
   </div>
 </template>
 
@@ -299,6 +316,8 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
+import ConfirmModal from '@/components/ConfirmModal.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { crearCobrament, eliminarCobrament, getCobramentsFactura, type Cobrament } from '@/services/cobraments'
 import { canviarEstatFactura, descarregarFacturaPdf, deleteFactura, getFactura, type Factura, type FacturaLinia } from '@/services/factures'
@@ -324,6 +343,10 @@ const cobramentsLoading = ref(false)
 const cobramentFormLoading = ref(false)
 const cobramentFormError = ref('')
 const cobramentFormSuccess = ref('')
+const showDeleteModal = ref(false)
+const deletingId = ref<number | null>(null)
+const showDeleteCobramentModal = ref(false)
+const deletingCobramentId = ref<number | null>(null)
 
 const cobramentsMeta = reactive({
   total_cobrat: 0,
@@ -567,21 +590,35 @@ async function handleEliminarCobrament(cobramentId: number) {
     return
   }
 
-  if (!window.confirm('Vols eliminar aquest cobrament?')) {
+  deletingCobramentId.value = cobramentId
+  showDeleteCobramentModal.value = true
+}
+
+async function confirmDeleteCobrament() {
+  if (!factura.value || !deletingCobramentId.value) {
     return
   }
+
+  showDeleteCobramentModal.value = false
 
   cobramentFormError.value = ''
   cobramentFormSuccess.value = ''
   cobramentsError.value = ''
 
   try {
-    await eliminarCobrament(factura.value.id, cobramentId)
+    await eliminarCobrament(factura.value.id, deletingCobramentId.value)
     cobramentFormSuccess.value = 'Cobrament eliminat correctament.'
     await recarregarFacturaICobraments()
   } catch (requestError: any) {
     cobramentsError.value = requestError?.response?.data?.message ?? 'No s\'ha pogut eliminar el cobrament.'
+  } finally {
+    deletingCobramentId.value = null
   }
+}
+
+function cancelDeleteCobrament() {
+  showDeleteCobramentModal.value = false
+  deletingCobramentId.value = null
 }
 
 async function handleDeleteFactura() {
@@ -589,18 +626,32 @@ async function handleDeleteFactura() {
     return
   }
 
-  if (!window.confirm('Vols eliminar aquesta factura?')) {
+  deletingId.value = factura.value.id
+  showDeleteModal.value = true
+}
+
+async function confirmDeleteFactura() {
+  if (!deletingId.value) {
     return
   }
+
+  showDeleteModal.value = false
 
   error.value = ''
 
   try {
-    await deleteFactura(factura.value.id)
+    await deleteFactura(deletingId.value)
     await router.push('/factures')
   } catch (requestError: any) {
     error.value = requestError?.response?.data?.message ?? 'No s\'ha pogut eliminar la factura.'
   }
+
+  deletingId.value = null
+}
+
+function cancelDeleteFactura() {
+  showDeleteModal.value = false
+  deletingId.value = null
 }
 
 async function handleDescarregarPdf() {

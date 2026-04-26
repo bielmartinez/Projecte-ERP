@@ -1,9 +1,8 @@
 <template>
   <div class="space-y-6">
-    <div class="flex items-center justify-between gap-4">
-      <h2 class="text-2xl font-semibold">{{ isEdit ? 'Editar quota' : 'Nova quota' }}</h2>
+    <PageHeader :title="isEdit ? 'Editar quota' : 'Nova quota'">
       <RouterLink to="/quotes" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
-    </div>
+    </PageHeader>
 
     <div v-if="initialLoading" class="space-y-4" aria-busy="true" aria-live="polite">
       <section class="bg-white rounded shadow p-6 space-y-4 animate-pulse">
@@ -30,7 +29,7 @@
       <section class="bg-white rounded shadow p-6 space-y-4">
         <h3 class="text-lg font-semibold">{{ isEdit ? 'Editar quota' : 'Crear quota' }}</h3>
 
-        <p v-if="formError" class="text-sm text-red-600">{{ formError }}</p>
+        <FormMessages :error="formError" />
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label class="space-y-1 md:col-span-2">
@@ -132,6 +131,8 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 
+import FormMessages from '@/components/FormMessages.vue'
+import PageHeader from '@/components/PageHeader.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import { getCategories, type CategoriaMoviment } from '@/services/categories'
 import {
