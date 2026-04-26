@@ -2,26 +2,26 @@ import { createRouter, createWebHistory } from 'vue-router'
 
 import MainLayout from '@/layouts/MainLayout.vue'
 import { useAuthStore } from '@/stores/auth'
-import ClientDetailView from '@/views/ClientDetailView.vue'
-import ClientFormView from '@/views/ClientFormView.vue'
+import ClientDetailView from '@/views/clients/ClientDetailView.vue'
+import ClientFormView from '@/views/clients/ClientFormView.vue'
 import CategoriesView from '@/views/CategoriesView.vue'
-import ClientsView from '@/views/ClientsView.vue'
+import ClientsView from '@/views/clients/ClientsView.vue'
 import Dashboard from '@/views/Dashboard.vue'
-import FacturaDetailView from '@/views/FacturaDetailView.vue'
-import FacturaFormView from '@/views/FacturaFormView.vue'
-import FacturesView from '@/views/FacturesView.vue'
-import LoginView from '@/views/LoginView.vue'
-import MovimentFormView from '@/views/MovimentFormView.vue'
-import PlantillaFormView from '@/views/PlantillaFormView.vue'
-import PlantillesView from '@/views/PlantillesView.vue'
-import MovimentsView from '@/views/MovimentsView.vue'
-import QuotaFormView from '@/views/QuotaFormView.vue'
-import QuotaDetailView from '@/views/QuotaDetailView.vue'
-import QuotesView from '@/views/QuotesView.vue'
-import VerifactuDetailView from '@/views/VerifactuDetailView.vue'
-import VerifactuView from '@/views/VerifactuView.vue'
+import FacturaDetailView from '@/views/factures/FacturaDetailView.vue'
+import FacturaFormView from '@/views/factures/FacturaFormView.vue'
+import FacturesView from '@/views/factures/FacturesView.vue'
+import LoginView from '@/views/auth/LoginView.vue'
+import MovimentFormView from '@/views/moviments/MovimentFormView.vue'
+import PlantillaFormView from '@/views/plantilles/PlantillaFormView.vue'
+import PlantillesView from '@/views/plantilles/PlantillesView.vue'
+import MovimentsView from '@/views/moviments/MovimentsView.vue'
+import QuotaFormView from '@/views/quotes/QuotaFormView.vue'
+import QuotaDetailView from '@/views/quotes/QuotaDetailView.vue'
+import QuotesView from '@/views/quotes/QuotesView.vue'
+import VerifactuDetailView from '@/views/verifactu/VerifactuDetailView.vue'
+import VerifactuView from '@/views/verifactu/VerifactuView.vue'
 import PerfilView from '@/views/PerfilView.vue'
-import RegisterView from '@/views/RegisterView.vue'
+import RegisterView from '@/views/auth/RegisterView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -96,7 +96,7 @@ const router = createRouter({
         {
           path: '/informes',
           name: 'informes',
-          component: () => import('@/views/InformesView.vue'),
+          component: () => import('@/views/informes/InformesView.vue'),
         },
         {
           path: 'quotes',
