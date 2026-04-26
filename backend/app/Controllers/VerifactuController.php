@@ -20,46 +20,28 @@ class VerifactuController extends BaseController
     public function index(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $page = max(1, (int) ($this->request->getGet('page') ?? 1));
             $limit = max(1, (int) ($this->request->getGet('limit') ?? 20));
 
             $resultat = $this->registreModel->obtenirRegistresPerUsuari($usuariId, $page, $limit);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'data' => $resultat['data'],
                 'meta' => $resultat['meta'],
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Error en verifactu index: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error en llistar els registres Verifactu',
-            ]);
+            return $this->jsonError('Error en llistar els registres Verifactu', 500);
         }
     }
 
     public function show(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $registre = $this->registreModel
                 ->where('id', $id)
@@ -67,65 +49,36 @@ class VerifactuController extends BaseController
                 ->first();
 
             if (!$registre) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Registre Verifactu no trobat',
-                ]);
+                return $this->jsonError('Registre Verifactu no trobat', 404);
             }
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'data' => $registre,
-            ]);
+            return $this->jsonOk(['data' => $registre]);
         } catch (\Exception $e) {
             log_message('error', 'Error en verifactu show: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error en carregar el registre Verifactu',
-            ]);
+            return $this->jsonError('Error en carregar el registre Verifactu', 500);
         }
     }
 
     public function validar(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $resultat = $this->verifactuService->validarCadena($usuariId);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'data' => $resultat,
-            ]);
+            return $this->jsonOk(['data' => $resultat]);
         } catch (\Exception $e) {
             log_message('error', 'Error en verifactu validar: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error en validar la cadena Verifactu',
-            ]);
+            return $this->jsonError('Error en validar la cadena Verifactu', 500);
         }
     }
 
     public function exportar(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $registres = $this->registreModel->obtenirTotsRegistres($usuariId);
             $nomFitxer = 'verifactu-export-' . date('Y-m-d') . '.json';
@@ -137,10 +90,7 @@ class VerifactuController extends BaseController
         } catch (\Exception $e) {
             log_message('error', 'Error en verifactu exportar: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error en exportar els registres Verifactu',
-            ]);
+            return $this->jsonError('Error en exportar els registres Verifactu', 500);
         }
     }
 }

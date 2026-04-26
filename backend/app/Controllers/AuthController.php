@@ -37,10 +37,7 @@ class AuthController extends BaseController
             ];
 
             if (!$this->usuariModel->validate($usuari)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'errors' => $this->usuariModel->errors(),
-                ]);
+                return $this->jsonError('Dades no vàlides', 422, ['errors' => $this->usuariModel->errors()]);
             }
 
             $usuari['password_hash'] = password_hash($usuari['password_hash'], PASSWORD_BCRYPT);
@@ -53,34 +50,24 @@ class AuthController extends BaseController
             if ($nouId <= 0 || !$this->crearCategoriesPerDefecte($nouId)) {
                 $db->transRollback();
 
-                return $this->response->setStatusCode(500)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha pogut completar el registre.',
-                ]);
+                return $this->jsonError('No s\'ha pogut completar el registre.', 500);
             }
 
             $db->transComplete();
 
             if ($db->transStatus() === false) {
-                return $this->response->setStatusCode(500)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha pogut completar el registre.',
-                ]);
+                return $this->jsonError('No s\'ha pogut completar el registre.', 500);
             }
 
             $usuariCreat = $this->usuariModel->find($nouId);
 
-            return $this->response->setStatusCode(201)->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'usuari' => $usuariCreat,
-            ]);
+            ], 201);
         } catch (\Throwable $e) {
             log_message('error', 'Error en auth register: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'No s\'ha pogut completar el registre.',
-            ]);
+            return $this->jsonError('No s\'ha pogut completar el registre.', 500);
         }
     }
 
@@ -93,19 +80,13 @@ class AuthController extends BaseController
         $recordar = (bool) ($dades['recordar'] ?? false);
 
         if ($email === '' || $password === '') {
-            return $this->response->setStatusCode(422)->setJSON([
-                'status' => 'error',
-                'message' => 'Email i contrasenya són obligatoris.',
-            ]);
+            return $this->jsonError('Email i contrasenya són obligatoris.', 422);
         }
 
         $usuari = $this->usuariModel->findPerLogin($email);
 
         if (!$usuari || !password_verify($password, $usuari['password_hash'])) {
-            return $this->response->setStatusCode(401)->setJSON([
-                'status' => 'error',
-                'message' => 'Credencials incorrectes.',
-            ]);
+            return $this->jsonError('Credencials incorrectes.', 401);
         }
 
         $this->usuariModel->update((int) $usuari['id'], [
@@ -116,11 +97,10 @@ class AuthController extends BaseController
 
         unset($usuari['password_hash']);
 
-        return $this->response->setStatusCode(200)->setJSON([
-            'status' => 'ok',
+        return $this->jsonOk([
             'token' => $token,
             'usuari' => $usuari,
-        ]);
+        ], 200);
     }
 
     public function logout(): ResponseInterface
@@ -128,18 +108,12 @@ class AuthController extends BaseController
         $token = $this->getBearerToken();
 
         if ($token === null) {
-            return $this->response->setStatusCode(401)->setJSON([
-                'status' => 'error',
-                'message' => 'No autenticat.',
-            ]);
+            return $this->jsonError('No autenticat.', 401);
         }
 
         $this->tokenModel->eliminarToken($token);
 
-        return $this->response->setStatusCode(200)->setJSON([
-            'status' => 'ok',
-            'message' => 'Sessió tancada correctament.',
-        ]);
+        return $this->jsonOk(['message' => 'Sessió tancada correctament.'], 200);
     }
 
     //Persisteix la sessió i retorna les dades de l'usuari associat al token vàlid
@@ -148,19 +122,13 @@ class AuthController extends BaseController
         $token = $this->getBearerToken();
 
         if ($token === null) {
-            return $this->response->setStatusCode(401)->setJSON([
-                'status' => 'error',
-                'message' => 'No autenticat.',
-            ]);
+            return $this->jsonError('No autenticat.', 401);
         }
 
         $tokenData = $this->tokenModel->findTokenValid($token);
 
         if (!$tokenData) {
-            return $this->response->setStatusCode(401)->setJSON([
-                'status' => 'error',
-                'message' => 'Token invàlid o expirat.',
-            ]);
+            return $this->jsonError('Token invàlid o expirat.', 401);
         }
 
         $this->tokenModel->registrarUs($token);
@@ -168,16 +136,12 @@ class AuthController extends BaseController
         $usuari = $this->usuariModel->find((int) $tokenData['usuari_id']);
 
         if (!$usuari) {
-            return $this->response->setStatusCode(404)->setJSON([
-                'status' => 'error',
-                'message' => 'Usuari no trobat.',
-            ]);
+            return $this->jsonError('Usuari no trobat.', 404);
         }
 
-        return $this->response->setStatusCode(200)->setJSON([
-            'status' => 'ok',
+        return $this->jsonOk([
             'usuari' => $usuari,
-        ]);
+        ], 200);
     }
 
     private function getBearerToken(): ?string

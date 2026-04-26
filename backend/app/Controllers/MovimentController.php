@@ -20,14 +20,7 @@ class MovimentController extends BaseController
     public function index(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $page = max(1, (int) ($this->request->getGet('page') ?? 1));
             $limit = (int) ($this->request->getGet('limit') ?? 10);
@@ -77,8 +70,7 @@ class MovimentController extends BaseController
                 ->get()
                 ->getResultArray();
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'data' => $moviments,
                 'meta' => [
                     'page' => $page,
@@ -94,27 +86,16 @@ class MovimentController extends BaseController
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Error en moviments index: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al llistar els moviments',
-            ]);
+            return $this->jsonError('Error al llistar els moviments', 500);
         }
     }
 
     public function show(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
+            $usuariId = $this->usuariId();
 
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
-
-            $builder = $this->movimentModel->builder();
-            $moviment = $builder
+            $moviment = $this->movimentModel->builder()
                 ->select('moviments.*, categories_moviment.nom AS categoria_nom')
                 ->join('categories_moviment', 'categories_moviment.id = moviments.categoria_id', 'left')
                 ->where('moviments.id', $id)
@@ -124,43 +105,24 @@ class MovimentController extends BaseController
                 ->getRowArray();
 
             if (!$moviment) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Moviment no trobat',
-                ]);
+                return $this->jsonError('Moviment no trobat', 404);
             }
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'data' => $moviment,
-            ]);
+            return $this->jsonOk(['data' => $moviment]);
         } catch (\Exception $e) {
             log_message('error', 'Error en moviments show: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al carregar el moviment',
-            ]);
+            return $this->jsonError('Error al carregar el moviment', 500);
         }
     }
 
     public function create(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $data = $this->request->getJSON(true);
             if (!$data) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             $payload = $this->filtrarPayload($data);
@@ -170,57 +132,33 @@ class MovimentController extends BaseController
             $tipus = (string) ($payload['tipus'] ?? '');
 
             if (!$this->validarCategoriaUsuario($categoriaId, $usuariId, $tipus)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'La categoria indicada no és vàlida per aquest usuari o tipus.',
-                ]);
+                return $this->jsonError('La categoria indicada no és vàlida per aquest usuari o tipus.', 422);
             }
 
             if (isset($payload['factura_id']) && (int) $payload['factura_id'] > 0) {
                 if (!$this->validarFacturaUsuario((int) $payload['factura_id'], $usuariId)) {
-                    return $this->response->setStatusCode(422)->setJSON([
-                        'status' => 'error',
-                        'message' => 'La factura indicada no és vàlida per aquest usuari.',
-                    ]);
+                    return $this->jsonError('La factura indicada no és vàlida per aquest usuari.', 422);
                 }
             }
 
             if (!$this->movimentModel->insert($payload)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Dades no vàlides',
-                    'errors' => $this->movimentModel->errors(),
-                ]);
+                return $this->jsonError('Dades no vàlides', 422, ['errors' => $this->movimentModel->errors()]);
             }
 
             $movimentId = (int) $this->movimentModel->getInsertID();
             $moviment = $this->movimentModel->find($movimentId);
 
-            return $this->response->setStatusCode(201)->setJSON([
-                'status' => 'ok',
-                'message' => 'Moviment creat correctament',
-                'data' => $moviment,
-            ]);
+            return $this->jsonOk(['data' => $moviment, 'message' => 'Moviment creat correctament'], 201);
         } catch (\Exception $e) {
             log_message('error', 'Error en moviments create: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al crear el moviment',
-            ]);
+            return $this->jsonError('Error al crear el moviment', 500);
         }
     }
 
     public function update(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $moviment = $this->movimentModel
                 ->where('id', $id)
@@ -228,82 +166,49 @@ class MovimentController extends BaseController
                 ->first();
 
             if (!$moviment) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Moviment no trobat',
-                ]);
+                return $this->jsonError('Moviment no trobat', 404);
             }
 
             $data = $this->request->getJSON(true);
             if (!$data) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             $payload = $this->filtrarPayload($data);
             if (empty($payload)) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No hi ha camps vàlids per actualitzar',
-                ]);
+                return $this->jsonError('No hi ha camps vàlids per actualitzar', 400);
             }
 
             $categoriaId = (int) ($payload['categoria_id'] ?? $moviment['categoria_id']);
             $tipus = (string) ($payload['tipus'] ?? $moviment['tipus']);
 
             if (!$this->validarCategoriaUsuario($categoriaId, $usuariId, $tipus)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'La categoria indicada no és vàlida per aquest usuari o tipus.',
-                ]);
+                return $this->jsonError('La categoria indicada no és vàlida per aquest usuari o tipus.', 422);
             }
 
             if (array_key_exists('factura_id', $payload) && (int) $payload['factura_id'] > 0) {
                 if (!$this->validarFacturaUsuario((int) $payload['factura_id'], $usuariId)) {
-                    return $this->response->setStatusCode(422)->setJSON([
-                        'status' => 'error',
-                        'message' => 'La factura indicada no és vàlida per aquest usuari.',
-                    ]);
+                    return $this->jsonError('La factura indicada no és vàlida per aquest usuari.', 422);
                 }
             }
 
             if (!$this->movimentModel->update($id, $payload)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Dades no vàlides',
-                    'errors' => $this->movimentModel->errors(),
-                ]);
+                return $this->jsonError('Dades no vàlides', 422, ['errors' => $this->movimentModel->errors()]);
             }
 
             $movimentActualitzat = $this->movimentModel->find($id);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'message' => 'Moviment actualitzat correctament',
-                'data' => $movimentActualitzat,
-            ]);
+            return $this->jsonOk(['data' => $movimentActualitzat, 'message' => 'Moviment actualitzat correctament']);
         } catch (\Exception $e) {
             log_message('error', 'Error en moviments update: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al actualitzar el moviment',
-            ]);
+            return $this->jsonError('Error al actualitzar el moviment', 500);
         }
     }
 
     public function delete(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $moviment = $this->movimentModel
                 ->where('id', $id)
@@ -311,24 +216,15 @@ class MovimentController extends BaseController
                 ->first();
 
             if (!$moviment) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Moviment no trobat',
-                ]);
+                return $this->jsonError('Moviment no trobat', 404);
             }
 
             $this->movimentModel->delete($id);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'message' => 'Moviment eliminat correctament',
-            ]);
+            return $this->jsonOk(['message' => 'Moviment eliminat correctament']);
         } catch (\Exception $e) {
             log_message('error', 'Error en moviments delete: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al eliminar el moviment',
-            ]);
+            return $this->jsonError('Error al eliminar el moviment', 500);
         }
     }
 

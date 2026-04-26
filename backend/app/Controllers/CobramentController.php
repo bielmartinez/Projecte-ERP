@@ -26,14 +26,7 @@ class CobramentController extends BaseController
     public function index(int $facturaId): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $factura = $this->facturaModel
                 ->where('id', $facturaId)
@@ -41,10 +34,7 @@ class CobramentController extends BaseController
                 ->first();
 
             if (!$factura) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Factura no trobada',
-                ]);
+                return $this->jsonError('Factura no trobada', 404);
             }
 
             $cobraments = $this->cobramentModel->obtenirCobramentsFactura($facturaId);
@@ -52,8 +42,7 @@ class CobramentController extends BaseController
             $totalFactura = round((float) ($factura['total'] ?? 0), 2);
             $pendent = round(max($totalFactura - $totalCobrat, 0), 2);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'data' => $cobraments,
                 'meta' => [
                     'total_cobrat' => $totalCobrat,
@@ -64,24 +53,14 @@ class CobramentController extends BaseController
         } catch (\Exception $e) {
             log_message('error', 'Error en factures cobramentsIndex: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al carregar els cobraments de la factura',
-            ]);
+            return $this->jsonError('Error al carregar els cobraments de la factura', 500);
         }
     }
 
     public function create(int $facturaId): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $factura = $this->facturaModel
                 ->where('id', $facturaId)
@@ -89,25 +68,16 @@ class CobramentController extends BaseController
                 ->first();
 
             if (!$factura) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Factura no trobada',
-                ]);
+                return $this->jsonError('Factura no trobada', 404);
             }
 
             if (!in_array((string) ($factura['estat'] ?? ''), ['emesa', 'parcialment_cobrada'], true)) {
-                return $this->response->setStatusCode(409)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Només es poden registrar cobraments per factures emeses o parcialment cobrades.',
-                ]);
+                return $this->jsonError('Només es poden registrar cobraments per factures emeses o parcialment cobrades.', 409);
             }
 
             $data = $this->request->getJSON(true) ?? [];
             if ($data === []) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             $payload = $this->filtrarPayloadCobrament($data);
@@ -120,25 +90,16 @@ class CobramentController extends BaseController
             $importCobrament = round((float) ($payload['import'] ?? 0), 2);
 
             if ($pendent <= 0) {
-                return $this->response->setStatusCode(409)->setJSON([
-                    'status' => 'error',
-                    'message' => 'La factura ja està cobrada i no admet més cobraments.',
-                ]);
+                return $this->jsonError('La factura ja està cobrada i no admet més cobraments.', 409);
             }
 
             if ($importCobrament > $pendent + 0.00001) {
-                return $this->response->setStatusCode(409)->setJSON([
-                    'status' => 'error',
-                    'message' => 'L\'import del cobrament excedeix l\'import pendent de la factura.',
-                ]);
+                return $this->jsonError('L\'import del cobrament excedeix l\'import pendent de la factura.', 409);
             }
 
             $categoriaIngres = $this->obtenirCategoriaIngresPerUsuari($usuariId);
             if (!$categoriaIngres) {
-                return $this->response->setStatusCode(409)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No hi ha cap categoria d\'ingrés disponible per registrar el cobrament.',
-                ]);
+                return $this->jsonError('No hi ha cap categoria d\'ingrés disponible per registrar el cobrament.', 409);
             }
 
             $db = \Config\Database::connect();
@@ -147,11 +108,7 @@ class CobramentController extends BaseController
             if (!$this->cobramentModel->insert($payload)) {
                 $db->transRollback();
 
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Dades de cobrament no vàlides',
-                    'errors' => $this->cobramentModel->errors(),
-                ]);
+                return $this->jsonError('Dades de cobrament no vàlides', 422, ['errors' => $this->cobramentModel->errors()]);
             }
 
             $cobramentId = (int) $this->cobramentModel->getInsertID();
@@ -168,11 +125,7 @@ class CobramentController extends BaseController
             if (!$this->movimentModel->insert($movimentPayload)) {
                 $db->transRollback();
 
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha pogut crear el moviment d\'ingrés del cobrament',
-                    'errors' => $this->movimentModel->errors(),
-                ]);
+                return $this->jsonError('No s\'ha pogut crear el moviment d\'ingrés del cobrament', 422, ['errors' => $this->movimentModel->errors()]);
             }
 
             $movimentId = (int) $this->movimentModel->getInsertID();
@@ -180,52 +133,35 @@ class CobramentController extends BaseController
             if (!$this->cobramentModel->update($cobramentId, ['moviment_id' => $movimentId])) {
                 $db->transRollback();
 
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha pogut vincular el moviment al cobrament',
-                ]);
+                return $this->jsonError('No s\'ha pogut vincular el moviment al cobrament', 422);
             }
 
             $totalCobratNou = $this->cobramentModel->totalCobrat($facturaId);
             if (!$this->recalcularEstatFacturaPerCobraments($factura, $totalCobratNou)) {
                 $db->transRollback();
 
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha pogut actualitzar l\'estat de la factura',
-                ]);
+                return $this->jsonError('No s\'ha pogut actualitzar l\'estat de la factura', 422);
             }
 
             $db->transCommit();
 
             $cobramentCreat = $this->cobramentModel->find($cobramentId);
 
-            return $this->response->setStatusCode(201)->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Cobrament registrat correctament',
                 'data' => $cobramentCreat,
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             log_message('error', 'Error en factures crearCobrament: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al registrar el cobrament de la factura',
-            ]);
+            return $this->jsonError('Error al registrar el cobrament de la factura', 500);
         }
     }
 
     public function delete(int $facturaId, int $cobramentId): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $factura = $this->facturaModel
                 ->where('id', $facturaId)
@@ -233,10 +169,7 @@ class CobramentController extends BaseController
                 ->first();
 
             if (!$factura) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Factura no trobada',
-                ]);
+                return $this->jsonError('Factura no trobada', 404);
             }
 
             $cobrament = $this->cobramentModel
@@ -245,10 +178,7 @@ class CobramentController extends BaseController
                 ->first();
 
             if (!$cobrament) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Cobrament no trobat',
-                ]);
+                return $this->jsonError('Cobrament no trobat', 404);
             }
 
             $db = \Config\Database::connect();
@@ -257,10 +187,7 @@ class CobramentController extends BaseController
             if (!$this->cobramentModel->delete($cobramentId)) {
                 $db->transRollback();
 
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha pogut eliminar el cobrament',
-                ]);
+                return $this->jsonError('No s\'ha pogut eliminar el cobrament', 422);
             }
 
             $movimentId = (int) ($cobrament['moviment_id'] ?? 0);
@@ -273,10 +200,7 @@ class CobramentController extends BaseController
                 if ($moviment && !$this->movimentModel->delete($movimentId)) {
                     $db->transRollback();
 
-                    return $this->response->setStatusCode(422)->setJSON([
-                        'status' => 'error',
-                        'message' => 'No s\'ha pogut eliminar el moviment associat al cobrament',
-                    ]);
+                    return $this->jsonError('No s\'ha pogut eliminar el moviment associat al cobrament', 422);
                 }
             }
 
@@ -284,25 +208,16 @@ class CobramentController extends BaseController
             if (!$this->recalcularEstatFacturaPerCobraments($factura, $totalCobratNou)) {
                 $db->transRollback();
 
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha pogut recalcular l\'estat de la factura',
-                ]);
+                return $this->jsonError('No s\'ha pogut recalcular l\'estat de la factura', 422);
             }
 
             $db->transCommit();
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'message' => 'Cobrament eliminat correctament',
-            ]);
+            return $this->jsonOk(['message' => 'Cobrament eliminat correctament']);
         } catch (\Exception $e) {
             log_message('error', 'Error en factures eliminarCobrament: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al eliminar el cobrament de la factura',
-            ]);
+            return $this->jsonError('Error al eliminar el cobrament de la factura', 500);
         }
     }
 

@@ -20,14 +20,7 @@ class PlantillaController extends BaseController
     public function index(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $page = max(1, (int) ($this->request->getGet('page') ?? 1));
             $limit = max(1, min((int) ($this->request->getGet('limit') ?? 10), 100));
@@ -59,8 +52,7 @@ class PlantillaController extends BaseController
             }
             unset($plantilla);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'data' => $plantilles,
                 'meta' => [
                     'page' => $page,
@@ -73,24 +65,14 @@ class PlantillaController extends BaseController
         } catch (\Exception $e) {
             log_message('error', 'Error en plantilles index: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al llistar plantilles',
-            ]);
+            return $this->jsonError('Error al llistar plantilles', 500);
         }
     }
 
     public function show(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $plantilla = $this->plantillaModel
                 ->where('id', $id)
@@ -98,16 +80,12 @@ class PlantillaController extends BaseController
                 ->first();
 
             if (!$plantilla) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Plantilla no trobada',
-                ]);
+                return $this->jsonError('Plantilla no trobada', 404);
             }
 
             $linies = $this->liniaPlantillaModel->obtenirLiniesPlantilla($id);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'data' => [
                     'plantilla' => $plantilla,
                     'linies' => $linies,
@@ -116,39 +94,23 @@ class PlantillaController extends BaseController
         } catch (\Exception $e) {
             log_message('error', 'Error en plantilles show: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al carregar la plantilla',
-            ]);
+            return $this->jsonError('Error al carregar la plantilla', 500);
         }
     }
 
     public function create(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $data = $this->request->getJSON(true) ?? [];
             if ($data === []) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             $linies = $data['linies'] ?? [];
             if (!is_array($linies) || $linies === []) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'La plantilla ha de tenir almenys una línia',
-                ]);
+                return $this->jsonError('La plantilla ha de tenir almenys una línia', 422);
             }
 
             $payload = $this->filtrarPayloadPlantilla($data);
@@ -162,11 +124,7 @@ class PlantillaController extends BaseController
             if (!$this->plantillaModel->insert($payload)) {
                 $db->transRollback();
 
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Dades de plantilla no vàlides',
-                    'errors' => $this->plantillaModel->errors(),
-                ]);
+                return $this->jsonError('Dades de plantilla no vàlides', 422, ['errors' => $this->plantillaModel->errors()]);
             }
 
             $plantillaId = (int) $this->plantillaModel->getInsertID();
@@ -175,10 +133,7 @@ class PlantillaController extends BaseController
                 if (!is_array($linia)) {
                     $db->transRollback();
 
-                    return $this->response->setStatusCode(422)->setJSON([
-                        'status' => 'error',
-                        'message' => 'Format de línies no vàlid',
-                    ]);
+                    return $this->jsonError('Format de línies no vàlid', 422);
                 }
 
                 $payloadLinia = $this->filtrarPayloadLinia($linia);
@@ -189,45 +144,30 @@ class PlantillaController extends BaseController
                 if (!$this->liniaPlantillaModel->insert($payloadLinia)) {
                     $db->transRollback();
 
-                    return $this->response->setStatusCode(422)->setJSON([
-                        'status' => 'error',
-                        'message' => 'Dades de línia no vàlides',
-                        'errors' => $this->liniaPlantillaModel->errors(),
-                    ]);
+                    return $this->jsonError('Dades de línia no vàlides', 422, ['errors' => $this->liniaPlantillaModel->errors()]);
                 }
             }
 
             $db->transCommit();
 
-            return $this->response->setStatusCode(201)->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Plantilla creada correctament',
                 'data' => [
                     'plantilla' => $this->plantillaModel->find($plantillaId),
                     'linies' => $this->liniaPlantillaModel->obtenirLiniesPlantilla($plantillaId),
                 ],
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             log_message('error', 'Error en plantilles create: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al crear la plantilla',
-            ]);
+            return $this->jsonError('Error al crear la plantilla', 500);
         }
     }
 
     public function update(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $plantilla = $this->plantillaModel
                 ->where('id', $id)
@@ -235,18 +175,12 @@ class PlantillaController extends BaseController
                 ->first();
 
             if (!$plantilla) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Plantilla no trobada',
-                ]);
+                return $this->jsonError('Plantilla no trobada', 404);
             }
 
             $data = $this->request->getJSON(true) ?? [];
             if ($data === []) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             $payload = $this->filtrarPayloadPlantilla($data);
@@ -258,11 +192,7 @@ class PlantillaController extends BaseController
             if ($payload !== [] && !$this->plantillaModel->update($id, $payload)) {
                 $db->transRollback();
 
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Dades de plantilla no vàlides',
-                    'errors' => $this->plantillaModel->errors(),
-                ]);
+                return $this->jsonError('Dades de plantilla no vàlides', 422, ['errors' => $this->plantillaModel->errors()]);
             }
 
             if (array_key_exists('linies', $data)) {
@@ -270,10 +200,7 @@ class PlantillaController extends BaseController
                 if (!is_array($linies) || $linies === []) {
                     $db->transRollback();
 
-                    return $this->response->setStatusCode(422)->setJSON([
-                        'status' => 'error',
-                        'message' => 'La plantilla ha de tenir almenys una línia',
-                    ]);
+                    return $this->jsonError('La plantilla ha de tenir almenys una línia', 422);
                 }
 
                 $this->liniaPlantillaModel->eliminarLiniesPlantilla($id);
@@ -284,10 +211,7 @@ class PlantillaController extends BaseController
                     if (!is_array($linia)) {
                         $db->transRollback();
 
-                        return $this->response->setStatusCode(422)->setJSON([
-                            'status' => 'error',
-                            'message' => 'Format de línies no vàlid',
-                        ]);
+                        return $this->jsonError('Format de línies no vàlid', 422);
                     }
 
                     $payloadLinia = $this->filtrarPayloadLinia($linia);
@@ -298,19 +222,14 @@ class PlantillaController extends BaseController
                     if (!$this->liniaPlantillaModel->insert($payloadLinia)) {
                         $db->transRollback();
 
-                        return $this->response->setStatusCode(422)->setJSON([
-                            'status' => 'error',
-                            'message' => 'Dades de línia no vàlides',
-                            'errors' => $this->liniaPlantillaModel->errors(),
-                        ]);
+                        return $this->jsonError('Dades de línia no vàlides', 422, ['errors' => $this->liniaPlantillaModel->errors()]);
                     }
                 }
             }
 
             $db->transCommit();
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Plantilla actualitzada correctament',
                 'data' => [
                     'plantilla' => $this->plantillaModel->find($id),
@@ -320,24 +239,14 @@ class PlantillaController extends BaseController
         } catch (\Exception $e) {
             log_message('error', 'Error en plantilles update: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error en actualitzar la plantilla',
-            ]);
+            return $this->jsonError('Error en actualitzar la plantilla', 500);
         }
     }
 
     public function delete(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $plantilla = $this->plantillaModel
                 ->where('id', $id)
@@ -345,30 +254,18 @@ class PlantillaController extends BaseController
                 ->first();
 
             if (!$plantilla) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Plantilla no trobada',
-                ]);
+                return $this->jsonError('Plantilla no trobada', 404);
             }
 
             if (!$this->plantillaModel->delete($id)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha pogut eliminar la plantilla',
-                ]);
+                return $this->jsonError('No s\'ha pogut eliminar la plantilla', 422);
             }
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'message' => 'Plantilla eliminada correctament',
-            ]);
+            return $this->jsonOk(['message' => 'Plantilla eliminada correctament']);
         } catch (\Exception $e) {
             log_message('error', 'Error en plantilles delete: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error en eliminar la plantilla',
-            ]);
+            return $this->jsonError('Error en eliminar la plantilla', 500);
         }
     }
 

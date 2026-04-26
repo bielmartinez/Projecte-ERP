@@ -42,4 +42,32 @@ abstract class BaseController extends Controller
         // Preload any models, libraries, etc, here.
         // $this->session = service('session');
     }
+
+    /**
+     * Retorna l'ID de l'usuari autenticat.
+     * Només cridar dins rutes protegides amb AuthFilter.
+     */
+    protected function usuariId(): int
+    {
+        return (int) user_id();
+    }
+
+    /**
+     * Retorna una resposta JSON d'èxit.
+     */
+    protected function jsonOk(array $data = [], int $code = 200): ResponseInterface
+    {
+        return $this->response->setStatusCode($code)->setJSON(array_merge(['status' => 'ok'], $data));
+    }
+
+    /**
+     * Retorna una resposta JSON d'error.
+     */
+    protected function jsonError(string $message, int $code = 400, array $extra = []): ResponseInterface
+    {
+        return $this->response->setStatusCode($code)->setJSON(array_merge([
+            'status' => 'error',
+            'message' => $message,
+        ], $extra));
+    }
 }

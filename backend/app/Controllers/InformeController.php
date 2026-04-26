@@ -24,19 +24,10 @@ class InformeController extends BaseController
      */
     public function mensual(int $any, int $mes): ResponseInterface
     {
-        $usuariId = user_id();
-        if (!$usuariId) {
-            return $this->response->setStatusCode(401)->setJSON([
-                'status' => 'error',
-                'message' => 'No autenticat',
-            ]);
-        }
+        $usuariId = $this->usuariId();
 
         if ($mes < 1 || $mes > 12 || $any < 2000 || $any > 2100) {
-            return $this->response->setStatusCode(400)->setJSON([
-                'status' => 'error',
-                'message' => 'Període no vàlid',
-            ]);
+            return $this->jsonError('Període no vàlid', 400);
         }
 
         $mesStr = str_pad((string) $mes, 2, '0', STR_PAD_LEFT);
@@ -52,19 +43,10 @@ class InformeController extends BaseController
      */
     public function trimestral(int $any, int $trimestre): ResponseInterface
     {
-        $usuariId = user_id();
-        if (!$usuariId) {
-            return $this->response->setStatusCode(401)->setJSON([
-                'status' => 'error',
-                'message' => 'No autenticat',
-            ]);
-        }
+        $usuariId = $this->usuariId();
 
         if ($trimestre < 1 || $trimestre > 4 || $any < 2000 || $any > 2100) {
-            return $this->response->setStatusCode(400)->setJSON([
-                'status' => 'error',
-                'message' => 'Període no vàlid',
-            ]);
+            return $this->jsonError('Període no vàlid', 400);
         }
 
         $mesInici = (($trimestre - 1) * 3) + 1;
@@ -83,19 +65,10 @@ class InformeController extends BaseController
      */
     public function anual(int $any): ResponseInterface
     {
-        $usuariId = user_id();
-        if (!$usuariId) {
-            return $this->response->setStatusCode(401)->setJSON([
-                'status' => 'error',
-                'message' => 'No autenticat',
-            ]);
-        }
+        $usuariId = $this->usuariId();
 
         if ($any < 2000 || $any > 2100) {
-            return $this->response->setStatusCode(400)->setJSON([
-                'status' => 'error',
-                'message' => 'Període no vàlid',
-            ]);
+            return $this->jsonError('Període no vàlid', 400);
         }
 
         $dataInici = "{$any}-01-01";
@@ -111,25 +84,19 @@ class InformeController extends BaseController
      */
     public function pdf(string $tipus, string $periode): ResponseInterface
     {
-        $usuariId = user_id();
-        if (!$usuariId) {
-            return $this->response->setStatusCode(401)->setJSON([
-                'status' => 'error',
-                'message' => 'No autenticat',
-            ]);
-        }
+        $usuariId = $this->usuariId();
 
         // Calcular dates segons el tipus i període
         switch ($tipus) {
             case 'mensual':
                 $parts = explode('-', $periode);
                 if (count($parts) !== 2) {
-                    return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Format: YYYY-MM']);
+                    return $this->jsonError('Format: YYYY-MM', 400);
                 }
                 $any = (int) $parts[0];
                 $mes = (int) $parts[1];
                 if ($mes < 1 || $mes > 12 || $any < 2000 || $any > 2100) {
-                    return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Període no vàlid']);
+                    return $this->jsonError('Període no vàlid', 400);
                 }
                 $mesStr = str_pad((string) $mes, 2, '0', STR_PAD_LEFT);
                 $dataInici = "{$any}-{$mesStr}-01";
@@ -140,12 +107,12 @@ class InformeController extends BaseController
             case 'trimestral':
                 $parts = explode('-', $periode);
                 if (count($parts) !== 2) {
-                    return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Format: YYYY-T']);
+                    return $this->jsonError('Format: YYYY-T', 400);
                 }
                 $any = (int) $parts[0];
                 $trimestre = (int) $parts[1];
                 if ($trimestre < 1 || $trimestre > 4 || $any < 2000 || $any > 2100) {
-                    return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Període no vàlid']);
+                    return $this->jsonError('Període no vàlid', 400);
                 }
                 $mesInici = (($trimestre - 1) * 3) + 1;
                 $mesFi = $mesInici + 2;
@@ -157,7 +124,7 @@ class InformeController extends BaseController
             case 'anual':
                 $any = (int) $periode;
                 if ($any < 2000 || $any > 2100) {
-                    return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Període no vàlid']);
+                    return $this->jsonError('Període no vàlid', 400);
                 }
                 $dataInici = "{$any}-01-01";
                 $dataFi = "{$any}-12-31";
@@ -165,7 +132,7 @@ class InformeController extends BaseController
                 break;
 
             default:
-                return $this->response->setStatusCode(400)->setJSON(['status' => 'error', 'message' => 'Tipus ha de ser: mensual, trimestral o anual']);
+                return $this->jsonError('Tipus ha de ser: mensual, trimestral o anual', 400);
         }
 
         try {
@@ -218,10 +185,7 @@ class InformeController extends BaseController
         } catch (\Exception $e) {
             log_message('error', "Error en informe PDF {$tipus}: " . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al generar el PDF de l\'informe',
-            ]);
+            return $this->jsonError('Error al generar el PDF de l\'informe', 500);
         }
     }
 
@@ -242,8 +206,7 @@ class InformeController extends BaseController
             $ivaRepercutit = $resumFactures['iva_repercutit'];
             $resultatIva = round($ivaRepercutit - $ivaSuportat, 2);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'data' => [
                     'periode' => [
                         'tipus' => $tipus,
@@ -272,10 +235,7 @@ class InformeController extends BaseController
         } catch (\Exception $e) {
             log_message('error', "Error en informe {$tipus}: " . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al generar l\'informe',
-            ]);
+            return $this->jsonError('Error al generar l\'informe', 500);
         }
     }
 }

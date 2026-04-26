@@ -26,14 +26,7 @@ class QuotaController extends BaseController
     public function index(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $activaParam = $this->request->getGet('activa');
             $activaNormalitzada = null;
@@ -45,18 +38,12 @@ class QuotaController extends BaseController
                 } elseif (in_array($activaText, ['0', 'false'], true)) {
                     $activaNormalitzada = false;
                 } else {
-                    return $this->response->setStatusCode(400)->setJSON([
-                        'status' => 'error',
-                        'message' => 'El filtre activa només pot ser 0 o 1.',
-                    ]);
+                    return $this->jsonError('El filtre activa només pot ser 0 o 1.', 400);
                 }
             }
 
             if ($activaParam !== null && $activaParam !== '' && $activaNormalitzada === null) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'El filtre activa només pot ser 0 o 1.',
-                ]);
+                return $this->jsonError('El filtre activa només pot ser 0 o 1.', 400);
             }
 
             if ($activaNormalitzada === true) {
@@ -66,31 +53,18 @@ class QuotaController extends BaseController
                 $quotes = $this->obtenirQuotesAmbPendentsFiltre($usuariId, $filtreActiva);
             }
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'data' => $quotes,
-            ]);
+            return $this->jsonOk(['data' => $quotes]);
         } catch (\Exception $e) {
             log_message('error', 'Error en quotes index: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al llistar les quotes',
-            ]);
+            return $this->jsonError('Error al llistar les quotes', 500);
         }
     }
 
     public function show(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $quota = $this->quotaModel->builder()
                 ->select('quotes.*, categories_moviment.nom AS categoria_nom')
@@ -102,10 +76,7 @@ class QuotaController extends BaseController
                 ->getRowArray();
 
             if (!$quota) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Quota no trobada',
-                ]);
+                return $this->jsonError('Quota no trobada', 404);
             }
 
             $quota['periodes_pendents'] = $this->quotaModel->calcularPeriodesPendents($quota);
@@ -115,38 +86,22 @@ class QuotaController extends BaseController
                 ->orderBy('id', 'DESC')
                 ->findAll();
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'data' => $quota,
-            ]);
+            return $this->jsonOk(['data' => $quota]);
         } catch (\Exception $e) {
             log_message('error', 'Error en quotes show: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al carregar la quota',
-            ]);
+            return $this->jsonError('Error al carregar la quota', 500);
         }
     }
 
     public function create(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $data = $this->request->getJSON(true);
             if (!$data) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             $payload = $this->filtrarPayload($data);
@@ -154,49 +109,31 @@ class QuotaController extends BaseController
 
             $categoriaId = (int) ($payload['categoria_id'] ?? 0);
             if (!$this->validarCategoriaDespesaUsuario($categoriaId, $usuariId)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'La categoria indicada no és vàlida per aquest usuari o tipus.',
-                ]);
+                return $this->jsonError('La categoria indicada no és vàlida per aquest usuari o tipus.', 422);
             }
 
             if (!$this->quotaModel->insert($payload)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Dades no vàlides',
-                    'errors' => $this->quotaModel->errors(),
-                ]);
+                return $this->jsonError('Dades no vàlides', 422, ['errors' => $this->quotaModel->errors()]);
             }
 
             $quotaId = (int) $this->quotaModel->getInsertID();
             $quota = $this->quotaModel->find($quotaId);
 
-            return $this->response->setStatusCode(201)->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Quota creada correctament',
                 'data' => $quota,
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             log_message('error', 'Error en quotes create: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al crear la quota',
-            ]);
+            return $this->jsonError('Error al crear la quota', 500);
         }
     }
 
     public function update(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $quota = $this->quotaModel
                 ->where('id', $id)
@@ -204,74 +141,47 @@ class QuotaController extends BaseController
                 ->first();
 
             if (!$quota) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Quota no trobada',
-                ]);
+                return $this->jsonError('Quota no trobada', 404);
             }
 
             $data = $this->request->getJSON(true);
             if (!$data) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             $payload = $this->filtrarPayload($data);
             if (empty($payload)) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No hi ha camps vàlids per actualitzar',
-                ]);
+                return $this->jsonError('No hi ha camps vàlids per actualitzar', 400);
             }
 
             if (array_key_exists('categoria_id', $payload)) {
                 $categoriaId = (int) ($payload['categoria_id'] ?? 0);
                 if (!$this->validarCategoriaDespesaUsuario($categoriaId, $usuariId)) {
-                    return $this->response->setStatusCode(422)->setJSON([
-                        'status' => 'error',
-                        'message' => 'La categoria indicada no és vàlida per aquest usuari o tipus.',
-                    ]);
+                    return $this->jsonError('La categoria indicada no és vàlida per aquest usuari o tipus.', 422);
                 }
             }
 
             if (!$this->quotaModel->update($id, $payload)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Dades no vàlides',
-                    'errors' => $this->quotaModel->errors(),
-                ]);
+                return $this->jsonError('Dades no vàlides', 422, ['errors' => $this->quotaModel->errors()]);
             }
 
             $quotaActualitzada = $this->quotaModel->find($id);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Quota actualitzada correctament',
                 'data' => $quotaActualitzada,
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Error en quotes update: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al actualitzar la quota',
-            ]);
+            return $this->jsonError('Error al actualitzar la quota', 500);
         }
     }
 
     public function delete(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $quota = $this->quotaModel
                 ->where('id', $id)
@@ -279,44 +189,25 @@ class QuotaController extends BaseController
                 ->first();
 
             if (!$quota) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Quota no trobada',
-                ]);
+                return $this->jsonError('Quota no trobada', 404);
             }
 
             if (!$this->quotaModel->delete($id)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha pogut eliminar la quota',
-                ]);
+                return $this->jsonError('No s\'ha pogut eliminar la quota', 422);
             }
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'message' => 'Quota eliminada correctament',
-            ]);
+            return $this->jsonOk(['message' => 'Quota eliminada correctament']);
         } catch (\Exception $e) {
             log_message('error', 'Error en quotes delete: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al eliminar la quota',
-            ]);
+            return $this->jsonError('Error al eliminar la quota', 500);
         }
     }
 
     public function pagar(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $quota = $this->quotaModel
                 ->where('id', $id)
@@ -325,41 +216,26 @@ class QuotaController extends BaseController
                 ->first();
 
             if (!$quota) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Quota no trobada',
-                ]);
+                return $this->jsonError('Quota no trobada', 404);
             }
 
             if (!$this->normalitzarBoolea($quota['activa'] ?? false)) {
-                return $this->response->setStatusCode(409)->setJSON([
-                    'status' => 'error',
-                    'message' => 'La quota està inactiva i no es pot pagar.',
-                ]);
+                return $this->jsonError('La quota està inactiva i no es pot pagar.', 409);
             }
 
             $data = $this->request->getJSON(true) ?? [];
             if ($data === []) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             $periodeCorresponent = trim((string) ($data['periode_corresponent'] ?? ''));
             if ($periodeCorresponent === '' || strtotime($periodeCorresponent) === false) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'El període corresponent és obligatori i ha de ser una data vàlida.',
-                ]);
+                return $this->jsonError('El període corresponent és obligatori i ha de ser una data vàlida.', 422);
             }
 
             $periodeCorresponent = date('Y-m-d', strtotime($periodeCorresponent));
             if (date('d', strtotime($periodeCorresponent)) !== '01') {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'El període corresponent ha de ser el primer dia del període.',
-                ]);
+                return $this->jsonError('El període corresponent ha de ser el primer dia del període.', 422);
             }
 
             $periodesPendents = $this->quotaModel->calcularPeriodesPendents($quota);
@@ -372,10 +248,7 @@ class QuotaController extends BaseController
             }
 
             if (!$periodePendent) {
-                return $this->response->setStatusCode(409)->setJSON([
-                    'status' => 'error',
-                    'message' => 'El període indicat no està pendent de pagament.',
-                ]);
+                return $this->jsonError('El període indicat no està pendent de pagament.', 409);
             }
 
             $jaPagat = $this->pagamentModel
@@ -385,18 +258,12 @@ class QuotaController extends BaseController
                 ->first();
 
             if ($jaPagat) {
-                return $this->response->setStatusCode(409)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Aquest període ja està pagat.',
-                ]);
+                return $this->jsonError('Aquest període ja està pagat.', 409);
             }
 
             $categoriaId = (int) ($quota['categoria_id'] ?? 0);
             if (!$this->validarCategoriaDespesaUsuario($categoriaId, $usuariId)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'La categoria de la quota no és vàlida per generar el moviment de despesa.',
-                ]);
+                return $this->jsonError('La categoria de la quota no és vàlida per generar el moviment de despesa.', 422);
             }
 
             $importPagat = array_key_exists('import', $data)
@@ -404,10 +271,7 @@ class QuotaController extends BaseController
                 : (float) ($quota['import'] ?? 0);
 
             if ($importPagat <= 0) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'L\'import del pagament ha de ser major que 0.',
-                ]);
+                return $this->jsonError('L\'import del pagament ha de ser major que 0.', 422);
             }
 
             $notes = null;
@@ -431,11 +295,7 @@ class QuotaController extends BaseController
             if (!$this->movimentModel->insert($movimentPayload)) {
                 $db->transRollback();
 
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha pogut crear el moviment de despesa del pagament',
-                    'errors' => $this->movimentModel->errors(),
-                ]);
+                return $this->jsonError('No s\'ha pogut crear el moviment de despesa del pagament', 422, ['errors' => $this->movimentModel->errors()]);
             }
 
             $movimentId = (int) $this->movimentModel->getInsertID();
@@ -453,11 +313,7 @@ class QuotaController extends BaseController
             if (!$this->pagamentModel->insert($pagamentPayload)) {
                 $db->transRollback();
 
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha pogut registrar el pagament de la quota',
-                    'errors' => $this->pagamentModel->errors(),
-                ]);
+                return $this->jsonError('No s\'ha pogut registrar el pagament de la quota', 422, ['errors' => $this->pagamentModel->errors()]);
             }
 
             $db->transCommit();
@@ -465,32 +321,21 @@ class QuotaController extends BaseController
             $pagamentId = (int) $this->pagamentModel->getInsertID();
             $pagament = $this->pagamentModel->find($pagamentId);
 
-            return $this->response->setStatusCode(201)->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Pagament registrat correctament',
                 'data' => $pagament,
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             log_message('error', 'Error en quotes pagar: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al registrar el pagament de la quota',
-            ]);
+            return $this->jsonError('Error al registrar el pagament de la quota', 500);
         }
     }
 
     public function pagaments(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $quota = $this->quotaModel
                 ->where('id', $id)
@@ -499,10 +344,7 @@ class QuotaController extends BaseController
                 ->first();
 
             if (!$quota) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Quota no trobada',
-                ]);
+                return $this->jsonError('Quota no trobada', 404);
             }
 
             $pagaments = $this->pagamentModel
@@ -511,17 +353,11 @@ class QuotaController extends BaseController
                 ->orderBy('id', 'DESC')
                 ->findAll();
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'data' => $pagaments,
-            ]);
+            return $this->jsonOk(['data' => $pagaments]);
         } catch (\Exception $e) {
             log_message('error', 'Error en quotes pagaments: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al carregar els pagaments de la quota',
-            ]);
+            return $this->jsonError('Error al carregar els pagaments de la quota', 500);
         }
     }
 

@@ -17,14 +17,7 @@ class CategoriaController extends BaseController
     public function index(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $page = max(1, (int) ($this->request->getGet('page') ?? 1));
             $limit = (int) ($this->request->getGet('limit') ?? 10);
@@ -53,8 +46,7 @@ class CategoriaController extends BaseController
                 ->get()
                 ->getResultArray();
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'data' => $categories,
                 'meta' => [
                     'page' => $page,
@@ -67,24 +59,14 @@ class CategoriaController extends BaseController
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Error en categories index: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al llistar les categories',
-            ]);
+            return $this->jsonError('Error al llistar les categories', 500);
         }
     }
 
     public function show(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $categoria = $this->categoriaModel
                 ->where('id', $id)
@@ -92,92 +74,55 @@ class CategoriaController extends BaseController
                 ->first();
 
             if (!$categoria) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Categoria no trobada',
-                ]);
+                return $this->jsonError('Categoria no trobada', 404);
             }
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'data' => $categoria,
-            ]);
+            return $this->jsonOk(['data' => $categoria]);
         } catch (\Exception $e) {
             log_message('error', 'Error en categories show: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al carregar la categoria',
-            ]);
+            return $this->jsonError('Error al carregar la categoria', 500);
         }
     }
 
     public function create(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $data = $this->request->getJSON(true);
             if (!$data) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             $payload = $this->filtrarPayload($data);
             $payload['usuari_id'] = $usuariId;
 
             if (!$this->categoriaModel->insert($payload)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Dades no vàlides',
-                    'errors' => $this->categoriaModel->errors(),
-                ]);
+                return $this->jsonError('Dades no vàlides', 422, ['errors' => $this->categoriaModel->errors()]);
             }
 
             $categoriaId = (int) $this->categoriaModel->getInsertID();
             $categoria = $this->categoriaModel->find($categoriaId);
 
-            return $this->response->setStatusCode(201)->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Categoria creada correctament',
                 'data' => $categoria,
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             $message = $e->getMessage();
             if (str_contains($message, 'uq_categories_moviment_usuari_tipus_nom')) {
-                return $this->response->setStatusCode(409)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Ja existeix una categoria amb aquest nom i tipus.',
-                ]);
+                return $this->jsonError('Ja existeix una categoria amb aquest nom i tipus.', 409);
             }
 
             log_message('error', 'Error en categories create: ' . $message);
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al crear la categoria',
-            ]);
+            return $this->jsonError('Error al crear la categoria', 500);
         }
     }
 
     public function update(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $categoria = $this->categoriaModel
                 ->where('id', $id)
@@ -185,71 +130,44 @@ class CategoriaController extends BaseController
                 ->first();
 
             if (!$categoria) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Categoria no trobada',
-                ]);
+                return $this->jsonError('Categoria no trobada', 404);
             }
 
             $data = $this->request->getJSON(true);
             if (!$data) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             $payload = $this->filtrarPayload($data);
             if (empty($payload)) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No hi ha camps vàlids per actualitzar',
-                ]);
+                return $this->jsonError('No hi ha camps vàlids per actualitzar', 400);
             }
 
             if (!$this->categoriaModel->update($id, $payload)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Dades no vàlides',
-                    'errors' => $this->categoriaModel->errors(),
-                ]);
+                return $this->jsonError('Dades no vàlides', 422, ['errors' => $this->categoriaModel->errors()]);
             }
 
             $categoriaActualitzada = $this->categoriaModel->find($id);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Categoria actualitzada correctament',
                 'data' => $categoriaActualitzada,
             ]);
         } catch (\Exception $e) {
             $message = $e->getMessage();
             if (str_contains($message, 'uq_categories_moviment_usuari_tipus_nom')) {
-                return $this->response->setStatusCode(409)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Ja existeix una categoria amb aquest nom i tipus.',
-                ]);
+                return $this->jsonError('Ja existeix una categoria amb aquest nom i tipus.', 409);
             }
 
             log_message('error', 'Error en categories update: ' . $message);
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al actualitzar la categoria',
-            ]);
+            return $this->jsonError('Error al actualitzar la categoria', 500);
         }
     }
 
     public function delete(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $categoria = $this->categoriaModel
                 ->where('id', $id)
@@ -257,10 +175,7 @@ class CategoriaController extends BaseController
                 ->first();
 
             if (!$categoria) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Categoria no trobada',
-                ]);
+                return $this->jsonError('Categoria no trobada', 404);
             }
 
             $movimentsActius = \Config\Database::connect()->table('moviments')
@@ -269,24 +184,15 @@ class CategoriaController extends BaseController
                 ->countAllResults();
 
             if ($movimentsActius > 0) {
-                return $this->response->setStatusCode(409)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No es pot eliminar la categoria perquè té moviments associats.',
-                ]);
+                return $this->jsonError('No es pot eliminar la categoria perquè té moviments associats.', 409);
             }
 
             $this->categoriaModel->delete($id);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'message' => 'Categoria eliminada correctament',
-            ]);
+            return $this->jsonOk(['message' => 'Categoria eliminada correctament']);
         } catch (\Exception $e) {
             log_message('error', 'Error en categories delete: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al eliminar la categoria',
-            ]);
+            return $this->jsonError('Error al eliminar la categoria', 500);
         }
     }
 

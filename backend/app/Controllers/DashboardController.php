@@ -29,14 +29,7 @@ class DashboardController extends BaseController
     public function resum(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $mesActual = date('Y-m');
             $mesAnterior = date('Y-m', strtotime('first day of last month'));
@@ -65,17 +58,11 @@ class DashboardController extends BaseController
                 ],
             ];
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'data' => $data,
-            ]);
+            return $this->jsonOk(['data' => $data]);
         } catch (\Exception $e) {
             log_message('error', 'Error en dashboard resum: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al carregar el resum del dashboard',
-            ]);
+            return $this->jsonError('Error al carregar el resum del dashboard', 500);
         }
     }
 
@@ -85,20 +72,12 @@ class DashboardController extends BaseController
     public function grafiques(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $evolucioMensual = $this->movimentModel->evolucioMensual($usuariId, 12);
             $distribucioCategories = $this->movimentModel->distribucioCategoriesMes($usuariId);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'data' => [
                     'evolucio_mensual' => $evolucioMensual,
                     'distribucio_categories' => $distribucioCategories,
@@ -107,10 +86,7 @@ class DashboardController extends BaseController
         } catch (\Exception $e) {
             log_message('error', 'Error en dashboard grafiques: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al carregar les gràfiques del dashboard',
-            ]);
+            return $this->jsonError('Error al carregar les gràfiques del dashboard', 500);
         }
     }
 
@@ -120,28 +96,15 @@ class DashboardController extends BaseController
     public function facturesPendents(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $facturesPendents = $this->facturaModel->pendentsCobrament($usuariId);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'data' => $facturesPendents,
-            ]);
+            return $this->jsonOk(['data' => $facturesPendents]);
         } catch (\Exception $e) {
             log_message('error', 'Error en dashboard facturesPendents: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al carregar les factures pendents',
-            ]);
+            return $this->jsonError('Error al carregar les factures pendents', 500);
         }
     }
 
@@ -151,14 +114,7 @@ class DashboardController extends BaseController
     public function quotesProperes(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $quotes = $this->quotaModel->obtenirAmbPendents($usuariId);
             $quotesAmbPendents = array_values(array_filter(
@@ -166,17 +122,11 @@ class DashboardController extends BaseController
                 static fn(array $quota): bool => (int) ($quota['periodes_pendents_count'] ?? 0) > 0
             ));
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'data' => $quotesAmbPendents,
-            ]);
+            return $this->jsonOk(['data' => $quotesAmbPendents]);
         } catch (\Exception $e) {
             log_message('error', 'Error en dashboard quotesProperes: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al carregar les quotes properes',
-            ]);
+            return $this->jsonError('Error al carregar les quotes properes', 500);
         }
     }
 }

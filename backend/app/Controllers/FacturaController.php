@@ -31,14 +31,7 @@ class FacturaController extends BaseController
     public function index(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $page = max(1, (int) ($this->request->getGet('page') ?? 1));
             $limit = max(1, min((int) ($this->request->getGet('limit') ?? 10), 100));
@@ -84,8 +77,7 @@ class FacturaController extends BaseController
                 ->get()
                 ->getResultArray();
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'data' => $factures,
                 'meta' => [
                     'page' => $page,
@@ -102,24 +94,14 @@ class FacturaController extends BaseController
         } catch (\Exception $e) {
             log_message('error', 'Error en factures index: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al llistar les factures',
-            ]);
+            return $this->jsonError('Error al llistar les factures', 500);
         }
     }
 
     public function show(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $factura = $this->facturaModel
                 ->where('id', $id)
@@ -127,10 +109,7 @@ class FacturaController extends BaseController
                 ->first();
 
             if (!$factura) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Factura no trobada',
-                ]);
+                return $this->jsonError('Factura no trobada', 404);
             }
 
             $linies = $this->liniaModel->obtenirLiniesFactura($id);
@@ -140,8 +119,7 @@ class FacturaController extends BaseController
                 ->where('usuari_id', $usuariId)
                 ->first();
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'data' => [
                     'factura' => $factura,
                     'linies' => $linies,
@@ -151,24 +129,14 @@ class FacturaController extends BaseController
         } catch (\Exception $e) {
             log_message('error', 'Error en factures show: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al carregar la factura',
-            ]);
+            return $this->jsonError('Error al carregar la factura', 500);
         }
     }
 
     public function pdf(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $factura = $this->facturaModel
                 ->where('id', $id)
@@ -176,10 +144,7 @@ class FacturaController extends BaseController
                 ->first();
 
             if (!$factura) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Factura no trobada',
-                ]);
+                return $this->jsonError('Factura no trobada', 404);
             }
 
             $linies = $this->liniaModel->obtenirLiniesFactura($id);
@@ -214,49 +179,30 @@ class FacturaController extends BaseController
         } catch (\Exception $e) {
             log_message('error', 'Error en factures pdf: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error en generar el PDF de la factura',
-            ]);
+            return $this->jsonError('Error en generar el PDF de la factura', 500);
         }
     }
 
     public function create(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $data = $this->request->getJSON(true) ?? [];
             if ($data === []) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             $linies = $data['linies'] ?? [];
             if (!is_array($linies) || $linies === []) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'La factura ha de tenir almenys una línia',
-                ]);
+                return $this->jsonError('La factura ha de tenir almenys una línia', 422);
             }
 
             $payload = $this->filtrarPayloadFactura($data);
             $payload['usuari_id'] = $usuariId;
 
             if (!$this->clientEsDelUsuari((int) ($payload['client_id'] ?? 0), $usuariId)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Client no vàlid per a aquest usuari',
-                ]);
+                return $this->jsonError('Client no vàlid per a aquest usuari', 422);
             }
 
             $payload['serie'] = trim((string) ($payload['serie'] ?? 'F')) ?: 'F';
@@ -275,11 +221,7 @@ class FacturaController extends BaseController
             if (!$this->facturaModel->insert($payload)) {
                 $db->transRollback();
 
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Dades no vàlides',
-                    'errors' => $this->facturaModel->errors(),
-                ]);
+                return $this->jsonError('Dades no vàlides', 422, ['errors' => $this->facturaModel->errors()]);
             }
 
             $facturaId = (int) $this->facturaModel->getInsertID();
@@ -288,10 +230,7 @@ class FacturaController extends BaseController
                 if (!is_array($linia)) {
                     $db->transRollback();
 
-                    return $this->response->setStatusCode(422)->setJSON([
-                        'status' => 'error',
-                        'message' => 'Format de línies no vàlid',
-                    ]);
+                    return $this->jsonError('Format de línies no vàlid', 422);
                 }
 
                 $payloadLinia = $this->filtrarPayloadLinia($linia);
@@ -302,21 +241,14 @@ class FacturaController extends BaseController
                 if (!$this->liniaModel->crearLinia($payloadLinia)) {
                     $db->transRollback();
 
-                    return $this->response->setStatusCode(422)->setJSON([
-                        'status' => 'error',
-                        'message' => 'Dades de línia no vàlides',
-                        'errors' => $this->liniaModel->errors(),
-                    ]);
+                    return $this->jsonError('Dades de línia no vàlides', 422, ['errors' => $this->liniaModel->errors()]);
                 }
             }
 
             if (!$this->facturaModel->actualitzarTotals($facturaId)) {
                 $db->transRollback();
 
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'han pogut actualitzar els totals',
-                ]);
+                return $this->jsonError('No s\'han pogut actualitzar els totals', 422);
             }
 
             $db->transCommit();
@@ -324,35 +256,24 @@ class FacturaController extends BaseController
             $facturaCreada = $this->facturaModel->find($facturaId);
             $liniesCreades = $this->liniaModel->obtenirLiniesFactura($facturaId);
 
-            return $this->response->setStatusCode(201)->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Factura creada correctament',
                 'data' => [
                     'factura' => $facturaCreada,
                     'linies' => $liniesCreades,
                 ],
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             log_message('error', 'Error en factures create: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al crear la factura',
-            ]);
+            return $this->jsonError('Error al crear la factura', 500);
         }
     }
 
     public function update(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $factura = $this->facturaModel
                 ->where('id', $id)
@@ -360,36 +281,24 @@ class FacturaController extends BaseController
                 ->first();
 
             if (!$factura) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Factura no trobada',
-                ]);
+                return $this->jsonError('Factura no trobada', 404);
             }
 
             $estatsNoEditables = ['emesa', 'cobrada', 'parcialment_cobrada', 'cancel·lada'];
             if (in_array($factura['estat'], $estatsNoEditables, true)) {
-                return $this->response->setStatusCode(403)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No es pot editar una factura amb estat \'' . $factura['estat'] . '\'. Només es poden editar esborranys.',
-                ]);
+                return $this->jsonError('No es pot editar una factura amb estat \'' . $factura['estat'] . '\'. Només es poden editar esborranys.', 403);
             }
 
             $data = $this->request->getJSON(true) ?? [];
             if ($data === []) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             $payload = $this->filtrarPayloadFactura($data);
             unset($payload['usuari_id'], $payload['numero_factura'], $payload['serie'], $payload['client_id']);
 
             if ($payload === [] && !array_key_exists('linies', $data)) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No hi ha camps vàlids per actualitzar',
-                ]);
+                return $this->jsonError('No hi ha camps vàlids per actualitzar', 400);
             }
 
             $db = \Config\Database::connect();
@@ -398,11 +307,7 @@ class FacturaController extends BaseController
             if ($payload !== [] && !$this->facturaModel->update($id, $payload)) {
                 $db->transRollback();
 
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Dades no vàlides',
-                    'errors' => $this->facturaModel->errors(),
-                ]);
+                return $this->jsonError('Dades no vàlides', 422, ['errors' => $this->facturaModel->errors()]);
             }
 
             if (array_key_exists('linies', $data)) {
@@ -412,10 +317,7 @@ class FacturaController extends BaseController
                 if (!is_array($linies) || $linies === []) {
                     $db->transRollback();
 
-                    return $this->response->setStatusCode(422)->setJSON([
-                        'status' => 'error',
-                        'message' => 'La factura ha de tenir almenys una línia',
-                    ]);
+                    return $this->jsonError('La factura ha de tenir almenys una línia', 422);
                 }
 
                 $this->liniaModel->eliminarLiniesFactura($id);
@@ -424,10 +326,7 @@ class FacturaController extends BaseController
                     if (!is_array($linia)) {
                         $db->transRollback();
 
-                        return $this->response->setStatusCode(422)->setJSON([
-                            'status' => 'error',
-                            'message' => 'Format de línies no vàlid',
-                        ]);
+                        return $this->jsonError('Format de línies no vàlid', 422);
                     }
 
                     $payloadLinia = $this->filtrarPayloadLinia($linia);
@@ -438,11 +337,7 @@ class FacturaController extends BaseController
                     if (!$this->liniaModel->crearLinia($payloadLinia)) {
                         $db->transRollback();
 
-                        return $this->response->setStatusCode(422)->setJSON([
-                            'status' => 'error',
-                            'message' => 'Dades de línia no vàlides',
-                            'errors' => $this->liniaModel->errors(),
-                        ]);
+                        return $this->jsonError('Dades de línia no vàlides', 422, ['errors' => $this->liniaModel->errors()]);
                     }
                 }
             }
@@ -450,10 +345,7 @@ class FacturaController extends BaseController
             if (!$this->facturaModel->actualitzarTotals($id)) {
                 $db->transRollback();
 
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'han pogut actualitzar els totals',
-                ]);
+                return $this->jsonError('No s\'han pogut actualitzar els totals', 422);
             }
 
             $db->transCommit();
@@ -461,8 +353,7 @@ class FacturaController extends BaseController
             $facturaActualitzada = $this->facturaModel->find($id);
             $liniesActualitzades = $this->liniaModel->obtenirLiniesFactura($id);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Factura actualitzada correctament',
                 'data' => [
                     'factura' => $facturaActualitzada,
@@ -472,24 +363,14 @@ class FacturaController extends BaseController
         } catch (\Exception $e) {
             log_message('error', 'Error en factures update: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error en actualitzar la factura',
-            ]);
+            return $this->jsonError('Error en actualitzar la factura', 500);
         }
     }
 
     public function delete(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $factura = $this->facturaModel
                 ->where('id', $id)
@@ -497,51 +378,29 @@ class FacturaController extends BaseController
                 ->first();
 
             if (!$factura) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Factura no trobada',
-                ]);
+                return $this->jsonError('Factura no trobada', 404);
             }
 
             if ($factura['estat'] !== 'esborrany') {
-                return $this->response->setStatusCode(403)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Només es poden eliminar factures en estat esborrany.',
-                ]);
+                return $this->jsonError('Només es poden eliminar factures en estat esborrany.', 403);
             }
 
             if (!$this->facturaModel->delete($id)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha pogut eliminar la factura',
-                ]);
+                return $this->jsonError('No s\'ha pogut eliminar la factura', 422);
             }
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'message' => 'Factura eliminada correctament',
-            ]);
+            return $this->jsonOk(['message' => 'Factura eliminada correctament']);
         } catch (\Exception $e) {
             log_message('error', 'Error en factures delete: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error en eliminar la factura',
-            ]);
+            return $this->jsonError('Error en eliminar la factura', 500);
         }
     }
 
     public function updateLinia(int $id, int $liniaId): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $factura = $this->facturaModel
                 ->where('id', $id)
@@ -549,50 +408,33 @@ class FacturaController extends BaseController
                 ->first();
 
             if (!$factura) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Factura no trobada',
-                ]);
+                return $this->jsonError('Factura no trobada', 404);
             }
 
             $linia = $this->liniaModel->find($liniaId);
             if (!$linia || (int) $linia['factura_id'] !== $id) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Línia no trobada',
-                ]);
+                return $this->jsonError('Línia no trobada', 404);
             }
 
             $data = $this->request->getJSON(true) ?? [];
             if ($data === []) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             $payloadLinia = $this->filtrarPayloadLinia($data);
             unset($payloadLinia['factura_id'], $payloadLinia['ordre']);
 
             if ($payloadLinia === []) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No hi ha camps de línia per actualitzar',
-                ]);
+                return $this->jsonError('No hi ha camps de línia per actualitzar', 400);
             }
 
             if (!$this->liniaModel->actualitzarLinia($liniaId, $payloadLinia)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Dades de línia no vàlides',
-                    'errors' => $this->liniaModel->errors(),
-                ]);
+                return $this->jsonError('Dades de línia no vàlides', 422, ['errors' => $this->liniaModel->errors()]);
             }
 
             $this->facturaModel->actualitzarTotals($id);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Línia actualitzada correctament',
                 'data' => [
                     'linia' => $this->liniaModel->find($liniaId),
@@ -602,24 +444,14 @@ class FacturaController extends BaseController
         } catch (\Exception $e) {
             log_message('error', 'Error en factures updateLinia: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error en actualitzar la línia',
-            ]);
+            return $this->jsonError('Error en actualitzar la línia', 500);
         }
     }
 
     public function deleteLinia(int $id, int $liniaId): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $factura = $this->facturaModel
                 ->where('id', $id)
@@ -627,31 +459,21 @@ class FacturaController extends BaseController
                 ->first();
 
             if (!$factura) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Factura no trobada',
-                ]);
+                return $this->jsonError('Factura no trobada', 404);
             }
 
             $linia = $this->liniaModel->find($liniaId);
             if (!$linia || (int) $linia['factura_id'] !== $id) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Línia no trobada',
-                ]);
+                return $this->jsonError('Línia no trobada', 404);
             }
 
             if (!$this->liniaModel->delete($liniaId)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha pogut eliminar la línia',
-                ]);
+                return $this->jsonError('No s\'ha pogut eliminar la línia', 422);
             }
 
             $this->facturaModel->actualitzarTotals($id);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Línia eliminada correctament',
                 'data' => [
                     'factura' => $this->facturaModel->find($id),
@@ -660,24 +482,14 @@ class FacturaController extends BaseController
         } catch (\Exception $e) {
             log_message('error', 'Error en factures deleteLinia: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error en eliminar la línia',
-            ]);
+            return $this->jsonError('Error en eliminar la línia', 500);
         }
     }
 
     public function canviarEstat(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $factura = $this->facturaModel
                 ->where('id', $id)
@@ -685,20 +497,14 @@ class FacturaController extends BaseController
                 ->first();
 
             if (!$factura) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Factura no trobada',
-                ]);
+                return $this->jsonError('Factura no trobada', 404);
             }
 
             $data = $this->request->getJSON(true) ?? [];
             $nouEstat = trim((string) ($data['estat'] ?? ''));
 
             if ($nouEstat === '') {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'L\'estat és obligatori',
-                ]);
+                return $this->jsonError('L\'estat és obligatori', 400);
             }
 
             $transicionsPermeses = [
@@ -710,17 +516,11 @@ class FacturaController extends BaseController
             $estatActual = (string) ($factura['estat'] ?? '');
 
             if (!isset($transicionsPermeses[$estatActual]) || !in_array($nouEstat, $transicionsPermeses[$estatActual], true)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No es pot canviar l\'estat de \'' . $estatActual . '\' a \'' . $nouEstat . '\'.',
-                ]);
+                return $this->jsonError('No es pot canviar l\'estat de \'' . $estatActual . '\' a \'' . $nouEstat . '\'.', 422);
             }
 
             if (!$this->facturaModel->canviarEstat($id, $nouEstat)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Estat no vàlid',
-                ]);
+                return $this->jsonError('Estat no vàlid', 422);
             }
 
             // --- Inici Verifactu ---
@@ -744,18 +544,14 @@ class FacturaController extends BaseController
             }
             // --- Fi Verifactu ---
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Estat actualitzat correctament',
                 'data' => $this->facturaModel->find($id),
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Error en factures canviarEstat: ' . $e->getMessage());
 
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error en canviar l\'estat',
-            ]);
+            return $this->jsonError('Error en canviar l\'estat', 500);
         }
     }
 

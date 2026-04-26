@@ -17,59 +17,33 @@ class PerfilController extends BaseController
     public function getPerfil(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $usuari = $this->usuariModel->find($usuariId);
 
             if (!$usuari) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Usuari no trobat',
-                ]);
+                return $this->jsonError('Usuari no trobat', 404);
             }
 
             unset($usuari['password_hash']);
             unset($usuari['remember_token']);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'data' => $usuari,
-            ]);
+            return $this->jsonOk(['data' => $usuari]);
         } catch (\Exception $e) {
             log_message('error', 'Error en getPerfil: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al obtenir el perfil',
-            ]);
+            return $this->jsonError('Error al obtenir el perfil', 500);
         }
     }
 
     public function updatePerfil(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $data = $this->request->getJSON(true);
 
             if (!$data) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             // Whitelist fields per evitar mass assignment
@@ -95,19 +69,12 @@ class PerfilController extends BaseController
             }
 
             if (empty($dataActualitzar)) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No hi ha camps vàlids per actualitzar',
-                ]);
+                return $this->jsonError('No hi ha camps vàlids per actualitzar', 400);
             }
 
 
             if (!$this->usuariModel->validate($dataActualitzar)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Dades no vàlides',
-                    'errors' => $this->usuariModel->errors(),
-                ]);
+                return $this->jsonError('Dades no vàlides', 422, ['errors' => $this->usuariModel->errors()]);
             }
 
             $this->usuariModel->update($usuariId, $dataActualitzar);
@@ -115,54 +82,34 @@ class PerfilController extends BaseController
             unset($usuari['password_hash']);
             unset($usuari['remember_token']);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Perfil actualitzat correctament',
                 'data' => $usuari,
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Error en updatePerfil: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al actualitzar el perfil',
-            ]);
+            return $this->jsonError('Error al actualitzar el perfil', 500);
         }
     }
 
     public function pujarLogo(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $fitxer = $this->request->getFile('logo');
 
             if (!$fitxer || $fitxer->getError() !== UPLOAD_ERR_OK) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap fitxer o hi ha un error en la pujada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap fitxer o hi ha un error en la pujada', 400);
             }
 
             $mimeTypesPermesos = ['image/jpeg', 'image/png', 'image/gif'];
             if (!in_array($fitxer->getMimeType(), $mimeTypesPermesos)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Tipus de fitxer no permès. Només JPG, PNG o GIF',
-                ]);
+                return $this->jsonError('Tipus de fitxer no permès. Només JPG, PNG o GIF', 422);
             }
 
             if ($fitxer->getSize() > 5 * 1024 * 1024) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'El fitxer és massa gran. Màxim 5MB',
-                ]);
+                return $this->jsonError('El fitxer és massa gran. Màxim 5MB', 422);
             }
 
             $uploadDir = WRITEPATH . 'uploads' . DIRECTORY_SEPARATOR . $usuariId;
@@ -177,39 +124,25 @@ class PerfilController extends BaseController
             $rutaRelativa = 'uploads/' . $usuariId . '/' . $nomFitxer;
             $this->usuariModel->update($usuariId, ['logo' => $rutaRelativa]);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Logotip pujat correctament',
                 'logo' => $rutaRelativa,
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Error en pujarLogo: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al pujar el logotip',
-            ]);
+            return $this->jsonError('Error al pujar el logotip', 500);
         }
     }
 
     public function canviarContrasenya(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $data = $this->request->getJSON(true);
 
             if (!isset($data['contrasenya_actual'], $data['contrasenya_nova'], $data['contrasenya_confirmacio'])) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Falten camps requerits',
-                ]);
+                return $this->jsonError('Falten camps requerits', 400);
             }
 
             // Query raw perquè el model elimina password_hash en afterFind
@@ -220,46 +153,28 @@ class PerfilController extends BaseController
             )->getRowArray();
 
             if (!$usuari || !isset($usuari['password_hash'])) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Usuari no trobat',
-                ]);
+                return $this->jsonError('Usuari no trobat', 404);
             }
 
             if (!password_verify($data['contrasenya_actual'], $usuari['password_hash'])) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'La contrasenya actual no és correcta',
-                ]);
+                return $this->jsonError('La contrasenya actual no és correcta', 401);
             }
 
             if ($data['contrasenya_nova'] !== $data['contrasenya_confirmacio']) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Les contrasenyes noves no coincideixen',
-                ]);
+                return $this->jsonError('Les contrasenyes noves no coincideixen', 422);
             }
 
             if (strlen($data['contrasenya_nova']) < 8) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'La contrasenya nova ha de tenir mínim 8 caràcters',
-                ]);
+                return $this->jsonError('La contrasenya nova ha de tenir mínim 8 caràcters', 422);
             }
 
             $passwordHash = password_hash($data['contrasenya_nova'], PASSWORD_BCRYPT);
             $this->usuariModel->update($usuariId, ['password_hash' => $passwordHash]);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'message' => 'Contrasenya actualitzada correctament',
-            ]);
+            return $this->jsonOk(['message' => 'Contrasenya actualitzada correctament']);
         } catch (\Exception $e) {
             log_message('error', 'Error en canviarContrasenya: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al canviar la contrasenya',
-            ]);
+            return $this->jsonError('Error al canviar la contrasenya', 500);
         }
     }
 }

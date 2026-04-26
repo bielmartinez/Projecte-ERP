@@ -17,14 +17,7 @@ class ClientController extends BaseController
     public function index(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $page = max(1, (int) ($this->request->getGet('page') ?? 1));
             $limit = (int) ($this->request->getGet('limit') ?? 10);
@@ -53,8 +46,7 @@ class ClientController extends BaseController
                 ->get()
                 ->getResultArray();
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'data' => $clients,
                 'meta' => [
                     'page' => $page,
@@ -66,24 +58,14 @@ class ClientController extends BaseController
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Error en clients index: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al llistar els clients',
-            ]);
+            return $this->jsonError('Error al llistar els clients', 500);
         }
     }
 
     public function show(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $client = $this->clientModel
                 ->where('id', $id)
@@ -91,10 +73,7 @@ class ClientController extends BaseController
                 ->first();
 
             if (!$client) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Client no trobat',
-                ]);
+                return $this->jsonError('Client no trobat', 404);
             }
 
             $db = \Config\Database::connect();
@@ -107,8 +86,7 @@ class ClientController extends BaseController
                 ->get()
                 ->getResultArray();
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'data' => [
                     'client' => $client,
                     'factures' => $factures,
@@ -116,72 +94,44 @@ class ClientController extends BaseController
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Error en clients show: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al carregar el client',
-            ]);
+            return $this->jsonError('Error al carregar el client', 500);
         }
     }
 
     public function create(): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $data = $this->request->getJSON(true);
             if (!$data) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             $payload = $this->filtrarPayload($data);
             $payload['usuari_id'] = $usuariId;
 
             if (!$this->clientModel->insert($payload)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Dades no vàlides',
-                    'errors' => $this->clientModel->errors(),
-                ]);
+                return $this->jsonError('Dades no vàlides', 422, ['errors' => $this->clientModel->errors()]);
             }
 
             $clientId = (int) $this->clientModel->getInsertID();
             $client = $this->clientModel->find($clientId);
 
-            return $this->response->setStatusCode(201)->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Client creat correctament',
                 'data' => $client,
-            ]);
+            ], 201);
         } catch (\Exception $e) {
             log_message('error', 'Error en clients create: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al crear el client',
-            ]);
+            return $this->jsonError('Error al crear el client', 500);
         }
     }
 
     public function update(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $client = $this->clientModel
                 ->where('id', $id)
@@ -189,63 +139,39 @@ class ClientController extends BaseController
                 ->first();
 
             if (!$client) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Client no trobat',
-                ]);
+                return $this->jsonError('Client no trobat', 404);
             }
 
             $data = $this->request->getJSON(true);
             if (!$data) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No s\'ha enviat cap dada',
-                ]);
+                return $this->jsonError('No s\'ha enviat cap dada', 400);
             }
 
             $payload = $this->filtrarPayload($data);
             if (empty($payload)) {
-                return $this->response->setStatusCode(400)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No hi ha camps vàlids per actualitzar',
-                ]);
+                return $this->jsonError('No hi ha camps vàlids per actualitzar', 400);
             }
 
             if (!$this->clientModel->update($id, $payload)) {
-                return $this->response->setStatusCode(422)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Dades no vàlides',
-                    'errors' => $this->clientModel->errors(),
-                ]);
+                return $this->jsonError('Dades no vàlides', 422, ['errors' => $this->clientModel->errors()]);
             }
 
             $clientActualitzat = $this->clientModel->find($id);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
+            return $this->jsonOk([
                 'message' => 'Client actualitzat correctament',
                 'data' => $clientActualitzat,
             ]);
         } catch (\Exception $e) {
             log_message('error', 'Error en clients update: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al actualitzar el client',
-            ]);
+            return $this->jsonError('Error al actualitzar el client', 500);
         }
     }
 
     public function delete(int $id): ResponseInterface
     {
         try {
-            $usuariId = user_id();
-
-            if (!$usuariId) {
-                return $this->response->setStatusCode(401)->setJSON([
-                    'status' => 'error',
-                    'message' => 'No autenticat',
-                ]);
-            }
+            $usuariId = $this->usuariId();
 
             $client = $this->clientModel
                 ->where('id', $id)
@@ -253,24 +179,15 @@ class ClientController extends BaseController
                 ->first();
 
             if (!$client) {
-                return $this->response->setStatusCode(404)->setJSON([
-                    'status' => 'error',
-                    'message' => 'Client no trobat',
-                ]);
+                return $this->jsonError('Client no trobat', 404);
             }
 
             $this->clientModel->delete($id);
 
-            return $this->response->setJSON([
-                'status' => 'ok',
-                'message' => 'Client eliminat correctament',
-            ]);
+            return $this->jsonOk(['message' => 'Client eliminat correctament']);
         } catch (\Exception $e) {
             log_message('error', 'Error en clients delete: ' . $e->getMessage());
-            return $this->response->setStatusCode(500)->setJSON([
-                'status' => 'error',
-                'message' => 'Error al eliminar el client',
-            ]);
+            return $this->jsonError('Error al eliminar el client', 500);
         }
     }
 
