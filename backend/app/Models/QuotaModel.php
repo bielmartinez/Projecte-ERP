@@ -108,7 +108,12 @@ class QuotaModel extends Model
             'in_list' => 'El valor d\'activa no és vàlid.',
         ],
     ];
-
+    /**
+     * Calcula periodes pendents.
+     *
+     * @param array $quota Valor d'entrada del mètode.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     public function calcularPeriodesPendents(array $quota): array
     {
         $quotaId = (int) ($quota['id'] ?? 0);
@@ -175,7 +180,12 @@ class QuotaModel extends Model
 
         return $pendents;
     }
-
+    /**
+     * Obté amb pendents segons els filtres indicats.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     public function obtenirAmbPendents(int $usuariId): array
     {
         $quotes = $this->builder()
@@ -197,7 +207,12 @@ class QuotaModel extends Model
 
         return $quotes;
     }
-
+    /**
+     * Converteix la periodicitat en nombre de mesos per cicle.
+     *
+     * @param string $periodicitat Valor d'entrada del mètode.
+     * @return int Valor numèric calculat pel mètode.
+     */
     private function pasMesosPeriodicitat(string $periodicitat): int
     {
         if ($periodicitat === 'trimestral') {
@@ -210,7 +225,14 @@ class QuotaModel extends Model
 
         return 1;
     }
-
+    /**
+     * Indica si un període de quota ja ha vençut segons el dia de pagament.
+     *
+     * @param \DateTime $iniciPeriode Valor d'entrada del mètode.
+     * @param int $diaPagament Valor d'entrada del mètode.
+     * @param \DateTime $avui Valor d'entrada del mètode.
+     * @return bool Indica si l'operació s'ha completat correctament.
+     */
     private function periodeJaHaVencut(\DateTime $iniciPeriode, int $diaPagament, \DateTime $avui): bool
     {
         $dataVenciment = new \DateTime($iniciPeriode->format('Y-m-01'));

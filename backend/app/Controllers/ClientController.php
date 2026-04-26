@@ -8,12 +8,18 @@ use CodeIgniter\HTTP\ResponseInterface;
 class ClientController extends BaseController
 {
     protected ClientModel $clientModel;
-
+    /**
+     * Inicialitza els models i serveis: ClientModel.
+     */
     public function __construct()
     {
         $this->clientModel = new ClientModel();
     }
-
+    /**
+     * Llista client disponibles per a l'usuari autenticat.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function index(): ResponseInterface
     {
         try {
@@ -61,7 +67,12 @@ class ClientController extends BaseController
             return $this->jsonError('Error al llistar els clients', 500);
         }
     }
-
+    /**
+     * Recupera el detall d'un client concret.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function show(int $id): ResponseInterface
     {
         try {
@@ -97,7 +108,11 @@ class ClientController extends BaseController
             return $this->jsonError('Error al carregar el client', 500);
         }
     }
-
+    /**
+     * Crea un nou client amb les dades rebudes.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function create(): ResponseInterface
     {
         try {
@@ -127,7 +142,12 @@ class ClientController extends BaseController
             return $this->jsonError('Error al crear el client', 500);
         }
     }
-
+    /**
+     * Actualitza les dades d'un client existent.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function update(int $id): ResponseInterface
     {
         try {
@@ -167,7 +187,12 @@ class ClientController extends BaseController
             return $this->jsonError('Error al actualitzar el client', 500);
         }
     }
-
+    /**
+     * Elimina un client (soft delete).
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function delete(int $id): ResponseInterface
     {
         try {
@@ -190,7 +215,12 @@ class ClientController extends BaseController
             return $this->jsonError('Error al eliminar el client', 500);
         }
     }
-
+    /**
+     * Filtra i normalitza payload.
+     *
+     * @param array $data Dades d'entrada del procés.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     private function filtrarPayload(array $data): array
     {
         $fieldsPermesos = [

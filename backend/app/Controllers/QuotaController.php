@@ -14,7 +14,9 @@ class QuotaController extends BaseController
     protected PagamentQuotaModel $pagamentModel;
     protected MovimentModel $movimentModel;
     protected CategoriaMovimentModel $categoriaModel;
-
+    /**
+     * Inicialitza els models i serveis: QuotaModel, PagamentQuotaModel, MovimentModel i CategoriaMovimentModel.
+     */
     public function __construct()
     {
         $this->quotaModel = new QuotaModel();
@@ -22,7 +24,11 @@ class QuotaController extends BaseController
         $this->movimentModel = new MovimentModel();
         $this->categoriaModel = new CategoriaMovimentModel();
     }
-
+    /**
+     * Llista quota disponibles per a l'usuari autenticat.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function index(): ResponseInterface
     {
         try {
@@ -60,7 +66,12 @@ class QuotaController extends BaseController
             return $this->jsonError('Error al llistar les quotes', 500);
         }
     }
-
+    /**
+     * Recupera el detall d'un quota concret.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function show(int $id): ResponseInterface
     {
         try {
@@ -93,7 +104,11 @@ class QuotaController extends BaseController
             return $this->jsonError('Error al carregar la quota', 500);
         }
     }
-
+    /**
+     * Crea un nou quota amb les dades rebudes.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function create(): ResponseInterface
     {
         try {
@@ -129,7 +144,12 @@ class QuotaController extends BaseController
             return $this->jsonError('Error al crear la quota', 500);
         }
     }
-
+    /**
+     * Actualitza les dades d'un quota existent.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function update(int $id): ResponseInterface
     {
         try {
@@ -177,7 +197,12 @@ class QuotaController extends BaseController
             return $this->jsonError('Error al actualitzar la quota', 500);
         }
     }
-
+    /**
+     * Elimina un quota (soft delete).
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function delete(int $id): ResponseInterface
     {
         try {
@@ -203,7 +228,12 @@ class QuotaController extends BaseController
             return $this->jsonError('Error al eliminar la quota', 500);
         }
     }
-
+    /**
+     * Registra el pagament d'una quota i crea el moviment de despesa associat.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function pagar(int $id): ResponseInterface
     {
         try {
@@ -331,7 +361,12 @@ class QuotaController extends BaseController
             return $this->jsonError('Error al registrar el pagament de la quota', 500);
         }
     }
-
+    /**
+     * Llista els pagaments registrats per a una quota concreta.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function pagaments(int $id): ResponseInterface
     {
         try {
@@ -360,7 +395,13 @@ class QuotaController extends BaseController
             return $this->jsonError('Error al carregar els pagaments de la quota', 500);
         }
     }
-
+    /**
+     * Valida categoria despesa usuario.
+     *
+     * @param int $categoriaId Identificador de la categoria.
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @return bool Indica si l'operació s'ha completat correctament.
+     */
     private function validarCategoriaDespesaUsuario(int $categoriaId, int $usuariId): bool
     {
         if ($categoriaId <= 0) {
@@ -375,7 +416,13 @@ class QuotaController extends BaseController
 
         return (bool) $categoria;
     }
-
+    /**
+     * Obté quotes amb pendents filtre segons els filtres indicats.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @param null|bool $activa Valor d'entrada del mètode.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     private function obtenirQuotesAmbPendentsFiltre(int $usuariId, ?bool $activa = null): array
     {
         $builder = $this->quotaModel->builder();
@@ -402,7 +449,12 @@ class QuotaController extends BaseController
 
         return $quotes;
     }
-
+    /**
+     * Filtra i normalitza payload.
+     *
+     * @param array $data Dades d'entrada del procés.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     private function filtrarPayload(array $data): array
     {
         $campsPermesos = [
@@ -456,7 +508,12 @@ class QuotaController extends BaseController
 
         return $payload;
     }
-
+    /**
+     * Retorna el nom del mes en català a partir del número.
+     *
+     * @param string $data Dades d'entrada del procés.
+     * @return string Valor textual obtingut o generat pel mètode.
+     */
     private function nomMes(string $data): string
     {
         $mesos = [
@@ -479,7 +536,12 @@ class QuotaController extends BaseController
 
         return ($mesos[$mes] ?? '') . ' ' . $any;
     }
-
+    /**
+     * Converteix un valor d'entrada en booleà normalitzat o null.
+     *
+     * @param mixed $valor Valor d'entrada del mètode.
+     * @return bool Indica si l'operació s'ha completat correctament.
+     */
     private function normalitzarBoolea(mixed $valor): bool
     {
         if (is_bool($valor)) {

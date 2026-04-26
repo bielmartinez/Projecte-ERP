@@ -50,14 +50,24 @@ class LiniaPlantillaModel extends Model
             'rules' => 'permit_empty|integer|greater_than_equal_to[0]',
         ],
     ];
-
+    /**
+     * Obté linies plantilla segons els filtres indicats.
+     *
+     * @param int $plantillaId Identificador de l'entitat relacionada.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     public function obtenirLiniesPlantilla(int $plantillaId): array
     {
         return $this->where('plantilla_id', $plantillaId)
             ->orderBy('ordre', 'ASC')
             ->findAll();
     }
-
+    /**
+     * Elimina linies plantilla.
+     *
+     * @param int $plantillaId Identificador de l'entitat relacionada.
+     * @return bool Indica si l'operació s'ha completat correctament.
+     */
     public function eliminarLiniesPlantilla(int $plantillaId): bool
     {
         return (bool) $this->where('plantilla_id', $plantillaId)->delete();

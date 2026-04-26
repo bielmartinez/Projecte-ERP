@@ -8,12 +8,18 @@ use CodeIgniter\HTTP\ResponseInterface;
 class CategoriaController extends BaseController
 {
     protected CategoriaMovimentModel $categoriaModel;
-
+    /**
+     * Inicialitza els models i serveis: CategoriaMovimentModel.
+     */
     public function __construct()
     {
         $this->categoriaModel = new CategoriaMovimentModel();
     }
-
+    /**
+     * Llista categoria disponibles per a l'usuari autenticat.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function index(): ResponseInterface
     {
         try {
@@ -62,7 +68,12 @@ class CategoriaController extends BaseController
             return $this->jsonError('Error al llistar les categories', 500);
         }
     }
-
+    /**
+     * Recupera el detall d'un categoria concret.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function show(int $id): ResponseInterface
     {
         try {
@@ -83,7 +94,11 @@ class CategoriaController extends BaseController
             return $this->jsonError('Error al carregar la categoria', 500);
         }
     }
-
+    /**
+     * Crea un nou categoria amb les dades rebudes.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function create(): ResponseInterface
     {
         try {
@@ -118,7 +133,12 @@ class CategoriaController extends BaseController
             return $this->jsonError('Error al crear la categoria', 500);
         }
     }
-
+    /**
+     * Actualitza les dades d'un categoria existent.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function update(int $id): ResponseInterface
     {
         try {
@@ -163,7 +183,12 @@ class CategoriaController extends BaseController
             return $this->jsonError('Error al actualitzar la categoria', 500);
         }
     }
-
+    /**
+     * Elimina un categoria (soft delete).
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function delete(int $id): ResponseInterface
     {
         try {
@@ -195,7 +220,12 @@ class CategoriaController extends BaseController
             return $this->jsonError('Error al eliminar la categoria', 500);
         }
     }
-
+    /**
+     * Filtra i normalitza payload.
+     *
+     * @param array $data Dades d'entrada del procés.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     private function filtrarPayload(array $data): array
     {
         $fieldsPermesos = [

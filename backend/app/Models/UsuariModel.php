@@ -135,7 +135,12 @@ class UsuariModel extends Model
     ];
 
     protected $afterFind = ['eliminarPasswordHash'];
-
+    /**
+     * Elimina password hash.
+     *
+     * @param array $data Dades d'entrada del procés.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     protected function eliminarPasswordHash(array $data): array
     {
         if (isset($data['data']['password_hash'])) {
@@ -152,7 +157,12 @@ class UsuariModel extends Model
 
         return $data;
     }
-
+    /**
+     * Cerca i retorna registres segons els criteris indicats.
+     *
+     * @param string $email Correu electrònic de l'usuari.
+     * @return array|null Registre trobat o null si no existeix.
+     */
     public function findPerLogin(string $email): array|null
     {
         return $this->builder()
@@ -162,7 +172,12 @@ class UsuariModel extends Model
                     ->get()
                     ->getRowArray();
     }
-
+    /**
+     * Cerca i retorna registres segons els criteris indicats.
+     *
+     * @param string $email Correu electrònic de l'usuari.
+     * @return array|null Registre trobat o null si no existeix.
+     */
     public function findPerEmail(string $email): array|null
     {
         return $this->where('email', $email)

@@ -12,9 +12,8 @@ class DashboardController extends BaseController
     protected MovimentModel $movimentModel;
     protected FacturaModel $facturaModel;
     protected QuotaModel $quotaModel;
-
     /**
-     * Inicialitza els models necessaris per al dashboard.
+     * Inicialitza els models i serveis: MovimentModel, FacturaModel i QuotaModel.
      */
     public function __construct()
     {
@@ -22,9 +21,10 @@ class DashboardController extends BaseController
         $this->facturaModel = new FacturaModel();
         $this->quotaModel = new QuotaModel();
     }
-
     /**
-     * Retorna el resum econòmic del mes actual i de l'anterior.
+     * Calcula el resum econòmic del mes actual i del mes anterior.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
      */
     public function resum(): ResponseInterface
     {
@@ -65,9 +65,10 @@ class DashboardController extends BaseController
             return $this->jsonError('Error al carregar el resum del dashboard', 500);
         }
     }
-
     /**
-     * Retorna les dades de gràfiques d'evolució i distribució de categories.
+     * Retorna les dades d'evolució mensual i distribució per categories.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
      */
     public function grafiques(): ResponseInterface
     {
@@ -89,9 +90,10 @@ class DashboardController extends BaseController
             return $this->jsonError('Error al carregar les gràfiques del dashboard', 500);
         }
     }
-
     /**
-     * Retorna les factures pendents de cobrament més urgents.
+     * Llista les factures pendents de cobrament més rellevants.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
      */
     public function facturesPendents(): ResponseInterface
     {
@@ -107,9 +109,10 @@ class DashboardController extends BaseController
             return $this->jsonError('Error al carregar les factures pendents', 500);
         }
     }
-
     /**
      * Retorna les quotes amb períodes pendents de pagament.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
      */
     public function quotesProperes(): ResponseInterface
     {

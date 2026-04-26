@@ -154,7 +154,13 @@ class FacturaModel extends Model
             'greater_than_equal_to' => 'El total no pot ser negatiu.',
         ],
     ];
-
+    /**
+     * Genera numero factura.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @param string $serie Valor d'entrada del mètode.
+     * @return string Valor textual obtingut o generat pel mètode.
+     */
     public function generarNumeroFactura(int $usuariId, string $serie = 'F'): string
     {
         $ultimaFactura = $this->where('usuari_id', $usuariId)
@@ -173,7 +179,12 @@ class FacturaModel extends Model
 
         return $serie . '-' . str_pad((string) $seguentNumero, 3, '0', STR_PAD_LEFT);
     }
-
+    /**
+     * Calcula totals.
+     *
+     * @param int $facturaId Identificador de la factura.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     public function calcularTotals(int $facturaId): array
     {
         $factura = $this->find($facturaId);
@@ -216,7 +227,12 @@ class FacturaModel extends Model
             'total' => round($total, 2),
         ];
     }
-
+    /**
+     * Actualitza totals.
+     *
+     * @param int $facturaId Identificador de la factura.
+     * @return bool Indica si l'operació s'ha completat correctament.
+     */
     public function actualitzarTotals(int $facturaId): bool
     {
         if (!$this->find($facturaId)) {
@@ -227,7 +243,13 @@ class FacturaModel extends Model
 
         return $this->update($facturaId, $totals);
     }
-
+    /**
+     * Canvia estat.
+     *
+     * @param int $facturaId Identificador de la factura.
+     * @param string $nouEstat Nou estat de la factura.
+     * @return bool Indica si l'operació s'ha completat correctament.
+     */
     public function canviarEstat(int $facturaId, string $nouEstat): bool
     {
         $estatsValids = ['esborrany', 'emesa', 'cancel·lada', 'cobrada', 'parcialment_cobrada'];
@@ -238,9 +260,12 @@ class FacturaModel extends Model
 
         return $this->update($facturaId, ['estat' => $nouEstat]);
     }
-
     /**
-     * Retorna les factures pendents de cobrament amb el client i l'import pendent.
+     * Retorna les factures pendents amb import cobrat i pendent.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @param int $limit Nombre màxim d'elements per pàgina.
+     * @return array Conjunt de dades retornat pel mètode.
      */
     public function pendentsCobrament(int $usuariId, int $limit = 10): array
     {
@@ -281,11 +306,13 @@ class FacturaModel extends Model
 
         return $factures;
     }
-
     /**
-     * Resum fiscal de factures emeses/cobrades en un període.
-     * Només compta factures amb estat: emesa, cobrada o parcialment_cobrada.
-     * Retorna subtotal (base imposable), iva_repercutit, irpf_retingut i total facturat.
+     * Calcula el resum fiscal de factures dins un període.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @param string $dataInici Data d'inici del període.
+     * @param string $dataFi Data de fi del període.
+     * @return array Conjunt de dades retornat pel mètode.
      */
     public function resumFiscalPeriode(int $usuariId, string $dataInici, string $dataFi): array
     {

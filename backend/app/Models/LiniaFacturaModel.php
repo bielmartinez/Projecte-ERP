@@ -104,7 +104,12 @@ class LiniaFacturaModel extends Model
 
         return round($baseAmbDescompte, 2);
     }
-
+    /**
+     * Crea una línia de factura i actualitza els totals de la factura.
+     *
+     * @param array $data Dades d'entrada del procés.
+     * @return mixed Resultat de l'operació executada pel mètode.
+     */
     public function crearLinia(array $data)
     {
         if (isset($data['quantitat'], $data['preu_unitari'])) {
@@ -121,7 +126,13 @@ class LiniaFacturaModel extends Model
 
         return $this->insert($data, true);
     }
-
+    /**
+     * Actualitza linia.
+     *
+     * @param int $liniaId Identificador de l'entitat relacionada.
+     * @param array $data Dades d'entrada del procés.
+     * @return bool Indica si l'operació s'ha completat correctament.
+     */
     public function actualitzarLinia(int $liniaId, array $data): bool
     {
         if (isset($data['quantitat']) || isset($data['preu_unitari']) || isset($data['descompte']) || isset($data['iva_percentatge'])) {
@@ -146,14 +157,24 @@ class LiniaFacturaModel extends Model
 
         return $this->update($liniaId, $data);
     }
-
+    /**
+     * Obté linies factura segons els filtres indicats.
+     *
+     * @param int $facturaId Identificador de la factura.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     public function obtenirLiniesFactura(int $facturaId): array
     {
         return $this->where('factura_id', $facturaId)
                     ->orderBy('ordre', 'ASC')
                     ->findAll();
     }
-
+    /**
+     * Elimina linies factura.
+     *
+     * @param int $facturaId Identificador de la factura.
+     * @return bool Indica si l'operació s'ha completat correctament.
+     */
     public function eliminarLiniesFactura(int $facturaId): bool
     {
         return (bool) $this->where('factura_id', $facturaId)->delete();

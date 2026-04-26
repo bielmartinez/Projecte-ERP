@@ -12,14 +12,20 @@ class AuthController extends BaseController
     protected UsuariModel $usuariModel;
     protected TokenAccesModel $tokenModel;
     protected CategoriaMovimentModel $categoriaMovimentModel;
-
+    /**
+     * Inicialitza els models i serveis: UsuariModel, TokenAccesModel i CategoriaMovimentModel.
+     */
     public function __construct()
     {
         $this->usuariModel = new UsuariModel();
         $this->tokenModel = new TokenAccesModel();
         $this->categoriaMovimentModel = new CategoriaMovimentModel();
     }
-
+    /**
+     * Registra un nou usuari i crea les categories per defecte.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function register(): ResponseInterface
     {
         try {
@@ -70,7 +76,11 @@ class AuthController extends BaseController
             return $this->jsonError('No s\'ha pogut completar el registre.', 500);
         }
     }
-
+    /**
+     * Valida credencials i genera un token d'accés per iniciar sessió.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function login(): ResponseInterface
     {
         $dades = $this->request->getJSON(true) ?? [];
@@ -102,7 +112,11 @@ class AuthController extends BaseController
             'usuari' => $usuari,
         ], 200);
     }
-
+    /**
+     * Invalida el token actual i tanca la sessió activa.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function logout(): ResponseInterface
     {
         $token = $this->getBearerToken();
@@ -117,6 +131,11 @@ class AuthController extends BaseController
     }
 
     //Persisteix la sessió i retorna les dades de l'usuari associat al token vàlid
+    /**
+     * Recupera les dades de l'usuari associat al token vigent.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function me(): ResponseInterface
     {
         $token = $this->getBearerToken();
@@ -143,7 +162,11 @@ class AuthController extends BaseController
             'usuari' => $usuari,
         ], 200);
     }
-
+    /**
+     * Extreu el token Bearer de la capçalera Authorization.
+     *
+     * @return ?string Resultat de l'operació executada pel mètode.
+     */
     private function getBearerToken(): ?string
     {
         $header = $this->request->getHeaderLine('Authorization');
@@ -158,7 +181,12 @@ class AuthController extends BaseController
 
         return trim($matches[1]);
     }
-
+    /**
+     * Insereix les categories inicials d'ingressos i despeses per a un usuari.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @return bool Indica si l'operació s'ha completat correctament.
+     */
     private function crearCategoriesPerDefecte(int $usuariId): bool
     {
         if ($usuariId <= 0) {

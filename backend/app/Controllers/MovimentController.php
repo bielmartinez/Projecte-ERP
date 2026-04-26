@@ -10,13 +10,19 @@ class MovimentController extends BaseController
 {
     protected MovimentModel $movimentModel;
     protected CategoriaMovimentModel $categoriaModel;
-
+    /**
+     * Inicialitza els models i serveis: MovimentModel i CategoriaMovimentModel.
+     */
     public function __construct()
     {
         $this->movimentModel = new MovimentModel();
         $this->categoriaModel = new CategoriaMovimentModel();
     }
-
+    /**
+     * Llista moviment disponibles per a l'usuari autenticat.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function index(): ResponseInterface
     {
         try {
@@ -89,7 +95,12 @@ class MovimentController extends BaseController
             return $this->jsonError('Error al llistar els moviments', 500);
         }
     }
-
+    /**
+     * Recupera el detall d'un moviment concret.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function show(int $id): ResponseInterface
     {
         try {
@@ -114,7 +125,11 @@ class MovimentController extends BaseController
             return $this->jsonError('Error al carregar el moviment', 500);
         }
     }
-
+    /**
+     * Crea un nou moviment amb les dades rebudes.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function create(): ResponseInterface
     {
         try {
@@ -154,7 +169,12 @@ class MovimentController extends BaseController
             return $this->jsonError('Error al crear el moviment', 500);
         }
     }
-
+    /**
+     * Actualitza les dades d'un moviment existent.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function update(int $id): ResponseInterface
     {
         try {
@@ -204,7 +224,12 @@ class MovimentController extends BaseController
             return $this->jsonError('Error al actualitzar el moviment', 500);
         }
     }
-
+    /**
+     * Elimina un moviment (soft delete).
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function delete(int $id): ResponseInterface
     {
         try {
@@ -227,7 +252,14 @@ class MovimentController extends BaseController
             return $this->jsonError('Error al eliminar el moviment', 500);
         }
     }
-
+    /**
+     * Valida categoria usuario.
+     *
+     * @param int $categoriaId Identificador de la categoria.
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @param string $tipus Tipus de període o registre.
+     * @return bool Indica si l'operació s'ha completat correctament.
+     */
     private function validarCategoriaUsuario(int $categoriaId, int $usuariId, string $tipus): bool
     {
         if ($categoriaId <= 0 || !in_array($tipus, ['ingres', 'despesa'], true)) {
@@ -242,7 +274,13 @@ class MovimentController extends BaseController
 
         return (bool) $categoria;
     }
-
+    /**
+     * Valida factura usuario.
+     *
+     * @param int $facturaId Identificador de la factura.
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @return bool Indica si l'operació s'ha completat correctament.
+     */
     private function validarFacturaUsuario(int $facturaId, int $usuariId): bool
     {
         if ($facturaId <= 0) {
@@ -259,7 +297,12 @@ class MovimentController extends BaseController
 
         return (bool) $factura;
     }
-
+    /**
+     * Filtra i normalitza payload.
+     *
+     * @param array $data Dades d'entrada del procés.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     private function filtrarPayload(array $data): array
     {
         $fieldsPermesos = [

@@ -8,12 +8,18 @@ use CodeIgniter\HTTP\ResponseInterface;
 class PerfilController extends BaseController
 {
     protected UsuariModel $usuariModel;
-
+    /**
+     * Inicialitza els models i serveis: UsuariModel.
+     */
     public function __construct()
     {
         $this->usuariModel = new UsuariModel();
     }
-
+    /**
+     * Obté perfil.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function getPerfil(): ResponseInterface
     {
         try {
@@ -34,7 +40,11 @@ class PerfilController extends BaseController
             return $this->jsonError('Error al obtenir el perfil', 500);
         }
     }
-
+    /**
+     * Actualitza les dades bàsiques del perfil d'usuari.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function updatePerfil(): ResponseInterface
     {
         try {
@@ -91,7 +101,11 @@ class PerfilController extends BaseController
             return $this->jsonError('Error al actualitzar el perfil', 500);
         }
     }
-
+    /**
+     * Puja i associa el logotip del perfil de l'usuari.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function pujarLogo(): ResponseInterface
     {
         try {
@@ -133,7 +147,11 @@ class PerfilController extends BaseController
             return $this->jsonError('Error al pujar el logotip', 500);
         }
     }
-
+    /**
+     * Canvia contrasenya.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function canviarContrasenya(): ResponseInterface
     {
         try {

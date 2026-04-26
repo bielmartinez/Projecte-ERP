@@ -14,7 +14,9 @@ class CobramentController extends BaseController
     protected CobramentFacturaModel $cobramentModel;
     protected MovimentModel $movimentModel;
     protected CategoriaMovimentModel $categoriaModel;
-
+    /**
+     * Inicialitza els models i serveis: FacturaModel, CobramentFacturaModel, MovimentModel i CategoriaMovimentModel.
+     */
     public function __construct()
     {
         $this->facturaModel = new FacturaModel();
@@ -22,7 +24,12 @@ class CobramentController extends BaseController
         $this->movimentModel = new MovimentModel();
         $this->categoriaModel = new CategoriaMovimentModel();
     }
-
+    /**
+     * Llista cobrament disponibles per a l'usuari autenticat.
+     *
+     * @param int $facturaId Identificador de la factura.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function index(int $facturaId): ResponseInterface
     {
         try {
@@ -56,7 +63,12 @@ class CobramentController extends BaseController
             return $this->jsonError('Error al carregar els cobraments de la factura', 500);
         }
     }
-
+    /**
+     * Crea un nou cobrament amb les dades rebudes.
+     *
+     * @param int $facturaId Identificador de la factura.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function create(int $facturaId): ResponseInterface
     {
         try {
@@ -157,7 +169,13 @@ class CobramentController extends BaseController
             return $this->jsonError('Error al registrar el cobrament de la factura', 500);
         }
     }
-
+    /**
+     * Elimina un cobrament (soft delete).
+     *
+     * @param int $facturaId Identificador de la factura.
+     * @param int $cobramentId Identificador del cobrament.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function delete(int $facturaId, int $cobramentId): ResponseInterface
     {
         try {
@@ -220,7 +238,12 @@ class CobramentController extends BaseController
             return $this->jsonError('Error al eliminar el cobrament de la factura', 500);
         }
     }
-
+    /**
+     * Filtra i normalitza payload cobrament.
+     *
+     * @param array $data Dades d'entrada del procés.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     private function filtrarPayloadCobrament(array $data): array
     {
         $campsPermesos = [
@@ -252,7 +275,12 @@ class CobramentController extends BaseController
 
         return $payload;
     }
-
+    /**
+     * Obté categoria ingres per usuari segons els filtres indicats.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @return ?array Registre trobat o null si no existeix.
+     */
     private function obtenirCategoriaIngresPerUsuari(int $usuariId): ?array
     {
         $categoriaVendes = $this->categoriaModel
@@ -271,7 +299,13 @@ class CobramentController extends BaseController
             ->orderBy('id', 'ASC')
             ->first();
     }
-
+    /**
+     * Recalcula estat factura per cobraments.
+     *
+     * @param array $factura Valor d'entrada del mètode.
+     * @param float $totalCobrat Valor d'entrada del mètode.
+     * @return bool Indica si l'operació s'ha completat correctament.
+     */
     private function recalcularEstatFacturaPerCobraments(array $factura, float $totalCobrat): bool
     {
         $facturaId = (int) ($factura['id'] ?? 0);

@@ -18,7 +18,9 @@ class FacturaController extends BaseController
     protected ClientModel $clientModel;
     protected UsuariModel $usuariModel;
     protected PdfFactura $pdfFactura;
-
+    /**
+     * Inicialitza els models i serveis: FacturaModel, LiniaFacturaModel, ClientModel, UsuariModel i PdfFactura.
+     */
     public function __construct()
     {
         $this->facturaModel = new FacturaModel();
@@ -27,7 +29,11 @@ class FacturaController extends BaseController
         $this->usuariModel = new UsuariModel();
         $this->pdfFactura = new PdfFactura();
     }
-
+    /**
+     * Llista factura disponibles per a l'usuari autenticat.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function index(): ResponseInterface
     {
         try {
@@ -97,7 +103,12 @@ class FacturaController extends BaseController
             return $this->jsonError('Error al llistar les factures', 500);
         }
     }
-
+    /**
+     * Recupera el detall d'un factura concret.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function show(int $id): ResponseInterface
     {
         try {
@@ -132,7 +143,12 @@ class FacturaController extends BaseController
             return $this->jsonError('Error al carregar la factura', 500);
         }
     }
-
+    /**
+     * Genera el PDF d'una factura amb les línies i dades fiscals.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Fitxer PDF generat o resposta JSON d'error.
+     */
     public function pdf(int $id): ResponseInterface
     {
         try {
@@ -182,7 +198,11 @@ class FacturaController extends BaseController
             return $this->jsonError('Error en generar el PDF de la factura', 500);
         }
     }
-
+    /**
+     * Crea un nou factura amb les dades rebudes.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function create(): ResponseInterface
     {
         try {
@@ -269,7 +289,12 @@ class FacturaController extends BaseController
             return $this->jsonError('Error al crear la factura', 500);
         }
     }
-
+    /**
+     * Actualitza les dades d'un factura existent.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function update(int $id): ResponseInterface
     {
         try {
@@ -366,7 +391,12 @@ class FacturaController extends BaseController
             return $this->jsonError('Error en actualitzar la factura', 500);
         }
     }
-
+    /**
+     * Elimina un factura (soft delete).
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function delete(int $id): ResponseInterface
     {
         try {
@@ -396,7 +426,13 @@ class FacturaController extends BaseController
             return $this->jsonError('Error en eliminar la factura', 500);
         }
     }
-
+    /**
+     * Actualitza una línia d'una factura existent.
+     *
+     * @param int $id Identificador del recurs.
+     * @param int $liniaId Identificador de l'entitat relacionada.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function updateLinia(int $id, int $liniaId): ResponseInterface
     {
         try {
@@ -447,7 +483,13 @@ class FacturaController extends BaseController
             return $this->jsonError('Error en actualitzar la línia', 500);
         }
     }
-
+    /**
+     * Elimina una línia de factura i recalcula els totals.
+     *
+     * @param int $id Identificador del recurs.
+     * @param int $liniaId Identificador de l'entitat relacionada.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function deleteLinia(int $id, int $liniaId): ResponseInterface
     {
         try {
@@ -485,7 +527,12 @@ class FacturaController extends BaseController
             return $this->jsonError('Error en eliminar la línia', 500);
         }
     }
-
+    /**
+     * Canvia estat.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function canviarEstat(int $id): ResponseInterface
     {
         try {
@@ -554,7 +601,12 @@ class FacturaController extends BaseController
             return $this->jsonError('Error en canviar l\'estat', 500);
         }
     }
-
+    /**
+     * Filtra i normalitza payload factura.
+     *
+     * @param array $data Dades d'entrada del procés.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     private function filtrarPayloadFactura(array $data): array
     {
         $campsPermesos = [
@@ -583,7 +635,12 @@ class FacturaController extends BaseController
 
         return $payload;
     }
-
+    /**
+     * Filtra i normalitza payload linia.
+     *
+     * @param array $data Dades d'entrada del procés.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     private function filtrarPayloadLinia(array $data): array
     {
         $campsPermesos = [
@@ -604,7 +661,13 @@ class FacturaController extends BaseController
 
         return $payload;
     }
-
+    /**
+     * Comprova que el client indicat pertany a l'usuari autenticat.
+     *
+     * @param int $clientId Identificador del client.
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @return bool Indica si l'operació s'ha completat correctament.
+     */
     private function clientEsDelUsuari(int $clientId, int $usuariId): bool
     {
         if ($clientId <= 0) {

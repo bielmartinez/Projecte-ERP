@@ -12,15 +12,20 @@ class InformeController extends BaseController
 {
     protected MovimentModel $movimentModel;
     protected FacturaModel $facturaModel;
-
+    /**
+     * Inicialitza els models i serveis: MovimentModel i FacturaModel.
+     */
     public function __construct()
     {
         $this->movimentModel = new MovimentModel();
         $this->facturaModel = new FacturaModel();
     }
-
     /**
-     * GET /informes/mensual/:any/:mes
+     * Genera l'informe econòmic mensual de l'usuari autenticat.
+     *
+     * @param int $any Any del període.
+     * @param int $mes Mes del període (1-12).
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
      */
     public function mensual(int $any, int $mes): ResponseInterface
     {
@@ -37,9 +42,12 @@ class InformeController extends BaseController
 
         return $this->generarInforme($usuariId, $dataInici, $dataFi, 'mensual', $etiqueta);
     }
-
     /**
-     * GET /informes/trimestral/:any/:trimestre
+     * Genera l'informe econòmic trimestral de l'usuari autenticat.
+     *
+     * @param int $any Any del període.
+     * @param int $trimestre Trimestre del període (1-4).
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
      */
     public function trimestral(int $any, int $trimestre): ResponseInterface
     {
@@ -59,9 +67,11 @@ class InformeController extends BaseController
 
         return $this->generarInforme($usuariId, $dataInici, $dataFi, 'trimestral', $etiqueta);
     }
-
     /**
-     * GET /informes/anual/:any
+     * Genera l'informe econòmic anual de l'usuari autenticat.
+     *
+     * @param int $any Any del període.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
      */
     public function anual(int $any): ResponseInterface
     {
@@ -77,10 +87,12 @@ class InformeController extends BaseController
 
         return $this->generarInforme($usuariId, $dataInici, $dataFi, 'anual', $etiqueta);
     }
-
     /**
-     * GET /informes/pdf/:tipus/:periode
-     * Exemples: /informes/pdf/mensual/2026-04, /informes/pdf/trimestral/2026-2, /informes/pdf/anual/2026
+     * Genera i descarrega l'informe econòmic en format PDF.
+     *
+     * @param string $tipus Tipus de període o registre.
+     * @param string $periode Període en format esperat pel mètode.
+     * @return ResponseInterface Fitxer PDF generat o resposta JSON d'error.
      */
     public function pdf(string $tipus, string $periode): ResponseInterface
     {
@@ -188,9 +200,15 @@ class InformeController extends BaseController
             return $this->jsonError('Error al generar el PDF de l\'informe', 500);
         }
     }
-
     /**
-     * Lògica compartida per generar l'informe de qualsevol període.
+     * Genera informe.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @param string $dataInici Data d'inici del període.
+     * @param string $dataFi Data de fi del període.
+     * @param string $tipus Tipus de període o registre.
+     * @param string $etiqueta Valor d'entrada del mètode.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
      */
     private function generarInforme(int $usuariId, string $dataInici, string $dataFi, string $tipus, string $etiqueta): ResponseInterface
     {

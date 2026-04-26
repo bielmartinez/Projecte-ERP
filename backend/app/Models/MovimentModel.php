@@ -83,9 +83,12 @@ class MovimentModel extends Model
             'valid_date' => 'La data no és vàlida.',
         ],
     ];
-
     /**
-     * Obté el resum d'ingressos i despeses d'un mes concret.
+     * Calcula el resum d'ingressos i despeses d'un mes concret.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @param string $mesPeriode Valor d'entrada del mètode.
+     * @return array Conjunt de dades retornat pel mètode.
      */
     public function resumMensual(int $usuariId, string $mesPeriode): array
     {
@@ -118,9 +121,12 @@ class MovimentModel extends Model
 
         return $resum;
     }
-
     /**
-     * Calcula l'evolució mensual d'ingressos i despeses per a una finestra de mesos.
+     * Calcula l'evolució mensual d'ingressos i despeses.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @param int $mesos Nombre de mesos a analitzar.
+     * @return array Conjunt de dades retornat pel mètode.
      */
     public function evolucioMensual(int $usuariId, int $mesos = 12): array
     {
@@ -172,9 +178,11 @@ class MovimentModel extends Model
 
         return array_values($mesosComplets);
     }
-
     /**
-     * Obté la distribució de despeses per categoria del mes actual.
+     * Retorna la distribució de despeses per categories del mes actual.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @return array Conjunt de dades retornat pel mètode.
      */
     public function distribucioCategoriesMes(int $usuariId): array
     {
@@ -202,9 +210,13 @@ class MovimentModel extends Model
 
         return $resultat;
     }
-
     /**
-     * Resum d'ingressos i despeses per un rang de dates.
+     * Calcula el resum d'ingressos i despeses d'un període.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @param string $dataInici Data d'inici del període.
+     * @param string $dataFi Data de fi del període.
+     * @return array Conjunt de dades retornat pel mètode.
      */
     public function resumPerPeriode(int $usuariId, string $dataInici, string $dataFi): array
     {
@@ -231,12 +243,13 @@ class MovimentModel extends Model
 
         return $resum;
     }
-
     /**
-     * Calcula l'IVA suportat de les despeses d'un període.
-     * L'import guardat és amb IVA inclòs, per tant:
-     * base = import / (1 + iva_percentatge/100)
-     * iva_suportat = import - base
+     * Calcula l'IVA suportat estimat dins un període.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @param string $dataInici Data d'inici del període.
+     * @param string $dataFi Data de fi del període.
+     * @return float Valor numèric calculat pel mètode.
      */
     public function ivaSuportatPeriode(int $usuariId, string $dataInici, string $dataFi): float
     {

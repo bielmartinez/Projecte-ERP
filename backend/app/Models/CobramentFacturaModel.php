@@ -74,7 +74,12 @@ class CobramentFacturaModel extends Model
             'max_length' => 'El mètode de pagament no pot excedir 50 caràcters.',
         ],
     ];
-
+    /**
+     * Obté cobraments factura segons els filtres indicats.
+     *
+     * @param int $facturaId Identificador de la factura.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     public function obtenirCobramentsFactura(int $facturaId): array
     {
         return $this->where('factura_id', $facturaId)
@@ -82,7 +87,12 @@ class CobramentFacturaModel extends Model
             ->orderBy('id', 'DESC')
             ->findAll();
     }
-
+    /**
+     * Calcula l'import total cobrat d'una factura.
+     *
+     * @param int $facturaId Identificador de la factura.
+     * @return float Valor numèric calculat pel mètode.
+     */
     public function totalCobrat(int $facturaId): float
     {
         $resultat = $this->builder()

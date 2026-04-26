@@ -10,13 +10,19 @@ class PlantillaController extends BaseController
 {
     protected PlantillaFacturaModel $plantillaModel;
     protected LiniaPlantillaModel $liniaPlantillaModel;
-
+    /**
+     * Inicialitza els models i serveis: PlantillaFacturaModel i LiniaPlantillaModel.
+     */
     public function __construct()
     {
         $this->plantillaModel = new PlantillaFacturaModel();
         $this->liniaPlantillaModel = new LiniaPlantillaModel();
     }
-
+    /**
+     * Llista plantilla disponibles per a l'usuari autenticat.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function index(): ResponseInterface
     {
         try {
@@ -68,7 +74,12 @@ class PlantillaController extends BaseController
             return $this->jsonError('Error al llistar plantilles', 500);
         }
     }
-
+    /**
+     * Recupera el detall d'un plantilla concret.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function show(int $id): ResponseInterface
     {
         try {
@@ -97,7 +108,11 @@ class PlantillaController extends BaseController
             return $this->jsonError('Error al carregar la plantilla', 500);
         }
     }
-
+    /**
+     * Crea un nou plantilla amb les dades rebudes.
+     *
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function create(): ResponseInterface
     {
         try {
@@ -163,7 +178,12 @@ class PlantillaController extends BaseController
             return $this->jsonError('Error al crear la plantilla', 500);
         }
     }
-
+    /**
+     * Actualitza les dades d'un plantilla existent.
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function update(int $id): ResponseInterface
     {
         try {
@@ -242,7 +262,12 @@ class PlantillaController extends BaseController
             return $this->jsonError('Error en actualitzar la plantilla', 500);
         }
     }
-
+    /**
+     * Elimina un plantilla (soft delete).
+     *
+     * @param int $id Identificador del recurs.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
+     */
     public function delete(int $id): ResponseInterface
     {
         try {
@@ -268,7 +293,12 @@ class PlantillaController extends BaseController
             return $this->jsonError('Error en eliminar la plantilla', 500);
         }
     }
-
+    /**
+     * Filtra i normalitza payload plantilla.
+     *
+     * @param array $data Dades d'entrada del procés.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     private function filtrarPayloadPlantilla(array $data): array
     {
         $campsPermesos = [
@@ -294,7 +324,12 @@ class PlantillaController extends BaseController
 
         return $payload;
     }
-
+    /**
+     * Filtra i normalitza payload linia.
+     *
+     * @param array $data Dades d'entrada del procés.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     private function filtrarPayloadLinia(array $data): array
     {
         $campsPermesos = [
@@ -315,7 +350,12 @@ class PlantillaController extends BaseController
 
         return $payload;
     }
-
+    /**
+     * Obté linies per plantilles segons els filtres indicats.
+     *
+     * @param array $plantillaIds Valor d'entrada del mètode.
+     * @return array Conjunt de dades retornat pel mètode.
+     */
     private function obtenirLiniesPerPlantilles(array $plantillaIds): array
     {
         if ($plantillaIds === []) {

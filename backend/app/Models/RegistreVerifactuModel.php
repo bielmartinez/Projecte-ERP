@@ -185,9 +185,11 @@ class RegistreVerifactuModel extends Model
             'required' => 'Les dades de factura són obligatòries.',
         ],
     ];
-
     /**
-     * Retorna l'últim registre Verifactu de l'usuari.
+     * Obté ultim registre segons els filtres indicats.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @return ?array Registre trobat o null si no existeix.
      */
     public function obtenirUltimRegistre(int $usuariId): ?array
     {
@@ -197,9 +199,13 @@ class RegistreVerifactuModel extends Model
 
         return is_array($registre) ? $registre : null;
     }
-
     /**
-     * Retorna registres Verifactu paginats de l'usuari amb l'estat actual de la factura.
+     * Obté registres per usuari segons els filtres indicats.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @param int $page Pàgina de resultats.
+     * @param int $limit Nombre màxim d'elements per pàgina.
+     * @return array Conjunt de dades retornat pel mètode.
      */
     public function obtenirRegistresPerUsuari(int $usuariId, int $page = 1, int $limit = 20): array
     {
@@ -230,9 +236,12 @@ class RegistreVerifactuModel extends Model
             ],
         ];
     }
-
     /**
-     * Retorna tots els registres Verifactu d'una factura concreta de l'usuari.
+     * Obté registres per factura segons els filtres indicats.
+     *
+     * @param int $facturaId Identificador de la factura.
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @return array Conjunt de dades retornat pel mètode.
      */
     public function obtenirRegistresPerFactura(int $facturaId, int $usuariId): array
     {
@@ -241,9 +250,11 @@ class RegistreVerifactuModel extends Model
             ->orderBy('id', 'ASC')
             ->findAll();
     }
-
     /**
-     * Retorna tots els registres Verifactu de l'usuari en ordre cronològic.
+     * Obté tots registres segons els filtres indicats.
+     *
+     * @param int $usuariId Identificador de l'usuari autenticat.
+     * @return array Conjunt de dades retornat pel mètode.
      */
     public function obtenirTotsRegistres(int $usuariId): array
     {
@@ -251,25 +262,36 @@ class RegistreVerifactuModel extends Model
             ->orderBy('id', 'ASC')
             ->findAll();
     }
-
     /**
-     * Bloqueja qualsevol actualització perquè els registres són immutables.
+     * Actualitza les dades d'un registre verifactu existent.
+     *
+     * @param mixed $id Identificador del recurs.
+     * @param mixed $row Dades a persistir en l'actualització.
+     * @return bool Indica si l'operació s'ha completat correctament.
      */
     public function update($id = null, $row = null): bool
     {
         throw new \RuntimeException('Els registres Verifactu són immutables i no es poden modificar.');
     }
-
     /**
-     * Bloqueja qualsevol actualització en lot perquè els registres són immutables.
+     * Bloqueja les actualitzacions en lot perquè els registres són immutables.
+     *
+     * @param null|array $set Conjunt de dades per a l'actualització en lot.
+     * @param null|string $index Camp clau utilitzat per actualitzar en lot.
+     * @param int $batchSize Mida del lot d'actualització.
+     * @param bool $returnSQL Indica si s'ha de retornar l'SQL generat.
+     * @return mixed Resultat de l'operació executada pel mètode.
      */
     public function updateBatch(?array $set = null, ?string $index = null, int $batchSize = 100, bool $returnSQL = false)
     {
         throw new \RuntimeException('Els registres Verifactu són immutables i no es poden modificar.');
     }
-
     /**
-     * Bloqueja qualsevol eliminació perquè els registres són immutables.
+     * Elimina un registre verifactu (soft delete).
+     *
+     * @param mixed $id Identificador del recurs.
+     * @param bool $purge Indica si s'ha d'eliminar definitivament.
+     * @return mixed Resultat de l'operació executada pel mètode.
      */
     public function delete($id = null, bool $purge = false)
     {

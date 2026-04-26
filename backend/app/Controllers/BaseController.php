@@ -26,9 +26,13 @@ abstract class BaseController extends Controller
      */
 
     // protected $session;
-
     /**
-     * @return void
+     * Inicialitza el controlador base i els serveis comuns de la petició.
+     *
+     * @param RequestInterface $request Instància de la petició HTTP.
+     * @param ResponseInterface $response Instància de la resposta HTTP.
+     * @param LoggerInterface $logger Instància del servei de registre.
+     * @return mixed Resultat de l'operació executada pel mètode.
      */
     public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
     {
@@ -42,26 +46,33 @@ abstract class BaseController extends Controller
         // Preload any models, libraries, etc, here.
         // $this->session = service('session');
     }
-
     /**
-     * Retorna l'ID de l'usuari autenticat.
-     * Només cridar dins rutes protegides amb AuthFilter.
+     * Retorna l'identificador de l'usuari autenticat.
+     *
+     * @return int Valor numèric calculat pel mètode.
      */
     protected function usuariId(): int
     {
         return (int) user_id();
     }
-
     /**
-     * Retorna una resposta JSON d'èxit.
+     * Construeix una resposta JSON d'èxit amb dades opcionals.
+     *
+     * @param array $data Dades d'entrada del procés.
+     * @param int $code Valor d'entrada del mètode.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
      */
     protected function jsonOk(array $data = [], int $code = 200): ResponseInterface
     {
         return $this->response->setStatusCode($code)->setJSON(array_merge(['status' => 'ok'], $data));
     }
-
     /**
-     * Retorna una resposta JSON d'error.
+     * Construeix una resposta JSON d'error amb missatge i codi HTTP.
+     *
+     * @param string $message Valor d'entrada del mètode.
+     * @param int $code Valor d'entrada del mètode.
+     * @param array $extra Valor d'entrada del mètode.
+     * @return ResponseInterface Resposta JSON amb les dades de l'operació o detall d'error.
      */
     protected function jsonError(string $message, int $code = 400, array $extra = []): ResponseInterface
     {
