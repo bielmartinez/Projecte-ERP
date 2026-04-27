@@ -112,7 +112,8 @@
 
       <section class="bg-white rounded shadow p-6 space-y-4">
         <h3 class="text-lg font-semibold">{{ editingId ? 'Editar categoria' : 'Crear categoria' }}</h3>
-        <FormMessages :error="formError" :success="formSuccess" />
+        <p v-if="formError" class="text-sm text-red-600">{{ formError }}</p>
+        <p v-if="formSuccess" class="text-sm text-green-600">{{ formSuccess }}</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label class="space-y-1">
@@ -144,23 +145,12 @@
         </div>
       </section>
     </template>
-
-    <ConfirmModal
-      :visible="showDeleteModal"
-      title="Eliminar categoria"
-      message="Estàs segur que vols eliminar aquesta categoria? Si té moviments associats no es podrà eliminar."
-      confirm-text="Eliminar"
-      @confirma="confirmDelete"
-      @cancel·la="cancelDelete"
-    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 
-import ConfirmModal from '@/components/ConfirmModal.vue'
-import FormMessages from '@/components/FormMessages.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import { useInitialLoading } from '@/composables/useInitialLoading'
 import {
@@ -176,8 +166,6 @@ import {
 const loading = ref(false)
 const listError = ref('')
 const categories = ref<CategoriaMoviment[]>([])
-const showDeleteModal = ref(false)
-const deletingId = ref<number | null>(null)
 
 const filters = reactive({
   search: '',
@@ -285,32 +273,18 @@ async function handleSubmit() {
 }
 
 async function handleDelete(id: number) {
-  deletingId.value = id
-  showDeleteModal.value = true
-}
-
-async function confirmDelete() {
-  if (!deletingId.value) {
+  if (!window.confirm('Vols eliminar aquesta categoria?')) {
     return
   }
-
-  showDeleteModal.value = false
 
   listError.value = ''
 
   try {
-    await deleteCategoria(deletingId.value)
+    await deleteCategoria(id)
     await loadCategories(meta.page)
   } catch (error: any) {
     listError.value = error?.response?.data?.message ?? 'No s\'ha pogut eliminar la categoria.'
   }
-
-  deletingId.value = null
-}
-
-function cancelDelete() {
-  showDeleteModal.value = false
-  deletingId.value = null
 }
 
 onMounted(() => {
