@@ -10,21 +10,10 @@
     failOnRisky="true"
     failOnWarning="true"
     cacheDirectory="build/.phpunit.cache">
-    <coverage
-        includeUncoveredFiles="true"
-        pathCoverage="false"
-        ignoreDeprecatedCodeUnits="true"
-        disableCodeCoverageIgnore="true">
-        <report>
-            <clover outputFile="build/logs/clover.xml"/>
-            <html outputDirectory="build/logs/html"/>
-            <php outputFile="build/logs/coverage.serialized"/>
-            <text outputFile="php://stdout" showUncoveredFiles="false"/>
-        </report>
-    </coverage>
+    <!-- Coverage disabled by default to avoid warnings when Xdebug/PCOV is not available. -->
     <testsuites>
-        <testsuite name="App">
-            <directory>./tests</directory>
+        <testsuite name="Unit">
+            <directory>./tests/unit</directory>
         </testsuite>
     </testsuites>
     <logging>
