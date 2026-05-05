@@ -299,7 +299,7 @@ onMounted(() => {
           <p class="text-2xl font-bold text-green-600">
             {{ resum ? formatMoneda(resum.mes_actual.ingressos) : '0,00 €' }}
           </p>
-          <p class="text-xs text-gray-400 mt-2">
+          <p class="text-xs text-gray-500 mt-2">
             Mes anterior: {{ resum ? formatMoneda(resum.mes_anterior.ingressos) : '0,00 €' }}
           </p>
         </div>
@@ -309,7 +309,7 @@ onMounted(() => {
           <p class="text-2xl font-bold text-red-600">
             {{ resum ? formatMoneda(resum.mes_actual.despeses) : '0,00 €' }}
           </p>
-          <p class="text-xs text-gray-400 mt-2">
+          <p class="text-xs text-gray-500 mt-2">
             Mes anterior: {{ resum ? formatMoneda(resum.mes_anterior.despeses) : '0,00 €' }}
           </p>
         </div>
@@ -322,7 +322,7 @@ onMounted(() => {
           >
             {{ resum ? formatMoneda(resum.mes_actual.benefici) : '0,00 €' }}
           </p>
-          <p class="text-xs text-gray-400 mt-2">
+          <p class="text-xs text-gray-500 mt-2">
             Mes anterior: {{ resum ? formatMoneda(resum.mes_anterior.benefici) : '0,00 €' }}
           </p>
         </div>
