@@ -23,4 +23,4 @@ COPY docker/nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 8080
 
-CMD ["sh", "-c", "php-fpm -D && nginx -g 'daemon off;'"]
+CMD ["sh", "-c", "php spark migrate --all && php-fpm -D && nginx -g 'daemon off;'"]
