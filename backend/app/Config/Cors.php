@@ -38,6 +38,7 @@ class Cors extends BaseConfig
             'http://localhost:5173',
             'http://127.0.0.1:5173',
             'frontend-production-65db.up.railway.app',
+            'https://frontend-production-65db.up.railway.app/',
         ],
 
         /**
