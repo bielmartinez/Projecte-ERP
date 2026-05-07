@@ -2,11 +2,11 @@
   <div class="space-y-6">
     <PageHeader title="Detall de quota">
       <div class="flex gap-2">
-        <RouterLink to="/quotes" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
+        <RouterLink to="/quotes" class="text-primary hover:underline">Tornar al llistat</RouterLink>
         <RouterLink
           v-if="quota"
           :to="{ path: '/quotes', query: { edit: String(quota.id) } }"
-          class="text-gray-700 hover:underline"
+          class="text-primary hover:underline"
         >
           Editar
         </RouterLink>
@@ -36,7 +36,7 @@
     </div>
 
     <template v-else>
-      <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
+      <p v-if="error" class="text-sm text-danger">{{ error }}</p>
 
       <section v-if="quota" class="bg-white rounded shadow p-6 space-y-4">
         <h3 class="text-lg font-semibold">Dades de la quota</h3>
@@ -53,7 +53,7 @@
             <strong>Estat:</strong>
             <span
               class="inline-block px-2 py-0.5 rounded text-xs font-medium ml-2"
-              :class="activaLabel.activa ? 'bg-green-100 text-green-800' : 'bg-gray-200 text-gray-700'"
+              :class="activaLabel.activa ? 'bg-success-light text-success-hover' : 'bg-gray-100 text-gray-700'"
             >
               {{ activaLabel.text }}
             </span>
@@ -65,10 +65,13 @@
       <section v-if="quota" class="bg-white rounded shadow p-6 space-y-4">
         <h3 class="text-lg font-semibold">Períodes pendents de pagament</h3>
 
-        <p v-if="pagamentError" class="text-sm text-red-600">{{ pagamentError }}</p>
-        <p v-if="pagamentSuccess" class="text-sm text-green-600">{{ pagamentSuccess }}</p>
+        <p v-if="pagamentError" class="text-sm text-danger">{{ pagamentError }}</p>
+        <p v-if="pagamentSuccess" class="text-sm text-success-hover">{{ pagamentSuccess }}</p>
 
-        <p v-if="periodesPendents.length === 0" class="text-sm text-green-700 bg-green-50 border border-green-200 rounded p-3">
+        <p
+          v-if="periodesPendents.length === 0"
+          class="text-sm text-success-hover bg-success-light border border-success-light rounded p-3"
+        >
           Tots els períodes estan al dia
         </p>
 
@@ -76,20 +79,20 @@
           <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
               <thead>
-                <tr class="text-left border-b">
-                  <th class="py-2 pr-4">Període</th>
-                  <th class="py-2 pr-4">Import (€)</th>
-                  <th class="py-2 pr-4">Acció</th>
+                <tr class="bg-gray-50 border-b">
+                  <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Període</th>
+                  <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Import (€)</th>
+                  <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Acció</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="periode in periodesPendents" :key="periode.periode" class="border-b">
+                <tr v-for="periode in periodesPendents" :key="periode.periode" class="border-b hover:bg-gray-50 transition-colors">
                   <td class="py-2 pr-4">{{ formatPeriode(periode.periode) }}</td>
                   <td class="py-2 pr-4">{{ Number(periode.import).toFixed(2) }} €</td>
                   <td class="py-2 pr-4">
                     <button
                       type="button"
-                      class="bg-gray-900 text-white px-3 py-1.5 rounded hover:bg-gray-800"
+                      class="bg-primary text-white px-3 py-1.5 rounded hover:bg-primary-hover"
                       @click="obrirFormulariPagament(periode)"
                     >
                       Pagar
@@ -100,7 +103,7 @@
             </table>
           </div>
 
-          <div v-if="periodeSeleccionat" class="border rounded p-4 space-y-3">
+          <div v-if="periodeSeleccionat" class="border border-gray-300 rounded p-4 space-y-3">
             <h4 class="font-medium text-sm">Pagar {{ formatPeriode(periodeSeleccionat) }}</h4>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -111,7 +114,7 @@
                   type="number"
                   min="0.01"
                   step="0.01"
-                  class="border rounded px-3 py-2 w-full"
+                  class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                 />
               </label>
 
@@ -119,7 +122,7 @@
                 <span class="text-sm font-medium text-gray-700">Notes (opcional)</span>
                 <textarea
                   v-model="formulariPagament.notes"
-                  class="border rounded px-3 py-2 w-full"
+                  class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                   rows="2"
                   placeholder="Notes del pagament"
                 ></textarea>
@@ -129,7 +132,7 @@
             <div class="flex gap-2">
               <button
                 type="button"
-                class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+                class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover disabled:opacity-50"
                 :disabled="pagamentLoading"
                 @click="confirmarPagament"
               >
@@ -137,7 +140,7 @@
               </button>
               <button
                 type="button"
-                class="px-4 py-2 rounded border"
+                class="px-4 py-2 rounded border border-primary text-primary hover:bg-primary-light"
                 :disabled="pagamentLoading"
                 @click="cancelarPagament"
               >
@@ -154,15 +157,15 @@
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
-              <tr class="text-left border-b">
-                <th class="py-2 pr-4">Període</th>
-                <th class="py-2 pr-4">Data pagament</th>
-                <th class="py-2 pr-4">Import (€)</th>
-                <th class="py-2 pr-4">Notes</th>
+              <tr class="bg-gray-50 border-b">
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Període</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Data pagament</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Import (€)</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Notes</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="pagament in pagaments" :key="pagament.id" class="border-b">
+              <tr v-for="pagament in pagaments" :key="pagament.id" class="border-b hover:bg-gray-50 transition-colors">
                 <td class="py-2 pr-4">{{ formatPeriode(pagament.periode_corresponent) }}</td>
                 <td class="py-2 pr-4">{{ pagament.data_pagament }}</td>
                 <td class="py-2 pr-4">{{ Number(pagament.import).toFixed(2) }} €</td>

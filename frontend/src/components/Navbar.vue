@@ -14,7 +14,7 @@
       <span class="text-sm text-gray-600">{{ displayName }}</span>
       <button
         type="button"
-        class="text-sm text-red-500 hover:text-red-600 disabled:opacity-50"
+        class="text-sm text-danger hover:text-danger-hover disabled:opacity-50"
         :disabled="isLoggingOut"
         @click="handleLogout"
       >

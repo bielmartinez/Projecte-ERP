@@ -1,19 +1,21 @@
 <template>
-  <AuthCard>
-    <h1 class="text-2xl font-semibold text-gray-900 mb-2">Crear compte</h1>
-    <p class="text-sm text-gray-600 mb-6">Registra el teu usuari per començar a treballar.</p>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center px-4">
+    <AuthCard>
+      <h1 class="text-3xl font-bold tracking-tight text-gray-900 mb-2">Crear compte</h1>
+      <p class="text-sm text-gray-500 mb-6">Registra el teu usuari per començar a treballar.</p>
 
-    <p v-if="authStore.error" class="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">
-      {{ authStore.error }}
-    </p>
+      <p v-if="authStore.error" class="mb-4 text-sm text-danger-hover bg-danger-light border border-danger-light rounded p-2">
+        {{ authStore.error }}
+      </p>
 
-    <AuthForm mode="register" :loading="authStore.loading" @submit="handleRegister" />
+      <AuthForm mode="register" :loading="authStore.loading" @submit="handleRegister" />
 
-    <p class="text-sm text-gray-600 mt-5 text-center">
-      Ja tens compte?
-      <RouterLink class="text-indigo-600 font-medium" :to="{ name: 'login' }">Inicia sessió</RouterLink>
-    </p>
-  </AuthCard>
+      <p class="text-sm text-gray-600 mt-5 text-center">
+        Ja tens compte?
+        <RouterLink class="text-primary hover:text-primary-hover font-medium" :to="{ name: 'login' }">Inicia sessió</RouterLink>
+      </p>
+    </AuthCard>
+  </div>
 </template>
 
 <script setup lang="ts">

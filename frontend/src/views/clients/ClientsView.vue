@@ -3,7 +3,7 @@
     <PageHeader title="Clients">
       <RouterLink
         to="/clients/nou"
-        class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
+        class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover"
       >
         Nou client
       </RouterLink>
@@ -20,16 +20,16 @@
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
-              <tr class="text-left border-b">
-                <th class="py-2 pr-4"><div class="h-4 w-16 rounded bg-gray-200"></div></th>
-                <th class="py-2 pr-4"><div class="h-4 w-20 rounded bg-gray-200"></div></th>
-                <th class="py-2 pr-4"><div class="h-4 w-12 rounded bg-gray-200"></div></th>
-                <th class="py-2 pr-4"><div class="h-4 w-14 rounded bg-gray-200"></div></th>
-                <th class="py-2 pr-4"><div class="h-4 w-16 rounded bg-gray-200"></div></th>
+              <tr class="bg-gray-50 border-b">
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600"><div class="h-4 w-16 rounded bg-gray-200"></div></th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600"><div class="h-4 w-20 rounded bg-gray-200"></div></th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600"><div class="h-4 w-12 rounded bg-gray-200"></div></th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600"><div class="h-4 w-14 rounded bg-gray-200"></div></th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600"><div class="h-4 w-16 rounded bg-gray-200"></div></th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="row in 5" :key="row" class="border-b">
+              <tr v-for="row in 5" :key="row" class="border-b hover:bg-gray-50 transition-colors">
                 <td class="py-2 pr-4"><div class="h-4 w-36 rounded bg-gray-200"></div></td>
                 <td class="py-2 pr-4"><div class="h-4 w-28 rounded bg-gray-200"></div></td>
                 <td class="py-2 pr-4"><div class="h-4 w-20 rounded bg-gray-200"></div></td>
@@ -57,34 +57,34 @@
           <input
             v-model="search"
             type="text"
-            class="border rounded px-3 py-2 w-full md:max-w-md"
+            class="border border-gray-300 rounded px-3 py-2 w-full md:max-w-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
             placeholder="Cercar per nom, empresa, NIF o email"
             @keyup.enter="loadClients(1)"
           />
           <button
             type="button"
-            class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
+            class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover"
             @click="loadClients(1)"
           >
             Cercar
           </button>
         </div>
 
-        <p v-if="listError" class="text-sm text-red-600">{{ listError }}</p>
+        <p v-if="listError" class="text-sm text-danger">{{ listError }}</p>
 
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
-              <tr class="text-left border-b">
-                <th class="py-2 pr-4">Nom</th>
-                <th class="py-2 pr-4">Empresa</th>
-                <th class="py-2 pr-4">NIF</th>
-                <th class="py-2 pr-4">Email</th>
-                <th class="py-2 pr-4">Accions</th>
+              <tr class="bg-gray-50 border-b">
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Nom</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Empresa</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">NIF</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Email</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Accions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="client in clients" :key="client.id" class="border-b">
+              <tr v-for="client in clients" :key="client.id" class="border-b hover:bg-gray-50 transition-colors">
                 <td class="py-2 pr-4">{{ client.nom }} {{ client.cognoms ?? '' }}</td>
                 <td class="py-2 pr-4">{{ client.nom_empresa ?? '-' }}</td>
                 <td class="py-2 pr-4">{{ client.nif ?? '-' }}</td>
@@ -92,14 +92,14 @@
                 <td class="py-2 pr-4 flex gap-2">
                   <RouterLink
                     :to="`/clients/${client.id}`"
-                    class="text-blue-600 hover:underline"
+                    class="text-primary hover:underline"
                   >
                     Veure
                   </RouterLink>
-                  <RouterLink :to="`/clients/${client.id}/editar`" class="text-gray-700 hover:underline">
+                  <RouterLink :to="`/clients/${client.id}/editar`" class="text-primary hover:underline">
                     Editar
                   </RouterLink>
-                  <button type="button" class="text-red-600 hover:underline" @click="handleDelete(client.id)">
+                  <button type="button" class="text-danger hover:underline" @click="handleDelete(client.id)">
                     Eliminar
                   </button>
                 </td>

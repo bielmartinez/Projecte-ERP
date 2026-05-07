@@ -3,7 +3,7 @@
     <PageHeader title="Plantilles">
       <RouterLink
         to="/plantilles/nova"
-        class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
+        class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover"
       >
         Nova plantilla
       </RouterLink>
@@ -31,7 +31,7 @@
             <input
               v-model="filters.search"
               type="text"
-              class="border rounded px-3 py-2 w-full"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               placeholder="Nom o descripció"
               @keyup.enter="loadPlantilles(1)"
             />
@@ -41,37 +41,37 @@
         <div class="flex gap-2">
           <button
             type="button"
-            class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
+            class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover"
             @click="loadPlantilles(1)"
           >
             Cercar
           </button>
           <button
             type="button"
-            class="px-4 py-2 rounded border"
+            class="px-4 py-2 rounded border border-primary text-primary hover:bg-primary-light"
             @click="resetFilters"
           >
             Netejar
           </button>
         </div>
 
-        <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
+        <p v-if="error" class="text-sm text-danger">{{ error }}</p>
       </section>
 
       <section class="bg-white rounded shadow p-4 space-y-4">
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
-              <tr class="text-left border-b">
-                <th class="py-2 pr-4">Nom</th>
-                <th class="py-2 pr-4">Línies</th>
-                <th class="py-2 pr-4">IVA / IRPF</th>
-                <th class="py-2 pr-4">Mètode pagament</th>
-                <th class="py-2 pr-4">Accions</th>
+              <tr class="bg-gray-50 border-b">
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Nom</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Línies</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">IVA / IRPF</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Mètode pagament</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Accions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="plantilla in plantilles" :key="plantilla.id" class="border-b">
+              <tr v-for="plantilla in plantilles" :key="plantilla.id" class="border-b hover:bg-gray-50 transition-colors">
                 <td class="py-2 pr-4">
                   <p class="font-medium">{{ plantilla.nom }}</p>
                   <p v-if="plantilla.descripcio" class="text-xs text-gray-500">{{ plantilla.descripcio }}</p>

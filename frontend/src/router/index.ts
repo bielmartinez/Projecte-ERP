@@ -4,6 +4,7 @@ import MainLayout from '@/layouts/MainLayout.vue'
 import { useAuthStore } from '@/stores/auth'
 import ClientDetailView from '@/views/clients/ClientDetailView.vue'
 import ClientFormView from '@/views/clients/ClientFormView.vue'
+import CategoriaFormView from '@/views/CategoriaFormView.vue'
 import CategoriesView from '@/views/CategoriesView.vue'
 import ClientsView from '@/views/clients/ClientsView.vue'
 import Dashboard from '@/views/Dashboard.vue'
@@ -77,6 +78,18 @@ const router = createRouter({
           path: 'categories',
           name: 'categories',
           component: CategoriesView
+        },
+        {
+          path: 'categories/nova',
+          name: 'categoria-nova',
+          component: CategoriaFormView,
+          meta: { requiresAuth: true }
+        },
+        {
+          path: 'categories/:id/editar',
+          name: 'categoria-editar',
+          component: CategoriaFormView,
+          meta: { requiresAuth: true }
         },
         {
           path: 'moviments/nou',

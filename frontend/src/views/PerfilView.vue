@@ -38,26 +38,26 @@
       <section class="bg-white rounded shadow p-6 space-y-4">
         <h3 class="text-lg font-semibold">Dades personals i fiscals</h3>
 
-        <p v-if="perfilError" class="text-sm text-red-600">{{ perfilError }}</p>
-        <p v-if="perfilSuccess" class="text-sm text-green-600">{{ perfilSuccess }}</p>
+        <p v-if="perfilError" class="text-sm text-danger">{{ perfilError }}</p>
+        <p v-if="perfilSuccess" class="text-sm text-success-hover">{{ perfilSuccess }}</p>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <input v-model="perfil.nom" class="border rounded px-3 py-2" placeholder="Nom" type="text" />
-          <input v-model="perfil.cognoms" class="border rounded px-3 py-2" placeholder="Cognoms" type="text" />
-          <input v-model="perfil.nif" class="border rounded px-3 py-2" placeholder="NIF" type="text" />
-          <input v-model="perfil.telefon" class="border rounded px-3 py-2" placeholder="Telèfon" type="text" />
-          <input v-model="perfil.nom_empresa" class="border rounded px-3 py-2" placeholder="Nom empresa" type="text" />
-          <input v-model="perfil.compte_bancari" class="border rounded px-3 py-2" placeholder="Compte bancari" type="text" />
-          <input v-model="perfil.adreca" class="border rounded px-3 py-2 md:col-span-2" placeholder="Adreça" type="text" />
-          <input v-model="perfil.codi_postal" class="border rounded px-3 py-2" placeholder="Codi postal" type="text" />
-          <input v-model="perfil.poblacio" class="border rounded px-3 py-2" placeholder="Població" type="text" />
-          <input v-model="perfil.provincia" class="border rounded px-3 py-2" placeholder="Província" type="text" />
-          <input v-model="perfil.pais" class="border rounded px-3 py-2" placeholder="País" type="text" />
+          <input v-model="perfil.nom" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="Nom" type="text" />
+          <input v-model="perfil.cognoms" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="Cognoms" type="text" />
+          <input v-model="perfil.nif" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="NIF" type="text" />
+          <input v-model="perfil.telefon" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="Telèfon" type="text" />
+          <input v-model="perfil.nom_empresa" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="Nom empresa" type="text" />
+          <input v-model="perfil.compte_bancari" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="Compte bancari" type="text" />
+          <input v-model="perfil.adreca" class="border border-gray-300 rounded px-3 py-2 md:col-span-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="Adreça" type="text" />
+          <input v-model="perfil.codi_postal" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="Codi postal" type="text" />
+          <input v-model="perfil.poblacio" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="Població" type="text" />
+          <input v-model="perfil.provincia" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="Província" type="text" />
+          <input v-model="perfil.pais" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="País" type="text" />
         </div>
 
         <button
           type="button"
-          class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+          class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover disabled:opacity-50"
           :disabled="perfilLoading"
           @click="handleSavePerfil"
         >
@@ -68,18 +68,18 @@
       <section class="bg-white rounded shadow p-6 space-y-4">
         <h3 class="text-lg font-semibold">Canviar contrasenya</h3>
 
-        <p v-if="passwordError" class="text-sm text-red-600">{{ passwordError }}</p>
-        <p v-if="passwordSuccess" class="text-sm text-green-600">{{ passwordSuccess }}</p>
+        <p v-if="passwordError" class="text-sm text-danger">{{ passwordError }}</p>
+        <p v-if="passwordSuccess" class="text-sm text-success-hover">{{ passwordSuccess }}</p>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <input v-model="passwordForm.contrasenya_actual" class="border rounded px-3 py-2" placeholder="Contrasenya actual" type="password" />
-          <input v-model="passwordForm.contrasenya_nova" class="border rounded px-3 py-2" placeholder="Contrasenya nova" type="password" />
-          <input v-model="passwordForm.contrasenya_confirmacio" class="border rounded px-3 py-2" placeholder="Confirmació contrasenya" type="password" />
+          <input v-model="passwordForm.contrasenya_actual" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="Contrasenya actual" type="password" />
+          <input v-model="passwordForm.contrasenya_nova" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="Contrasenya nova" type="password" />
+          <input v-model="passwordForm.contrasenya_confirmacio" class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors" placeholder="Confirmació contrasenya" type="password" />
         </div>
 
         <button
           type="button"
-          class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+          class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover disabled:opacity-50"
           :disabled="passwordLoading"
           @click="handleChangePassword"
         >

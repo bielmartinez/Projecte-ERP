@@ -2,14 +2,18 @@
   <div class="space-y-6">
     <PageHeader title="Detall de factura">
       <div class="flex gap-2">
-        <RouterLink to="/factures" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
-        <RouterLink v-if="factura && factura.estat === 'esborrany'" :to="`/factures/${factura.id}/editar`" class="text-gray-700 hover:underline">
+        <RouterLink to="/factures" class="text-primary hover:underline">Tornar al llistat</RouterLink>
+        <RouterLink
+          v-if="factura && factura.estat === 'esborrany'"
+          :to="`/factures/${factura.id}/editar`"
+          class="text-primary hover:underline"
+        >
           Editar
         </RouterLink>
         <button
           v-if="factura"
           type="button"
-          class="text-gray-700 hover:underline"
+          class="text-primary hover:underline"
           @click="handleDescarregarPdf"
         >
           Descarregar PDF
@@ -41,8 +45,8 @@
     </div>
 
     <template v-else>
-      <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
-      <p v-if="success" class="text-sm text-green-600">{{ success }}</p>
+      <p v-if="error" class="text-sm text-danger">{{ error }}</p>
+      <p v-if="success" class="text-sm text-success-hover">{{ success }}</p>
 
       <section v-if="factura" class="bg-white rounded shadow p-6 space-y-4">
         <h3 class="text-lg font-semibold">Informació general</h3>
@@ -59,7 +63,23 @@
           <p><strong>IRPF import:</strong> {{ Number(factura.irpf_import).toFixed(2) }} €</p>
           <p><strong>Total:</strong> {{ Number(factura.total).toFixed(2) }} €</p>
           <p><strong>Mètode pagament:</strong> {{ factura.metode_pagament ?? '-' }}</p>
-          <p><strong>Estat:</strong> {{ factura.estat }}</p>
+          <p>
+            <strong>Estat:</strong>
+            <span
+              class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium capitalize ml-2"
+              :class="
+                factura.estat === 'cobrada'
+                  ? 'bg-success text-white'
+                  : factura.estat === 'cancel·lada'
+                    ? 'bg-danger-light text-danger-hover'
+                    : factura.estat === 'emesa'
+                      ? 'bg-primary-light text-primary'
+                      : 'bg-gray-100 text-gray-700'
+              "
+            >
+              {{ factura.estat }}
+            </span>
+          </p>
           <p class="md:col-span-2"><strong>Notes:</strong> {{ factura.notes ?? '-' }}</p>
         </div>
 
@@ -68,7 +88,7 @@
           <select
             id="estat"
             v-model="selectedEstat"
-            class="border rounded px-3 py-2 text-sm"
+            class="border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
             :disabled="!potCanviarEstat"
           >
             <option
@@ -82,7 +102,7 @@
           <button
             v-if="potCanviarEstat"
             type="button"
-            class="px-3 py-2 border rounded text-sm disabled:opacity-50"
+            class="px-3 py-2 border border-primary text-primary rounded text-sm hover:bg-primary-light disabled:opacity-50"
             :disabled="changingEstat"
             @click="handleCanviarEstat"
           >
@@ -101,12 +121,12 @@
         </div>
 
         <div class="h-3 w-full rounded-full bg-gray-200 overflow-hidden">
-          <div class="h-full bg-green-500 transition-all duration-300" :style="{ width: `${percentatgeCobrat}%` }"></div>
+          <div class="h-full bg-success transition-all duration-300" :style="{ width: `${percentatgeCobrat}%` }"></div>
         </div>
 
-        <p v-if="cobramentsError" class="text-sm text-red-600">{{ cobramentsError }}</p>
-        <p v-if="cobramentFormError" class="text-sm text-red-600">{{ cobramentFormError }}</p>
-        <p v-if="cobramentFormSuccess" class="text-sm text-green-600">{{ cobramentFormSuccess }}</p>
+        <p v-if="cobramentsError" class="text-sm text-danger">{{ cobramentsError }}</p>
+        <p v-if="cobramentFormError" class="text-sm text-danger">{{ cobramentFormError }}</p>
+        <p v-if="cobramentFormSuccess" class="text-sm text-success-hover">{{ cobramentFormSuccess }}</p>
 
         <div v-if="cobramentsLoading" class="space-y-2 animate-pulse" aria-busy="true" aria-live="polite">
           <div v-for="row in 3" :key="`row-cobraments-${row}`" class="h-10 rounded bg-gray-200"></div>
@@ -115,16 +135,16 @@
         <div v-else class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
-              <tr class="text-left border-b">
-                <th class="py-2 pr-4">Data</th>
-                <th class="py-2 pr-4">Import</th>
-                <th class="py-2 pr-4">Mètode</th>
-                <th class="py-2 pr-4">Notes</th>
-                <th class="py-2 pr-4">Accions</th>
+              <tr class="bg-gray-50 border-b">
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Data</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Import</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Mètode</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Notes</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Accions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="cobrament in cobraments" :key="cobrament.id" class="border-b">
+              <tr v-for="cobrament in cobraments" :key="cobrament.id" class="border-b hover:bg-gray-50 transition-colors">
                 <td class="py-2 pr-4">{{ cobrament.data_cobrament }}</td>
                 <td class="py-2 pr-4">{{ Number(cobrament.import).toFixed(2) }} €</td>
                 <td class="py-2 pr-4">{{ cobrament.metode_pagament ?? '-' }}</td>
@@ -132,7 +152,7 @@
                 <td class="py-2 pr-4">
                   <button
                     type="button"
-                    class="text-red-600 hover:underline"
+                    class="text-danger hover:underline"
                     :disabled="cobramentFormLoading"
                     @click="handleEliminarCobrament(cobrament.id)"
                   >
@@ -147,7 +167,7 @@
           </table>
         </div>
 
-        <div v-if="potRegistrarCobraments" class="border rounded p-4 space-y-3">
+        <div v-if="potRegistrarCobraments" class="border border-gray-300 rounded p-4 space-y-3">
           <h4 class="font-medium text-sm">Registrar cobrament</h4>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -158,13 +178,17 @@
                 type="number"
                 min="0.01"
                 step="0.01"
-                class="border rounded px-3 py-2 w-full"
+                class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               />
             </label>
 
             <label class="space-y-1">
               <span class="text-sm font-medium text-gray-700">Data</span>
-              <input v-model="cobramentForm.data_cobrament" type="date" class="border rounded px-3 py-2 w-full" />
+              <input
+                v-model="cobramentForm.data_cobrament"
+                type="date"
+                class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+              />
             </label>
 
             <label class="space-y-1">
@@ -173,7 +197,7 @@
                 v-model="cobramentForm.metode_pagament"
                 type="text"
                 maxlength="50"
-                class="border rounded px-3 py-2 w-full"
+                class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                 placeholder="Transferència, targeta..."
               />
             </label>
@@ -182,7 +206,7 @@
               <span class="text-sm font-medium text-gray-700">Notes</span>
               <textarea
                 v-model="cobramentForm.notes"
-                class="border rounded px-3 py-2 w-full"
+                class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
                 rows="2"
                 placeholder="Notes opcionals"
               ></textarea>
@@ -192,7 +216,7 @@
           <div class="flex gap-2">
             <button
               type="button"
-              class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+              class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover disabled:opacity-50"
               :disabled="cobramentFormLoading"
               @click="handleCrearCobrament"
             >
@@ -208,19 +232,19 @@
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
-              <tr class="text-left border-b">
-                <th class="py-2 pr-4">Tipus</th>
-                <th class="py-2 pr-4">Data generació</th>
-                <th class="py-2 pr-4">Hash</th>
-                <th class="py-2 pr-4">Accions</th>
+              <tr class="bg-gray-50 border-b">
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Tipus</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Data generació</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Hash</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Accions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="registre in registresVerifactu" :key="registre.id" class="border-b">
+              <tr v-for="registre in registresVerifactu" :key="registre.id" class="border-b hover:bg-gray-50 transition-colors">
                 <td class="py-2 pr-4">
                   <span
                     class="inline-block px-2 py-0.5 rounded text-xs font-medium"
-                    :class="registre.tipus_registre === 'alta' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                    :class="registre.tipus_registre === 'alta' ? 'bg-success-light text-success-hover' : 'bg-danger-light text-danger-hover'"
                   >
                     {{ registre.tipus_registre }}
                   </span>
@@ -232,13 +256,13 @@
                   </span>
                 </td>
                 <td class="py-2 pr-4 flex flex-wrap gap-3">
-                  <RouterLink :to="`/verifactu/${registre.id}`" class="text-blue-600 hover:underline">Detall</RouterLink>
+                  <RouterLink :to="`/verifactu/${registre.id}`" class="text-primary hover:underline">Detall</RouterLink>
                   <a
                     v-if="registre.codi_qr"
                     :href="registre.codi_qr"
                     target="_blank"
                     rel="noopener"
-                    class="text-gray-700 hover:underline"
+                    class="text-primary hover:underline"
                   >
                     Verificar a l'AEAT
                   </a>
@@ -255,7 +279,7 @@
           <button
             v-if="factura && factura.estat === 'esborrany'"
             type="button"
-            class="text-red-600 hover:underline text-sm"
+            class="text-danger hover:underline text-sm"
             @click="handleDeleteFactura"
           >
             Eliminar factura
@@ -265,17 +289,17 @@
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
-              <tr class="text-left border-b">
-                <th class="py-2 pr-4">Descripció</th>
-                <th class="py-2 pr-4">Quantitat</th>
-                <th class="py-2 pr-4">Preu</th>
-                <th class="py-2 pr-4">IVA %</th>
-                <th class="py-2 pr-4">Desc %</th>
-                <th class="py-2 pr-4">Total línia</th>
+              <tr class="bg-gray-50 border-b">
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Descripció</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Quantitat</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Preu</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">IVA %</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Desc %</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Total línia</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="linia in linies" :key="linia.id" class="border-b">
+              <tr v-for="linia in linies" :key="linia.id" class="border-b hover:bg-gray-50 transition-colors">
                 <td class="py-2 pr-4">{{ linia.descripcio }}</td>
                 <td class="py-2 pr-4">{{ Number(linia.quantitat).toFixed(3) }}</td>
                 <td class="py-2 pr-4">{{ Number(linia.preu_unitari).toFixed(2) }} €</td>

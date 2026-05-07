@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <PageHeader :title="isEdit ? 'Editar client' : 'Nou client'">
-      <RouterLink to="/clients" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
+      <RouterLink to="/clients" class="text-primary hover:underline">Tornar al llistat</RouterLink>
     </PageHeader>
 
     <div v-if="initialLoading" class="space-y-6" aria-busy="true" aria-live="polite">
@@ -36,69 +36,129 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Nom <span class="text-red-500">*</span></span>
-            <input v-model="form.nom" type="text" class="border rounded px-3 py-2" placeholder="Nom*" />
+            <input
+              v-model="form.nom"
+              type="text"
+              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+              placeholder="Nom*"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Cognoms</span>
-            <input v-model="form.cognoms" type="text" class="border rounded px-3 py-2" placeholder="Cognoms" />
+            <input
+              v-model="form.cognoms"
+              type="text"
+              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+              placeholder="Cognoms"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Nom empresa</span>
-            <input v-model="form.nom_empresa" type="text" class="border rounded px-3 py-2" placeholder="Nom empresa" />
+            <input
+              v-model="form.nom_empresa"
+              type="text"
+              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+              placeholder="Nom empresa"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">NIF <span class="text-red-500">*</span></span>
-            <input v-model="form.nif" type="text" class="border rounded px-3 py-2" placeholder="NIF" />
+            <input
+              v-model="form.nif"
+              type="text"
+              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+              placeholder="NIF"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Correu electrònic <span class="text-red-500">*</span></span>
-            <input v-model="form.email" type="email" class="border rounded px-3 py-2" placeholder="Email" />
+            <input
+              v-model="form.email"
+              type="email"
+              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+              placeholder="Email"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Telèfon</span>
-            <input v-model="form.telefon" type="text" class="border rounded px-3 py-2" placeholder="Telèfon" />
+            <input
+              v-model="form.telefon"
+              type="text"
+              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+              placeholder="Telèfon"
+            />
           </label>
 
           <label class="space-y-1 md:col-span-2">
             <span class="text-sm font-medium text-gray-700">Adreça</span>
-            <input v-model="form.adreca" type="text" class="border rounded px-3 py-2" placeholder="Adreça" />
+            <input
+              v-model="form.adreca"
+              type="text"
+              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+              placeholder="Adreça"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Codi postal</span>
-            <input v-model="form.codi_postal" type="text" class="border rounded px-3 py-2" placeholder="Codi postal" />
+            <input
+              v-model="form.codi_postal"
+              type="text"
+              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+              placeholder="Codi postal"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Població</span>
-            <input v-model="form.poblacio" type="text" class="border rounded px-3 py-2" placeholder="Població" />
+            <input
+              v-model="form.poblacio"
+              type="text"
+              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+              placeholder="Població"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Província</span>
-            <input v-model="form.provincia" type="text" class="border rounded px-3 py-2" placeholder="Província" />
+            <input
+              v-model="form.provincia"
+              type="text"
+              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+              placeholder="Província"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">País</span>
-            <input v-model="form.pais" type="text" class="border rounded px-3 py-2" placeholder="País" />
+            <input
+              v-model="form.pais"
+              type="text"
+              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+              placeholder="País"
+            />
           </label>
 
           <label class="space-y-1 md:col-span-2">
             <span class="text-sm font-medium text-gray-700">Notes</span>
-            <textarea v-model="form.notes" class="border rounded px-3 py-2" rows="3" placeholder="Notes"></textarea>
+            <textarea
+              v-model="form.notes"
+              class="border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+              rows="3"
+              placeholder="Notes"
+            ></textarea>
           </label>
         </div>
 
         <div class="flex gap-2">
           <button
             type="button"
-            class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+            class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover disabled:opacity-50"
             :disabled="formLoading"
             @click="handleSubmit"
           >
@@ -107,7 +167,7 @@
 
           <button
             type="button"
-            class="px-4 py-2 rounded border"
+            class="px-4 py-2 rounded border border-primary text-primary hover:bg-primary-light"
             :disabled="formLoading"
             @click="resetForm"
           >

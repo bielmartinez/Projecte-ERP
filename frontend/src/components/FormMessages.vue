@@ -1,7 +1,7 @@
 <template>
-  <div v-if="error || success">
-    <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
-    <p v-if="success" class="text-sm text-green-600">{{ success }}</p>
+  <div v-if="error || success" class="space-y-2">
+    <p v-if="error" class="text-sm rounded px-3 py-2 bg-danger-light text-danger-hover">{{ error }}</p>
+    <p v-if="success" class="text-sm rounded px-3 py-2 bg-success-light text-success-hover">{{ success }}</p>
   </div>
 </template>
 

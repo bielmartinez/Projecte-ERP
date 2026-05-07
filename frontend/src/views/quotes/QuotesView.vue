@@ -3,7 +3,7 @@
     <PageHeader title="Quotes">
       <RouterLink
         to="/quotes/nova"
-        class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
+        class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover"
       >
         Nova quota
       </RouterLink>
@@ -26,7 +26,10 @@
         <div class="flex items-end gap-3">
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Filtre estat</span>
-            <select v-model="filters.activa" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model="filters.activa"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option value="totes">Totes</option>
               <option value="1">Actives</option>
               <option value="0">Inactives</option>
@@ -35,30 +38,30 @@
 
           <button
             type="button"
-            class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
+            class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover"
             @click="loadQuotes"
           >
             Filtrar
           </button>
         </div>
 
-        <p v-if="listError" class="text-sm text-red-600">{{ listError }}</p>
+        <p v-if="listError" class="text-sm text-danger">{{ listError }}</p>
 
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
-              <tr class="text-left border-b">
-                <th class="py-2 pr-4">Nom</th>
-                <th class="py-2 pr-4">Import (€)</th>
-                <th class="py-2 pr-4">Periodicitat</th>
-                <th class="py-2 pr-4">Dia pagament</th>
-                <th class="py-2 pr-4">Pendents</th>
-                <th class="py-2 pr-4">Proper venciment</th>
-                <th class="py-2 pr-4">Accions</th>
+              <tr class="bg-gray-50 border-b">
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Nom</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Import (€)</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Periodicitat</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Dia pagament</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Pendents</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Proper venciment</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Accions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="quota in quotes" :key="quota.id" class="border-b">
+              <tr v-for="quota in quotes" :key="quota.id" class="border-b hover:bg-gray-50 transition-colors">
                 <td class="py-2 pr-4 font-medium">{{ quota.nom }}</td>
                 <td class="py-2 pr-4">{{ Number(quota.import).toFixed(2) }} €</td>
                 <td class="py-2 pr-4">{{ labelPeriodicitat(quota.periodicitat) }}</td>
@@ -66,13 +69,13 @@
                 <td class="py-2 pr-4">
                   <span
                     v-if="Number(quota.periodes_pendents_count ?? 0) > 0"
-                    class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800"
+                    class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-danger-light text-danger-hover"
                   >
                     {{ quota.periodes_pendents_count }} pendents
                   </span>
                   <span
                     v-else
-                    class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800"
+                    class="inline-block px-2 py-0.5 rounded text-xs font-medium bg-success-light text-success-hover"
                   >
                     Al dia
                   </span>
@@ -81,11 +84,11 @@
                   {{ quota.proper_venciment ? formatPeriode(quota.proper_venciment) : '-' }}
                 </td>
                 <td class="py-2 pr-4 flex flex-wrap gap-2">
-                  <RouterLink :to="`/quotes/${quota.id}`" class="text-blue-600 hover:underline">Veure</RouterLink>
-                  <RouterLink :to="`/quotes/${quota.id}/editar`" class="text-gray-700 hover:underline">
+                  <RouterLink :to="`/quotes/${quota.id}`" class="text-primary hover:underline">Veure</RouterLink>
+                  <RouterLink :to="`/quotes/${quota.id}/editar`" class="text-primary hover:underline">
                     Editar
                   </RouterLink>
-                  <button type="button" class="text-red-600 hover:underline" @click="handleDelete(quota.id)">
+                  <button type="button" class="text-danger hover:underline" @click="handleDelete(quota.id)">
                     Eliminar
                   </button>
                 </td>

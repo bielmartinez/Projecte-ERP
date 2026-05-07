@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <PageHeader :title="isEdit ? 'Editar quota' : 'Nova quota'">
-      <RouterLink to="/quotes" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
+      <RouterLink to="/quotes" class="text-primary hover:underline">Tornar al llistat</RouterLink>
     </PageHeader>
 
     <div v-if="initialLoading" class="space-y-4" aria-busy="true" aria-live="polite">
@@ -37,7 +37,7 @@
             <input
               v-model="form.nom"
               type="text"
-              class="border rounded px-3 py-2 w-full"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               placeholder="Nom de la quota"
             />
           </label>
@@ -47,7 +47,7 @@
             <input
               v-model="form.descripcio"
               type="text"
-              class="border rounded px-3 py-2 w-full"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               placeholder="Descripció de la quota"
             />
           </label>
@@ -59,13 +59,16 @@
               type="number"
               min="0.01"
               step="0.01"
-              class="border rounded px-3 py-2 w-full"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
             />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Periodicitat</span>
-            <select v-model="form.periodicitat" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model="form.periodicitat"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option value="mensual">Mensual</option>
               <option value="trimestral">Trimestral</option>
               <option value="anual">Anual</option>
@@ -79,23 +82,34 @@
               type="number"
               min="1"
               max="31"
-              class="border rounded px-3 py-2 w-full"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
             />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Data inici</span>
-            <input v-model="form.data_inici" type="date" class="border rounded px-3 py-2 w-full" />
+            <input
+              v-model="form.data_inici"
+              type="date"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Data fi (opcional)</span>
-            <input v-model="form.data_fi" type="date" class="border rounded px-3 py-2 w-full" />
+            <input
+              v-model="form.data_fi"
+              type="date"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Categoria</span>
-            <select v-model.number="form.categoria_id" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model.number="form.categoria_id"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option :value="0">Selecciona categoria</option>
               <option v-for="categoria in categories" :key="categoria.id" :value="categoria.id">
                 {{ categoria.nom }}
@@ -112,13 +126,18 @@
         <div class="flex gap-2">
           <button
             type="button"
-            class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+            class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover disabled:opacity-50"
             :disabled="formLoading"
             @click="handleSubmit"
           >
             {{ formLoading ? 'Guardant...' : isEdit ? 'Actualitzar' : 'Crear' }}
           </button>
-          <button type="button" class="px-4 py-2 rounded border" :disabled="formLoading" @click="resetForm">
+          <button
+            type="button"
+            class="px-4 py-2 rounded border border-primary text-primary hover:bg-primary-light"
+            :disabled="formLoading"
+            @click="resetForm"
+          >
             Netejar
           </button>
         </div>

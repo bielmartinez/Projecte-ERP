@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <PageHeader :title="isEdit ? 'Editar plantilla' : 'Nova plantilla'">
-      <RouterLink to="/plantilles" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
+      <RouterLink to="/plantilles" class="text-primary hover:underline">Tornar al llistat</RouterLink>
     </PageHeader>
 
     <div v-if="initialLoading" class="space-y-6" aria-busy="true" aria-live="polite">
@@ -37,34 +37,58 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <label class="space-y-1 md:col-span-2">
             <span class="text-sm font-medium text-gray-700">Nom de plantilla</span>
-            <input v-model="form.nom" type="text" class="border rounded px-3 py-2 w-full" />
+            <input
+              v-model="form.nom"
+              type="text"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">IVA (%) per defecte</span>
-            <select v-model.number="form.iva_percentatge" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model.number="form.iva_percentatge"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option v-for="iva in IVA_OPTIONS" :key="iva" :value="iva">{{ iva }}%</option>
             </select>
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">IRPF (%)</span>
-            <input v-model.number="form.irpf_percentatge" type="number" step="0.01" class="border rounded px-3 py-2 w-full" />
+            <input
+              v-model.number="form.irpf_percentatge"
+              type="number"
+              step="0.01"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            />
           </label>
 
           <label class="space-y-1 md:col-span-2">
             <span class="text-sm font-medium text-gray-700">Mètode de pagament</span>
-            <input v-model="form.metode_pagament" type="text" class="border rounded px-3 py-2 w-full" />
+            <input
+              v-model="form.metode_pagament"
+              type="text"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            />
           </label>
 
           <label class="space-y-1 md:col-span-3">
             <span class="text-sm font-medium text-gray-700">Descripció</span>
-            <textarea v-model="form.descripcio" rows="2" class="border rounded px-3 py-2 w-full"></textarea>
+            <textarea
+              v-model="form.descripcio"
+              rows="2"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            ></textarea>
           </label>
 
           <label class="space-y-1 md:col-span-3">
             <span class="text-sm font-medium text-gray-700">Notes plantilla</span>
-            <textarea v-model="form.notes_plantilla" rows="3" class="border rounded px-3 py-2 w-full"></textarea>
+            <textarea
+              v-model="form.notes_plantilla"
+              rows="3"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            ></textarea>
           </label>
         </div>
       </section>
@@ -78,7 +102,7 @@
       <section class="bg-white rounded shadow p-6">
         <button
           type="button"
-          class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+          class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover disabled:opacity-50"
           :disabled="saving"
           @click="handleSubmit"
         >

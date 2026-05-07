@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <PageHeader :title="isEdit ? 'Editar factura' : 'Nova factura'">
-      <RouterLink to="/factures" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
+      <RouterLink to="/factures" class="text-primary hover:underline">Tornar al llistat</RouterLink>
     </PageHeader>
 
     <!-- Div de càrrega  de la pagina-->
@@ -38,7 +38,10 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Client</span>
-            <select v-model.number="form.client_id" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model.number="form.client_id"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option :value="0">Selecciona client</option>
               <option v-for="client in clients" :key="client.id" :value="client.id">
                 {{ client.nom }} {{ client.cognoms ?? '' }}
@@ -48,29 +51,48 @@
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Data emissió</span>
-            <input v-model="form.data_emisio" type="date" class="border rounded px-3 py-2 w-full" />
+            <input
+              v-model="form.data_emisio"
+              type="date"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Data venciment</span>
-            <input v-model="form.data_venciment" type="date" class="border rounded px-3 py-2 w-full" />
+            <input
+              v-model="form.data_venciment"
+              type="date"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">IVA per defecte (%)</span>
-            <select v-model.number="form.iva_percentatge" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model.number="form.iva_percentatge"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option v-for="iva in IVA_OPTIONS" :key="iva" :value="iva">{{ iva }}%</option>
             </select>
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">IRPF (%)</span>
-            <input v-model.number="form.irpf_percentatge" type="number" step="0.01" class="border rounded px-3 py-2 w-full" />
+            <input
+              v-model.number="form.irpf_percentatge"
+              type="number"
+              step="0.01"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Estat</span>
-            <select v-model="form.estat" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model="form.estat"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option value="esborrany">Esborrany</option>
               <option value="emesa">Emesa</option>
               <option value="cancel·lada">Cancel·lada</option>
@@ -80,12 +102,20 @@
 
           <label class="space-y-1 md:col-span-2">
             <span class="text-sm font-medium text-gray-700">Mètode de pagament</span>
-            <input v-model="form.metode_pagament" type="text" class="border rounded px-3 py-2 w-full" />
+            <input
+              v-model="form.metode_pagament"
+              type="text"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            />
           </label>
 
           <label class="space-y-1 md:col-span-3">
             <span class="text-sm font-medium text-gray-700">Notes</span>
-            <textarea v-model="form.notes" rows="3" class="border rounded px-3 py-2 w-full"></textarea>
+            <textarea
+              v-model="form.notes"
+              rows="3"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            ></textarea>
           </label>
         </div>
       </section>
@@ -110,7 +140,7 @@
         <div class="flex gap-2">
           <button
             type="button"
-            class="px-4 py-2 rounded border disabled:opacity-50"
+            class="px-4 py-2 rounded border border-primary text-primary hover:bg-primary-light disabled:opacity-50"
             :disabled="saving"
             @click="handleSaveAsTemplate"
           >
@@ -118,7 +148,7 @@
           </button>
           <button
             type="button"
-            class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+            class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover disabled:opacity-50"
             :disabled="saving"
             @click="handleSubmit"
           >
@@ -144,7 +174,7 @@
           <div class="flex justify-end gap-2">
             <button
               type="button"
-              class="px-4 py-2 rounded border"
+              class="px-4 py-2 rounded border border-primary text-primary hover:bg-primary-light"
               :disabled="saving"
               @click="cancelZeroPriceWarning"
             >
@@ -152,7 +182,7 @@
             </button>
             <button
               type="button"
-              class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+              class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover disabled:opacity-50"
               :disabled="saving"
               @click="confirmZeroPriceWarning"
             >

@@ -1,23 +1,25 @@
 <template>
-  <AuthCard>
-    <h1 class="text-2xl font-semibold text-gray-900 mb-2">Iniciar sessió</h1>
-    <p class="text-sm text-gray-600 mb-6">Accedeix al teu ERP per gestionar el negoci.</p>
+  <div class="min-h-screen bg-gradient-to-br from-indigo-100 via-blue-200 to-primary/20 flex items-center justify-center px-4 py-8"">
+    <AuthCard>
+      <h1 class="text-3xl font-bold tracking-tight text-gray-900 mb-2">Iniciar sessió</h1>
+      <p class="text-sm text-gray-500 mb-6">Accedeix al teu ERP per gestionar el negoci.</p>
 
-    <p v-if="authStore.error" class="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded p-2">
+    <p v-if="authStore.error" class="mb-4 text-sm text-danger-hover bg-danger-light border border-danger-light rounded p-2">
       {{ authStore.error }}
     </p>
 
-    <p v-if="sessionMessage" class="mb-4 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+    <p v-if="sessionMessage" class="mb-4 text-sm text-primary bg-primary-light border border-primary rounded p-2">
       {{ sessionMessage }}
     </p>
 
     <AuthForm mode="login" :loading="authStore.loading" @submit="handleLogin" />
 
-    <p class="text-sm text-gray-600 mt-5 text-center">
-      Encara no tens compte?
-      <RouterLink class="text-indigo-600 font-medium" :to="{ name: 'register' }">Registra't</RouterLink>
-    </p>
-  </AuthCard>
+      <p class="text-sm text-gray-600 mt-5 text-center">
+        Encara no tens compte?
+        <RouterLink class="text-primary hover:text-primary-hover font-medium" :to="{ name: 'register' }">Registra't</RouterLink>
+      </p>
+    </AuthCard>
+  </div>
 </template>
 
 <script setup lang="ts">

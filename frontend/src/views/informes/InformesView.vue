@@ -21,7 +21,10 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Tipus d'informe</span>
-            <select v-model="tipusInforme" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model="tipusInforme"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option value="mensual">Mensual</option>
               <option value="trimestral">Trimestral</option>
               <option value="anual">Anual</option>
@@ -30,21 +33,30 @@
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Any</span>
-            <select v-model.number="anySeleccionat" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model.number="anySeleccionat"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option v-for="a in anysDisponibles" :key="a" :value="a">{{ a }}</option>
             </select>
           </label>
 
           <label v-if="tipusInforme === 'mensual'" class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Mes</span>
-            <select v-model.number="mesSeleccionat" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model.number="mesSeleccionat"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option v-for="m in 12" :key="m" :value="m">{{ nomMes(m) }}</option>
             </select>
           </label>
 
           <label v-if="tipusInforme === 'trimestral'" class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Trimestre</span>
-            <select v-model.number="trimestreSeleccionat" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model.number="trimestreSeleccionat"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option :value="1">T1 (Gener - Març)</option>
               <option :value="2">T2 (Abril - Juny)</option>
               <option :value="3">T3 (Juliol - Setembre)</option>
@@ -56,7 +68,7 @@
         <div class="flex gap-2">
           <button
             type="button"
-            class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+            class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover disabled:opacity-50"
             :disabled="loading"
             @click="carregarInforme"
           >
@@ -65,7 +77,7 @@
           <button
             v-if="informe"
             type="button"
-            class="border px-4 py-2 rounded hover:bg-gray-50 disabled:opacity-50"
+            class="border border-primary text-primary px-4 py-2 rounded hover:bg-primary-light disabled:opacity-50"
             :disabled="descarregant"
             @click="descarregarPdf"
           >
@@ -73,7 +85,7 @@
           </button>
         </div>
 
-        <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
+        <p v-if="error" class="text-sm text-danger">{{ error }}</p>
       </section>
 
       <template v-if="informe">
@@ -84,22 +96,27 @@
           <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
               <thead>
-                <tr class="border-b">
-                  <th class="py-2 pr-4 text-left font-semibold" colspan="2">Resum d'activitat</th>
+                <tr class="bg-gray-50 border-b">
+                  <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600 text-left" colspan="2">
+                    Resum d'activitat
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                <tr class="border-b">
+                <tr class="border-b hover:bg-gray-50 transition-colors">
                   <td class="py-2 pr-4">Ingressos totals</td>
-                  <td class="py-2 text-right font-medium text-green-700">{{ formatMoney(informe.moviments.ingressos) }}</td>
+                  <td class="py-2 text-right font-medium text-success-hover">{{ formatMoney(informe.moviments.ingressos) }}</td>
                 </tr>
-                <tr class="border-b">
+                <tr class="border-b hover:bg-gray-50 transition-colors">
                   <td class="py-2 pr-4">Despeses totals</td>
-                  <td class="py-2 text-right font-medium text-red-700">{{ formatMoney(informe.moviments.despeses) }}</td>
+                  <td class="py-2 text-right font-medium text-danger-hover">{{ formatMoney(informe.moviments.despeses) }}</td>
                 </tr>
                 <tr class="border-b bg-gray-50">
                   <td class="py-2 pr-4 font-semibold">Benefici net</td>
-                  <td class="py-2 text-right font-semibold" :class="informe.moviments.benefici >= 0 ? 'text-green-700' : 'text-red-700'">
+                  <td
+                    class="py-2 text-right font-semibold"
+                    :class="informe.moviments.benefici >= 0 ? 'text-success-hover' : 'text-danger-hover'"
+                  >
                     {{ formatMoney(informe.moviments.benefici) }}
                   </td>
                 </tr>
@@ -112,20 +129,22 @@
           <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
               <thead>
-                <tr class="border-b">
-                  <th class="py-2 pr-4 text-left font-semibold" colspan="2">Facturació</th>
+                <tr class="bg-gray-50 border-b">
+                  <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600 text-left" colspan="2">
+                    Facturació
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                <tr class="border-b">
+                <tr class="border-b hover:bg-gray-50 transition-colors">
                   <td class="py-2 pr-4">Factures emeses</td>
                   <td class="py-2 text-right font-medium">{{ informe.factures.num_factures }}</td>
                 </tr>
-                <tr class="border-b">
+                <tr class="border-b hover:bg-gray-50 transition-colors">
                   <td class="py-2 pr-4">Base imposable</td>
                   <td class="py-2 text-right font-medium">{{ formatMoney(informe.factures.base_imposable) }}</td>
                 </tr>
-                <tr class="border-b">
+                <tr class="border-b hover:bg-gray-50 transition-colors">
                   <td class="py-2 pr-4">Total facturat</td>
                   <td class="py-2 text-right font-medium">{{ formatMoney(informe.factures.total_facturat) }}</td>
                 </tr>
@@ -138,26 +157,31 @@
           <div class="overflow-x-auto">
             <table class="min-w-full text-sm">
               <thead>
-                <tr class="border-b">
-                  <th class="py-2 pr-4 text-left font-semibold" colspan="2">Resum fiscal</th>
+                <tr class="bg-gray-50 border-b">
+                  <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600 text-left" colspan="2">
+                    Resum fiscal
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                <tr class="border-b">
+                <tr class="border-b hover:bg-gray-50 transition-colors">
                   <td class="py-2 pr-4">IVA repercutit (cobrat als clients)</td>
                   <td class="py-2 text-right font-medium">{{ formatMoney(informe.fiscal.iva_repercutit) }}</td>
                 </tr>
-                <tr class="border-b">
+                <tr class="border-b hover:bg-gray-50 transition-colors">
                   <td class="py-2 pr-4">IVA suportat (pagat en despeses)</td>
                   <td class="py-2 text-right font-medium">{{ formatMoney(informe.fiscal.iva_suportat) }}</td>
                 </tr>
                 <tr class="border-b bg-gray-50">
                   <td class="py-2 pr-4 font-semibold">Resultat IVA (a pagar a Hisenda)</td>
-                  <td class="py-2 text-right font-semibold" :class="informe.fiscal.resultat_iva >= 0 ? 'text-red-700' : 'text-green-700'">
+                  <td
+                    class="py-2 text-right font-semibold"
+                    :class="informe.fiscal.resultat_iva >= 0 ? 'text-danger-hover' : 'text-success-hover'"
+                  >
                     {{ formatMoney(informe.fiscal.resultat_iva) }}
                   </td>
                 </tr>
-                <tr class="border-b">
+                <tr class="border-b hover:bg-gray-50 transition-colors">
                   <td class="py-2 pr-4">IRPF retingut en factures</td>
                   <td class="py-2 text-right font-medium">{{ formatMoney(informe.fiscal.irpf_retingut) }}</td>
                 </tr>

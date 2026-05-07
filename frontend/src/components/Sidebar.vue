@@ -4,7 +4,7 @@
 
   <!-- Sidebar -->
   <aside
-    class="bg-gray-900 text-white min-h-screen w-64 z-50 transition-transform duration-300"
+    class="bg-sidebar text-white min-h-screen w-64 z-50 transition-transform duration-300"
     :class="[
       'fixed md:relative',
       open ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
@@ -14,9 +14,9 @@
       <RouterLink
         to="/"
         exact
-        class="block px-3 py-4 rounded hover:bg-gray-700"
-        active-class="bg-gray-700"
-        exact-active-class="bg-gray-700"
+        class="block px-3 py-4 rounded hover:bg-sidebar-hover"
+        active-class="bg-primary"
+        exact-active-class="bg-primary"
         @click="emit('close')"
       >
         Dashboard
@@ -25,8 +25,8 @@
 
       <RouterLink
         to="/factures"
-        class="block px-3 py-4 rounded hover:bg-gray-700"
-        active-class="bg-gray-700"
+        class="block px-3 py-4 rounded hover:bg-sidebar-hover"
+        active-class="bg-primary"
         @click="emit('close')"
       >
         Factures
@@ -35,8 +35,8 @@
 
       <RouterLink
         to="/clients"
-        class="block px-3 py-4 rounded hover:bg-gray-700"
-        active-class="bg-gray-700"
+        class="block px-3 py-4 rounded hover:bg-sidebar-hover"
+        active-class="bg-primary"
         @click="emit('close')"
       >
         Clients
@@ -45,8 +45,8 @@
 
       <RouterLink
         to="/categories"
-        class="block px-3 py-4 rounded hover:bg-gray-700"
-        active-class="bg-gray-700"
+        class="block px-3 py-4 rounded hover:bg-sidebar-hover"
+        active-class="bg-primary"
         @click="emit('close')"
       >
         Categories
@@ -55,8 +55,8 @@
 
       <RouterLink
         to="/moviments"
-        class="block px-3 py-4 rounded hover:bg-gray-700"
-        active-class="bg-gray-700"
+        class="block px-3 py-4 rounded hover:bg-sidebar-hover"
+        active-class="bg-primary"
         @click="emit('close')"
       >
         Moviments
@@ -65,8 +65,8 @@
 
       <RouterLink
         to="/quotes"
-        class="block px-3 py-4 rounded hover:bg-gray-700"
-        active-class="bg-gray-700"
+        class="block px-3 py-4 rounded hover:bg-sidebar-hover"
+        active-class="bg-primary"
         @click="emit('close')"
       >
         Quotes
@@ -75,8 +75,8 @@
 
       <RouterLink
         to="/informes"
-        class="block px-3 py-4 rounded hover:bg-gray-700"
-        active-class="bg-gray-700"
+        class="block px-3 py-4 rounded hover:bg-sidebar-hover"
+        active-class="bg-primary"
         @click="emit('close')"
       >
         Informes
@@ -85,8 +85,8 @@
 
       <RouterLink
         to="/plantilles"
-        class="block px-3 py-4 rounded hover:bg-gray-700"
-        active-class="bg-gray-700"
+        class="block px-3 py-4 rounded hover:bg-sidebar-hover"
+        active-class="bg-primary"
         @click="emit('close')"
       >
         Plantilles
@@ -95,8 +95,8 @@
 
       <RouterLink
         to="/verifactu"
-        class="block px-3 py-4 rounded hover:bg-gray-700"
-        active-class="bg-gray-700"
+        class="block px-3 py-4 rounded hover:bg-sidebar-hover"
+        active-class="bg-primary"
         @click="emit('close')"
       >
         Verifactu
@@ -105,8 +105,8 @@
 
       <RouterLink
         to="/perfil"
-        class="block px-3 py-4 rounded hover:bg-gray-700"
-        active-class="bg-gray-700"
+        class="block px-3 py-4 rounded hover:bg-sidebar-hover"
+        active-class="bg-primary"
         @click="emit('close')"
       >
         Perfil

@@ -16,7 +16,7 @@
           <div class="mt-6 flex justify-end gap-3">
             <button
               type="button"
-              class="rounded border px-4 py-2 hover:bg-gray-50"
+              class="rounded border border-gray-300 px-4 py-2 hover:bg-gray-50"
               @click="onCancel"
             >
               {{ cancelText }}
@@ -66,10 +66,10 @@ const emit = defineEmits<{
 
 const confirmButtonClass = computed(() => {
   if (props.variant === 'warning') {
-    return 'bg-amber-500 hover:bg-amber-600'
+    return 'bg-primary hover:bg-primary-hover'
   }
 
-  return 'bg-red-600 hover:bg-red-700'
+  return 'bg-danger hover:bg-danger-hover'
 })
 
 function onConfirm() {

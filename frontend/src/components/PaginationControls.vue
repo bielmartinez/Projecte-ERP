@@ -4,7 +4,7 @@
     <div class="flex gap-2">
       <button
         type="button"
-        class="px-3 py-1 border rounded disabled:opacity-50"
+        class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 transition-colors disabled:opacity-50"
         :disabled="page <= 1"
         @click="$emit('canvia-pagina', page - 1)"
       >
@@ -12,7 +12,7 @@
       </button>
       <button
         type="button"
-        class="px-3 py-1 border rounded disabled:opacity-50"
+        class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 transition-colors disabled:opacity-50"
         :disabled="page >= (totalPages || 1)"
         @click="$emit('canvia-pagina', page + 1)"
       >

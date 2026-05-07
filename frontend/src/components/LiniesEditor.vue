@@ -2,7 +2,13 @@
   <section class="bg-white rounded shadow p-6 space-y-4">
     <div class="flex items-center justify-between">
       <h3 class="text-lg font-semibold">{{ props.titol }}</h3>
-      <button type="button" class="px-3 py-1 border rounded" @click="addLinia">Afegir línia</button>
+      <button
+        type="button"
+        class="px-3 py-1 border border-primary text-primary rounded hover:bg-primary-light transition-colors"
+        @click="addLinia"
+      >
+        Afegir línia
+      </button>
     </div>
 
     <div class="space-y-3">
@@ -19,7 +25,7 @@
         <input
           v-model="linia.descripcio"
           type="text"
-          class="border rounded px-3 py-2 md:col-span-4"
+          class="border border-gray-300 rounded px-3 py-2 md:col-span-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
           placeholder="Descripció"
         />
 
@@ -28,7 +34,7 @@
           type="number"
           min="1"
           step="1"
-          class="border rounded px-3 py-2 md:col-span-2"
+          class="border border-gray-300 rounded px-3 py-2 md:col-span-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
           placeholder="Quantitat"
         />
 
@@ -38,7 +44,7 @@
             type="number"
             min="0"
             step="0.01"
-            class="border rounded px-3 py-2 pr-8 w-full"
+            class="border border-gray-300 rounded px-3 py-2 pr-8 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
             placeholder="Preu"
           />
           <span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-500">€</span>
@@ -46,7 +52,7 @@
 
         <select
           v-model.number="linia.iva_percentatge"
-          class="border rounded px-3 py-2 md:col-span-1"
+          class="border border-gray-300 rounded px-3 py-2 md:col-span-1 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
         >
           <option v-for="iva in IVA_OPTIONS" :key="`iva-${index}-${iva}`" :value="iva">{{ iva }}%</option>
         </select>
@@ -57,13 +63,13 @@
           min="0"
           max="100"
           step="0.01"
-          class="border rounded px-3 py-2 md:col-span-2"
+          class="border border-gray-300 rounded px-3 py-2 md:col-span-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
           placeholder="Desc %"
         />
 
         <button
           type="button"
-          class="text-red-600 hover:underline md:col-span-1 py-2"
+          class="text-danger hover:underline md:col-span-1 py-2"
           @click="removeLinia(index)"
         >
           Eliminar

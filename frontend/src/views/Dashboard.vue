@@ -296,7 +296,7 @@ onMounted(() => {
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="bg-white p-5 rounded-lg shadow">
           <p class="text-sm text-gray-500 mb-2">Ingressos del mes</p>
-          <p class="text-2xl font-bold text-green-600">
+          <p class="text-2xl font-bold text-success-hover">
             {{ resum ? formatMoneda(resum.mes_actual.ingressos) : '0,00 €' }}
           </p>
           <p class="text-xs text-gray-500 mt-2">
@@ -306,7 +306,7 @@ onMounted(() => {
 
         <div class="bg-white p-5 rounded-lg shadow">
           <p class="text-sm text-gray-500 mb-2">Despeses del mes</p>
-          <p class="text-2xl font-bold text-red-600">
+          <p class="text-2xl font-bold text-danger-hover">
             {{ resum ? formatMoneda(resum.mes_actual.despeses) : '0,00 €' }}
           </p>
           <p class="text-xs text-gray-500 mt-2">
@@ -318,7 +318,7 @@ onMounted(() => {
           <p class="text-sm text-gray-500 mb-2">Benefici del mes</p>
           <p
             class="text-2xl font-bold"
-            :class="(resum?.mes_actual.benefici ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'"
+            :class="(resum?.mes_actual.benefici ?? 0) >= 0 ? 'text-success-hover' : 'text-danger-hover'"
           >
             {{ resum ? formatMoneda(resum.mes_actual.benefici) : '0,00 €' }}
           </p>
@@ -365,31 +365,31 @@ onMounted(() => {
 
           <div v-else class="overflow-x-auto">
             <table class="w-full text-sm text-left">
-              <thead class="text-xs text-gray-500 uppercase">
-                <tr>
-                  <th class="py-2 pr-3">Factura</th>
-                  <th class="py-2 pr-3">Client</th>
-                  <th class="py-2 pr-3">Total</th>
-                  <th class="py-2 pr-3">Pendent</th>
-                  <th class="py-2">Estat</th>
+              <thead>
+                <tr class="bg-gray-50 border-b">
+                  <th class="py-3 pr-3 text-xs font-semibold uppercase tracking-wide text-gray-600">Factura</th>
+                  <th class="py-3 pr-3 text-xs font-semibold uppercase tracking-wide text-gray-600">Client</th>
+                  <th class="py-3 pr-3 text-xs font-semibold uppercase tracking-wide text-gray-600">Total</th>
+                  <th class="py-3 pr-3 text-xs font-semibold uppercase tracking-wide text-gray-600">Pendent</th>
+                  <th class="py-3 text-xs font-semibold uppercase tracking-wide text-gray-600">Estat</th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="factura in facturesPendents" :key="factura.id" class="border-b border-gray-100">
+                <tr v-for="factura in facturesPendents" :key="factura.id" class="border-b hover:bg-gray-50 transition-colors">
                   <td class="py-3 pr-3 font-medium">
-                    <router-link :to="rutaFactura(factura.id)" class="text-blue-600 hover:underline">
+                    <router-link :to="rutaFactura(factura.id)" class="text-primary hover:underline">
                       {{ factura.numero_factura }}
                     </router-link>
                   </td>
                   <td class="py-3 pr-3 text-gray-700">{{ factura.client_nom }}</td>
                   <td class="py-3 pr-3 text-gray-700">{{ formatMoneda(factura.total) }}</td>
-                  <td class="py-3 pr-3 text-red-600 font-medium">{{ formatMoneda(factura.import_pendent) }}</td>
+                  <td class="py-3 pr-3 text-danger-hover font-medium">{{ formatMoneda(factura.import_pendent) }}</td>
                   <td class="py-3">
                     <span
                       class="inline-flex px-2 py-1 rounded-full text-xs font-medium"
                       :class="factura.estat === 'parcialment_cobrada'
-                        ? 'bg-blue-100 text-blue-800'
-                        : 'bg-yellow-100 text-yellow-800'"
+                        ? 'bg-primary-light text-primary'
+                        : 'bg-danger-light text-danger-hover'"
                     >
                       {{ factura.estat }}
                     </span>
@@ -413,12 +413,12 @@ onMounted(() => {
             >
               <div class="flex items-start justify-between gap-4">
                 <div>
-                  <router-link :to="rutaQuota(quota.id)" class="text-blue-600 hover:underline font-medium">
+                  <router-link :to="rutaQuota(quota.id)" class="text-primary hover:underline font-medium">
                     {{ quota.nom }}
                   </router-link>
                   <p class="text-sm text-gray-500 mt-1">{{ quota.categoria_nom ?? 'Sense categoria' }}</p>
                 </div>
-                <span class="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                <span class="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-danger-light text-danger-hover">
                   {{ quota.periodes_pendents_count }} pendents
                 </span>
               </div>

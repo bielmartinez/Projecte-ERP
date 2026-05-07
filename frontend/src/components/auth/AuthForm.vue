@@ -7,7 +7,7 @@
         v-model.trim="nom"
         type="text"
         required
-        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
       />
     </div>
 
@@ -17,7 +17,7 @@
         id="cognoms"
         v-model.trim="cognoms"
         type="text"
-        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
       />
     </div>
 
@@ -28,7 +28,7 @@
         v-model.trim="email"
         type="email"
         required
-        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
       />
     </div>
 
@@ -39,7 +39,7 @@
         v-model="password"
         type="password"
         required
-        class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
       />
     </div>
 
@@ -51,7 +51,7 @@
     <button
       type="submit"
       :disabled="loading"
-      class="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700 disabled:opacity-60"
+      class="w-full bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover mt-2 disabled:opacity-60 transition-colors"
     >
       {{ buttonLabel }}
     </button>

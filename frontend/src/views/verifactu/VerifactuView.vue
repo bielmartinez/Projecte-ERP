@@ -5,7 +5,7 @@
         <div class="flex gap-2">
         <button
           type="button"
-          class="px-4 py-2 border rounded text-sm disabled:opacity-50"
+          class="px-4 py-2 border border-primary text-primary rounded text-sm hover:bg-primary-light disabled:opacity-50"
           :disabled="validacioLoading"
           @click="handleValidar"
         >
@@ -13,7 +13,7 @@
         </button>
         <button
           type="button"
-          class="bg-gray-900 text-white px-4 py-2 rounded text-sm hover:bg-gray-800 disabled:opacity-50"
+          class="bg-primary text-white px-4 py-2 rounded text-sm hover:bg-primary-hover disabled:opacity-50"
           :disabled="exportarLoading"
           @click="handleExportar"
         >
@@ -39,24 +39,24 @@
     </div>
 
     <template v-else>
-      <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
+      <p v-if="error" class="text-sm text-danger">{{ error }}</p>
 
       <section
         v-if="validacio"
         class="rounded-lg p-4"
-        :class="validacio.valid ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'"
+        :class="validacio.valid ? 'bg-success-light border border-success-light' : 'bg-danger-light border border-danger-light'"
       >
         <p
           class="text-sm font-semibold"
-          :class="validacio.valid ? 'text-green-700' : 'text-red-700'"
+          :class="validacio.valid ? 'text-success-hover' : 'text-danger-hover'"
         >
           {{ validacio.valid ? 'Cadena íntegra' : 'Cadena compromesa' }}
         </p>
-        <p class="text-sm mt-1" :class="validacio.valid ? 'text-green-700' : 'text-red-700'">
+        <p class="text-sm mt-1" :class="validacio.valid ? 'text-success-hover' : 'text-danger-hover'">
           Total de registres: {{ validacio.total_registres }}
         </p>
 
-        <ul v-if="!validacio.valid && validacio.errors.length > 0" class="mt-2 space-y-1 text-sm text-red-700">
+        <ul v-if="!validacio.valid && validacio.errors.length > 0" class="mt-2 space-y-1 text-sm text-danger-hover">
           <li v-for="item in validacio.errors" :key="`${item.registre_id}-${item.motiu}`">
             Registre #{{ item.registre_id }}: {{ item.motiu }}
           </li>
@@ -67,29 +67,29 @@
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
-              <tr class="text-left border-b">
-                <th class="py-2 pr-4">#</th>
-                <th class="py-2 pr-4">Factura</th>
-                <th class="py-2 pr-4">Tipus</th>
-                <th class="py-2 pr-4">Data</th>
-                <th class="py-2 pr-4">Import</th>
-                <th class="py-2 pr-4">Hash</th>
-                <th class="py-2 pr-4">Estat factura</th>
-                <th class="py-2 pr-4">Accions</th>
+              <tr class="bg-gray-50 border-b">
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">#</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Factura</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Tipus</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Data</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Import</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Hash</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Estat factura</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Accions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="registre in registres" :key="registre.id" class="border-b">
+              <tr v-for="registre in registres" :key="registre.id" class="border-b hover:bg-gray-50 transition-colors">
                 <td class="py-2 pr-4">{{ registre.id }}</td>
                 <td class="py-2 pr-4">
-                  <RouterLink :to="`/factures/${registre.factura_id}`" class="text-blue-600 hover:underline">
+                  <RouterLink :to="`/factures/${registre.factura_id}`" class="text-primary hover:underline">
                     {{ registre.numero_factura }}
                   </RouterLink>
                 </td>
                 <td class="py-2 pr-4">
                   <span
                     class="inline-block px-2 py-0.5 rounded text-xs font-medium"
-                    :class="registre.tipus_registre === 'alta' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                    :class="registre.tipus_registre === 'alta' ? 'bg-success-light text-success-hover' : 'bg-danger-light text-danger-hover'"
                   >
                     {{ registre.tipus_registre }}
                   </span>
@@ -110,7 +110,7 @@
                   </span>
                 </td>
                 <td class="py-2 pr-4">
-                  <RouterLink :to="`/verifactu/${registre.id}`" class="text-blue-600 hover:underline">
+                  <RouterLink :to="`/verifactu/${registre.id}`" class="text-primary hover:underline">
                     Detall
                   </RouterLink>
                 </td>
@@ -128,7 +128,7 @@
           <div class="flex gap-2">
             <button
               type="button"
-              class="px-3 py-1 border rounded disabled:opacity-50"
+              class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 transition-colors disabled:opacity-50"
               :disabled="meta.page <= 1 || pageLoading"
               @click="handlePagina(meta.page - 1)"
             >
@@ -136,7 +136,7 @@
             </button>
             <button
               type="button"
-              class="px-3 py-1 border rounded disabled:opacity-50"
+              class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-50 transition-colors disabled:opacity-50"
               :disabled="meta.page >= meta.total_pages || pageLoading"
               @click="handlePagina(meta.page + 1)"
             >
@@ -232,19 +232,19 @@ function hashCurt(hash: string): string {
 
 function classeEstat(estat: string | null): string {
   if (estat === 'emesa') {
-    return 'bg-blue-100 text-blue-800'
+    return 'bg-primary-light text-primary'
   }
 
   if (estat === 'cobrada') {
-    return 'bg-green-100 text-green-800'
+    return 'bg-success-light text-success-hover'
   }
 
   if (estat === 'cancel·lada') {
-    return 'bg-red-100 text-red-800'
+    return 'bg-danger-light text-danger-hover'
   }
 
   if (estat === 'parcialment_cobrada') {
-    return 'bg-yellow-100 text-yellow-800'
+    return 'bg-primary-light text-primary'
   }
 
   return 'bg-gray-100 text-gray-700'

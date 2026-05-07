@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <PageHeader :title="isEdit ? 'Editar moviment' : 'Nou moviment'">
-      <RouterLink to="/moviments" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
+      <RouterLink to="/moviments" class="text-primary hover:underline">Tornar al llistat</RouterLink>
     </PageHeader>
 
     <div v-if="initialLoading" class="space-y-4" aria-busy="true" aria-live="polite">
@@ -27,7 +27,10 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Tipus</span>
-            <select v-model="form.tipus" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model="form.tipus"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option value="ingres">Ingrés</option>
               <option value="despesa">Despesa</option>
             </select>
@@ -35,7 +38,10 @@
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Categoria</span>
-            <select v-model.number="form.categoria_id" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model.number="form.categoria_id"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option :value="0">Selecciona categoria</option>
               <option v-for="categoria in categoriesForForm" :key="categoria.id" :value="categoria.id">
                 {{ categoria.nom }}
@@ -48,7 +54,7 @@
             <input
               v-model="form.descripcio"
               type="text"
-              class="border rounded px-3 py-2 w-full"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               placeholder="Descripció del moviment"
             />
           </label>
@@ -60,13 +66,16 @@
               type="number"
               min="0.01"
               step="0.01"
-              class="border rounded px-3 py-2 w-full"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
             />
           </label>
 
           <label v-if="form.tipus === 'despesa'" class="space-y-1">
             <span class="text-sm font-medium text-gray-700">IVA (%)</span>
-            <select v-model.number="form.iva_percentatge" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model.number="form.iva_percentatge"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option :value="0">0% (Exempt)</option>
               <option :value="4">4% (Superreduït)</option>
               <option :value="10">10% (Reduït)</option>
@@ -76,12 +85,19 @@
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Data</span>
-            <input v-model="form.data" type="date" class="border rounded px-3 py-2 w-full" />
+            <input
+              v-model="form.data"
+              type="date"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Factura (opcional)</span>
-            <select v-model.number="form.factura_id" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model.number="form.factura_id"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option :value="0">Sense factura</option>
               <option v-for="factura in factures" :key="factura.id" :value="factura.id">
                 {{ factura.numero_factura }} — {{ Number(factura.total).toFixed(2) }} €
@@ -93,13 +109,18 @@
         <div class="flex gap-2">
           <button
             type="button"
-            class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800 disabled:opacity-50"
+            class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover disabled:opacity-50"
             :disabled="formLoading"
             @click="handleSubmit"
           >
             {{ formLoading ? 'Guardant...' : isEdit ? 'Actualitzar' : 'Crear' }}
           </button>
-          <button type="button" class="px-4 py-2 rounded border" :disabled="formLoading" @click="resetForm">
+          <button
+            type="button"
+            class="px-4 py-2 rounded border border-primary text-primary hover:bg-primary-light"
+            :disabled="formLoading"
+            @click="resetForm"
+          >
             Netejar
           </button>
         </div>

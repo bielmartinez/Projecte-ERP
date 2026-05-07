@@ -37,11 +37,11 @@ const buttonClass = computed(() => {
   const base = 'px-3 py-1 rounded border text-sm transition-colors disabled:opacity-50'
 
   if (props.variant === 'primary') {
-    return `${base} border-indigo-200 text-indigo-700 hover:bg-indigo-50`
+    return `${base} border-primary text-primary hover:bg-primary-light`
   }
 
   if (props.variant === 'danger') {
-    return `${base} border-red-200 text-red-700 hover:bg-red-50`
+    return `${base} border-danger text-danger-hover hover:bg-danger-light`
   }
 
   return `${base} border-gray-300 text-gray-700 hover:bg-gray-50`

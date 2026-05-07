@@ -2,7 +2,7 @@
   <div class="space-y-6">
     <div class="mb-6">
       <PageHeader title="Detall registre Verifactu">
-      <RouterLink to="/verifactu" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
+      <RouterLink to="/verifactu" class="text-primary hover:underline">Tornar al llistat</RouterLink>
       </PageHeader>
     </div>
 
@@ -27,7 +27,7 @@
     </div>
 
     <template v-else>
-      <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
+      <p v-if="error" class="text-sm text-danger">{{ error }}</p>
 
       <template v-if="registre">
         <section class="bg-white rounded shadow p-6 space-y-4">
@@ -39,14 +39,14 @@
               <strong>Tipus registre:</strong>
               <span
                 class="inline-block px-2 py-0.5 rounded text-xs font-medium ml-2"
-                :class="registre.tipus_registre === 'alta' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                :class="registre.tipus_registre === 'alta' ? 'bg-success-light text-success-hover' : 'bg-danger-light text-danger-hover'"
               >
                 {{ registre.tipus_registre }}
               </span>
             </p>
             <p>
               <strong>Factura:</strong>
-              <RouterLink :to="`/factures/${registre.factura_id}`" class="text-blue-600 hover:underline ml-1">
+              <RouterLink :to="`/factures/${registre.factura_id}`" class="text-primary hover:underline ml-1">
                 {{ registre.numero_factura }}
               </RouterLink>
             </p>
@@ -88,7 +88,12 @@
           <h3 class="text-lg font-semibold">Codi QR</h3>
 
           <p v-if="registre.codi_qr">
-            <a :href="registre.codi_qr" target="_blank" rel="noopener" class="text-blue-600 hover:underline break-all">
+            <a
+              :href="registre.codi_qr"
+              target="_blank"
+              rel="noopener"
+              class="text-primary hover:underline break-all"
+            >
               {{ registre.codi_qr }}
             </a>
           </p>

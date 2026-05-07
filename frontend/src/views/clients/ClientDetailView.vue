@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-6">
     <PageHeader title="Detall del client">
-      <RouterLink to="/clients" class="text-blue-600 hover:underline">Tornar al llistat</RouterLink>
+      <RouterLink to="/clients" class="text-primary hover:underline">Tornar al llistat</RouterLink>
     </PageHeader>
 
     <!-- Div de càrrega  de la pagina-->
@@ -25,15 +25,15 @@
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
-              <tr class="text-left border-b">
-                <th class="py-2 pr-4"><div class="h-4 w-14 rounded bg-gray-200"></div></th>
-                <th class="py-2 pr-4"><div class="h-4 w-20 rounded bg-gray-200"></div></th>
-                <th class="py-2 pr-4"><div class="h-4 w-10 rounded bg-gray-200"></div></th>
-                <th class="py-2 pr-4"><div class="h-4 w-12 rounded bg-gray-200"></div></th>
+              <tr class="bg-gray-50 border-b">
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600"><div class="h-4 w-14 rounded bg-gray-200"></div></th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600"><div class="h-4 w-20 rounded bg-gray-200"></div></th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600"><div class="h-4 w-10 rounded bg-gray-200"></div></th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600"><div class="h-4 w-12 rounded bg-gray-200"></div></th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="row in 4" :key="row" class="border-b">
+              <tr v-for="row in 4" :key="row" class="border-b hover:bg-gray-50 transition-colors">
                 <td class="py-2 pr-4"><div class="h-4 w-24 rounded bg-gray-200"></div></td>
                 <td class="py-2 pr-4"><div class="h-4 w-28 rounded bg-gray-200"></div></td>
                 <td class="py-2 pr-4"><div class="h-4 w-20 rounded bg-gray-200"></div></td>
@@ -47,7 +47,7 @@
 
     <template v-else>
 
-      <p v-if="error" class="text-sm text-red-600">{{ error }}</p>
+      <p v-if="error" class="text-sm text-danger">{{ error }}</p>
 
       <section v-if="client" class="bg-white rounded shadow p-6 space-y-3">
         <h3 class="text-lg font-semibold">Dades del client</h3>
@@ -69,18 +69,33 @@
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
-              <tr class="text-left border-b">
-                <th class="py-2 pr-4">Número</th>
-                <th class="py-2 pr-4">Data emissió</th>
-                <th class="py-2 pr-4">Estat</th>
-                <th class="py-2 pr-4">Total</th>
+              <tr class="bg-gray-50 border-b">
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Número</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Data emissió</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Estat</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Total</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="factura in factures" :key="factura.id" class="border-b">
+              <tr v-for="factura in factures" :key="factura.id" class="border-b hover:bg-gray-50 transition-colors">
                 <td class="py-2 pr-4">{{ factura.numero_factura }}</td>
                 <td class="py-2 pr-4">{{ factura.data_emisio }}</td>
-                <td class="py-2 pr-4">{{ factura.estat }}</td>
+                <td class="py-2 pr-4">
+                  <span
+                    class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium capitalize"
+                    :class="
+                      factura.estat === 'cobrada'
+                        ? 'bg-success text-white'
+                        : factura.estat === 'cancel·lada'
+                          ? 'bg-danger-light text-danger-hover'
+                          : factura.estat === 'emesa'
+                            ? 'bg-primary-light text-primary'
+                            : 'bg-gray-100 text-gray-700'
+                    "
+                  >
+                    {{ factura.estat }}
+                  </span>
+                </td>
                 <td class="py-2 pr-4">{{ factura.total }} €</td>
               </tr>
               <tr v-if="factures.length === 0">

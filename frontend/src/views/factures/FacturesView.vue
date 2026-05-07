@@ -4,13 +4,13 @@
       <div class="flex items-center gap-2">
         <RouterLink
           to="/plantilles"
-          class="px-4 py-2 rounded border hover:bg-gray-50"
+          class="px-4 py-2 rounded border border-primary text-primary hover:bg-primary-light"
         >
           Des de plantilla
         </RouterLink>
         <RouterLink
           to="/factures/nova"
-          class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
+          class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover"
         >
           Nova factura
         </RouterLink>
@@ -34,16 +34,16 @@
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
-              <tr class="text-left border-b">
-                <th class="py-2 pr-4"><div class="h-4 w-14 rounded bg-gray-200"></div></th>
-                <th class="py-2 pr-4"><div class="h-4 w-14 rounded bg-gray-200"></div></th>
-                <th class="py-2 pr-4"><div class="h-4 w-16 rounded bg-gray-200"></div></th>
-                <th class="py-2 pr-4"><div class="h-4 w-14 rounded bg-gray-200"></div></th>
-                <th class="py-2 pr-4"><div class="h-4 w-14 rounded bg-gray-200"></div></th>
+              <tr class="bg-gray-50 border-b">
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600"><div class="h-4 w-14 rounded bg-gray-200"></div></th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600"><div class="h-4 w-14 rounded bg-gray-200"></div></th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600"><div class="h-4 w-16 rounded bg-gray-200"></div></th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600"><div class="h-4 w-14 rounded bg-gray-200"></div></th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600"><div class="h-4 w-14 rounded bg-gray-200"></div></th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="row in 6" :key="row" class="border-b">
+              <tr v-for="row in 6" :key="row" class="border-b hover:bg-gray-50 transition-colors">
                 <td class="py-2 pr-4"><div class="h-4 w-24 rounded bg-gray-200"></div></td>
                 <td class="py-2 pr-4"><div class="h-4 w-40 rounded bg-gray-200"></div></td>
                 <td class="py-2 pr-4"><div class="h-4 w-20 rounded bg-gray-200"></div></td>
@@ -64,7 +64,7 @@
             <input
               v-model="filters.search"
               type="text"
-              class="border rounded px-3 py-2 w-full"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
               placeholder="Número o notes"
               @keyup.enter="loadFactures(1)"
             />
@@ -72,7 +72,10 @@
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Estat</span>
-            <select v-model="filters.estat" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model="filters.estat"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option value="">Tots els estats</option>
               <option value="esborrany">Esborrany</option>
               <option value="emesa">Emesa</option>
@@ -83,7 +86,10 @@
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Client</span>
-            <select v-model.number="filters.client_id" class="border rounded px-3 py-2 w-full">
+            <select
+              v-model.number="filters.client_id"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            >
               <option :value="0">Tots els clients</option>
               <option v-for="client in clients" :key="client.id" :value="client.id">
                 {{ client.nom }} {{ client.cognoms ?? '' }}
@@ -93,55 +99,65 @@
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Data des de</span>
-            <input v-model="filters.data_desde" type="date" class="border rounded px-3 py-2 w-full" />
+            <input
+              v-model="filters.data_desde"
+              type="date"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            />
           </label>
 
           <label class="space-y-1">
             <span class="text-sm font-medium text-gray-700">Data fins</span>
-            <input v-model="filters.data_fins" type="date" class="border rounded px-3 py-2 w-full" />
+            <input
+              v-model="filters.data_fins"
+              type="date"
+              class="border border-gray-300 rounded px-3 py-2 w-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-colors"
+            />
           </label>
         </div>
 
         <div class="flex gap-2">
           <button
             type="button"
-            class="bg-gray-900 text-white px-4 py-2 rounded hover:bg-gray-800"
+            class="bg-primary text-white px-4 py-2 rounded hover:bg-primary-hover"
             @click="loadFactures(1)"
           >
             Cercar
           </button>
           <button
             type="button"
-            class="px-4 py-2 rounded border"
+            class="px-4 py-2 rounded border border-primary text-primary hover:bg-primary-light"
             @click="resetFilters"
           >
             Netejar
           </button>
         </div>
 
-        <p v-if="listError" class="text-sm text-red-600">{{ listError }}</p>
+        <p v-if="listError" class="text-sm text-danger">{{ listError }}</p>
       </section>
 
       <section class="bg-white rounded shadow p-4 space-y-4">
         <div class="overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead>
-              <tr class="text-left border-b">
-                <th class="py-2 pr-4">Número</th>
-                <th class="py-2 pr-4">Client</th>
-                <th class="py-2 pr-4">Data</th>
-                <th class="py-2 pr-4">Estat</th>
-                <th class="py-2 pr-4">Total</th>
-                <th class="py-2 pr-4">Accions</th>
+              <tr class="bg-gray-50 border-b">
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Número</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Client</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Data</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Estat</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Total</th>
+                <th class="py-3 pr-4 text-xs font-semibold uppercase tracking-wide text-gray-600">Accions</th>
               </tr>
             </thead>
             <tbody>
-              <tr v-for="factura in factures" :key="factura.id" class="border-b">
+              <tr v-for="factura in factures" :key="factura.id" class="border-b hover:bg-gray-50 transition-colors">
                 <td class="py-2 pr-4">{{ factura.numero_factura }}</td>
                 <td class="py-2 pr-4">{{ getClientLabel(factura.client_id) }}</td>
                 <td class="py-2 pr-4">{{ factura.data_emisio }}</td>
                 <td class="py-2 pr-4">
-                  <span class="capitalize">{{ factura.estat }}</span>
+                  <span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium capitalize" :class="getStatusClasses(factura.estat)">
+                    {{ factura.estat }}
+                  </span>
                 </td>
                 <td class="py-2 pr-4">{{ Number(factura.total).toFixed(2) }} €</td>
                 <td class="py-2 pr-4 flex flex-wrap gap-2">
@@ -226,6 +242,21 @@ function getFacturaSortNumber(numeroFactura: string) {
 
   const parsed = Number(digits)
   return Number.isFinite(parsed) ? parsed : 0
+}
+
+function getStatusClasses(estat: string) {
+  switch (estat) {
+    case 'cobrada':
+      return 'bg-success text-white'
+    case 'cancel·lada':
+      return 'bg-danger-light text-danger-hover'
+    case 'emesa':
+      return 'bg-primary-light text-primary'
+    case 'esborrany':
+      return 'bg-gray-100 text-gray-700'
+    default:
+      return 'bg-primary-light text-primary'
+  }
 }
 
 function resetFilters() {
